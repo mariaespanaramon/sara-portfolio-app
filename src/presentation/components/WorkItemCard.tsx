@@ -37,7 +37,7 @@ export function WorkItemCard({ item }: WorkItemCardProps) {
 
   return (
     <article
-      className="relative aspect-[4/3] overflow-hidden bg-dark-surface cursor-pointer group"
+      className="relative aspect-[16/9] overflow-hidden bg-dark-surface cursor-pointer group"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
@@ -63,21 +63,23 @@ export function WorkItemCard({ item }: WorkItemCardProps) {
 
       {/* Overlay with title and tags (visible on hover) */}
       <div
-        className={`absolute inset-0 bg-dark-bg/60 flex flex-col items-center justify-center transition-opacity duration-300 ${
+        className={`absolute inset-0 bg-dark-bg/60 flex flex-col items-center justify-between py-8 transition-opacity duration-300 ${
           isHovered ? 'opacity-100' : 'opacity-0'
         }`}
       >
         {/* Title in center */}
-        <h3 className="font-title text-3xl md:text-4xl lg:text-5xl text-center px-6 mb-auto mt-auto">
-          {item.title}
-        </h3>
+        <div className="flex-1 flex items-center justify-center">
+          <h3 className="font-title text-3xl md:text-4xl lg:text-5xl text-center px-6">
+            {item.title}
+          </h3>
+        </div>
 
         {/* Tags at bottom */}
-        <div className="flex flex-wrap gap-2 justify-center px-6 pb-8">
+        <div className="flex flex-wrap gap-2 justify-center px-6">
           {item.tags.map((tag) => (
             <span
               key={tag}
-              className="px-3 py-1 text-xs font-light tracking-wide border border-dark-text-muted text-dark-text-secondary"
+              className="px-3 py-2 text-sm font-light tracking-wide border border-dark-text-muted text-dark-text-secondary"
             >
               {tag}
             </span>

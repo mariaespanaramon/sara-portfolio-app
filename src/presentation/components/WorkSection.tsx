@@ -36,9 +36,9 @@ export function WorkSection({ repository }: WorkSectionProps) {
 
   return (
     <section id="work" className="py-20 lg:py-32">
-      <div className="container mx-auto px-6 lg:px-12">
-        {/* Grid of work items */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="w-full max-w-full">
+        {/* Grid of work items - 1 column on mobile, 3 columns on desktop, no gaps */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
           {workItems.map((item) => (
             <WorkItemCard key={item.id} item={item} />
           ))}
