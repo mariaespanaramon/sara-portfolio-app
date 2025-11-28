@@ -125,7 +125,7 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
                 {workItem.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-4 py-2 text-xs font-light tracking-wide border border-dark-border text-dark-text-secondary"
+                    className="px-4 py-2 text-sm font-bold tracking-wide text-dark-text-primary uppercase"
                   >
                     {tag}
                   </span>

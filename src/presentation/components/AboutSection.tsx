@@ -40,17 +40,17 @@ export function AboutSection({ repository }: AboutSectionProps) {
           <div className="space-y-16 lg:space-y-24">
             {/* Title */}
             <div>
-              <h2 className="font-title text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight leading-tight mb-4">
+              <h2 className="font-title text-4xl sm:text-6xl lg:text-7xl font-light tracking-tight leading-tight mb-4">
                 {aboutContent.name}
               </h2>
-              <p className="text-2xl lg:text-3xl text-dark-text-secondary font-light">
+              <p className="text-2xl lg:text-2xl text-dark-text-secondary font-light">
                 {aboutContent.role}
               </p>
             </div>
 
             {/* Bio */}
             <div>
-              <p className="text-xl lg:text-2xl text-dark-text-secondary font-light leading-relaxed whitespace-pre-line">
+              <p className="text-xl lg:text-xl text-dark-text-secondary font-light leading-relaxed whitespace-pre-line">
                 {aboutContent.bio}
               </p>
             </div>
@@ -64,7 +64,7 @@ export function AboutSection({ repository }: AboutSectionProps) {
                 {aboutContent.skills.map((skill) => (
                   <div
                     key={skill}
-                    className="px-6 py-4 border border-dark-border text-center text-dark-text-secondary font-light hover:border-dark-text-muted transition-colors"
+                    className="px-6 py-4 text-center text-dark-text-primary font-light text-lg"
                   >
                     {skill}
                   </div>
