@@ -42,7 +42,7 @@ export function WorkItemCard({ item, index }: WorkItemCardProps) {
                 <span>{item.year}</span>
               </div>
 
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight leading-tight">
+              <h2 className="font-title text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight leading-tight">
                 {item.title}
               </h2>
 

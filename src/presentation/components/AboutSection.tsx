@@ -17,7 +17,7 @@ export function AboutSection({ repository }: AboutSectionProps) {
       <section id="about" className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-dark-text-muted border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-dark-text-secondary font-light">Loading about content...</p>
+          <p className="text-dark-text-secondary font-light">Loading Sara's story...</p>
         </div>
       </section>
     );
@@ -50,7 +50,7 @@ export function AboutSection({ repository }: AboutSectionProps) {
 
             {/* Bio */}
             <div>
-              <p className="text-xl lg:text-2xl text-dark-text-secondary font-light leading-relaxed">
+              <p className="text-xl lg:text-2xl text-dark-text-secondary font-light leading-relaxed whitespace-pre-line">
                 {aboutContent.bio}
               </p>
             </div>
