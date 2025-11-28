@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useWorkItems } from '../../application/service/useWorkItems';
 import type { WorkItemRepository } from '../../infrastructure/ports/repositories';
 
@@ -14,6 +15,22 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { workItems, loading, error } = useWorkItems(repository);
+
+  // Scroll to top when component mounts or slug changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
+
+  const handleBackToWork = () => {
+    navigate('/');
+    // Use setTimeout to ensure navigation completes before scrolling
+    setTimeout(() => {
+      const workSection = document.getElementById('work');
+      if (workSection) {
+        workSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+  };
 
   if (loading) {
     return (
@@ -47,7 +64,7 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
         <div className="text-center">
           <p className="text-dark-text-secondary font-light mb-4">Project not found</p>
           <button
-            onClick={() => navigate('/#work')}
+            onClick={handleBackToWork}
             className="px-6 py-2 border border-dark-border hover:border-dark-text-muted transition-colors"
           >
             Back to Work
@@ -62,7 +79,7 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
       <div className="container mx-auto px-6 lg:px-12">
         {/* Back button */}
         <button
-          onClick={() => navigate('/#work')}
+          onClick={handleBackToWork}
           className="mb-8 text-dark-text-secondary hover:text-dark-text-primary transition-colors flex items-center gap-2"
         >
           <span>←</span>
