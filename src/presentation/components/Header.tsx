@@ -12,6 +12,10 @@ export function Header() {
           {/* Logo/Brand */}
           <a
             href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             className="font-heading text-xl lg:text-2xl font-light tracking-tight hover:opacity-70 transition-opacity"
           >
             sara ramon

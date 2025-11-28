@@ -17,7 +17,7 @@ export function AboutSection({ repository }: AboutSectionProps) {
       <section id="about" className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-dark-text-muted border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-dark-text-secondary font-light">Loading Sara's story...</p>
+          <p className="font-title text-dark-text-secondary font-light">Loading Sara's story...</p>
         </div>
       </section>
     );
@@ -27,7 +27,7 @@ export function AboutSection({ repository }: AboutSectionProps) {
     return (
       <section id="about" className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-500 font-light">Error: {error || 'Content not available'}</p>
+          <p className="font-title text-red-500 font-light">Error: {error || 'Content not available'}</p>
         </div>
       </section>
     );
@@ -40,7 +40,7 @@ export function AboutSection({ repository }: AboutSectionProps) {
           <div className="space-y-16 lg:space-y-24">
             {/* Title */}
             <div>
-              <h2 className="text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight leading-tight mb-4">
+              <h2 className="font-title text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight leading-tight mb-4">
                 {aboutContent.name}
               </h2>
               <p className="text-2xl lg:text-3xl text-dark-text-secondary font-light">
