@@ -35,10 +35,15 @@ export function WorkSection({ repository }: WorkSectionProps) {
   }
 
   return (
-    <section id="work" className="relative">
-      {workItems.map((item, index) => (
-        <WorkItemCard key={item.id} item={item} index={index} />
-      ))}
+    <section id="work">
+      <div className="w-full max-w-full">
+        {/* Grid of work items - 1 column on mobile, 3 columns on desktop, no gaps */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
+          {workItems.map((item) => (
+            <WorkItemCard key={item.id} item={item} />
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

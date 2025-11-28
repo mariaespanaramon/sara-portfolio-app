@@ -8,5 +8,6 @@ export interface WorkItem {
   description: string;
   year: string;
   imageUrl: string;
+  gifUrl: string;
   tags: string[];
 }

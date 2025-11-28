@@ -7,11 +7,13 @@
 // - Infrastructure: Adapters and ports (src/infrastructure)
 // - Presentation: React components (src/presentation/components)
 
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header } from './presentation/components/Header';
 import { Hero } from './presentation/components/Hero';
 import { WorkSection } from './presentation/components/WorkSection';
 import { AboutSection } from './presentation/components/AboutSection';
 import { Footer } from './presentation/components/Footer';
+import { WorkItemDetail } from './presentation/components/WorkItemDetail';
 import { MockWorkItemRepository } from './infrastructure/adapters/MockWorkItemRepository';
 import { MockAboutContentRepository } from './infrastructure/adapters/MockAboutContentRepository';
 
@@ -21,20 +23,39 @@ const workItemRepository = new MockWorkItemRepository();
 const aboutContentRepository = new MockAboutContentRepository();
 
 /**
+ * Home page component
+ */
+function HomePage() {
+  return (
+    <>
+      <Hero />
+      <WorkSection repository={workItemRepository} />
+      <AboutSection repository={aboutContentRepository} />
+    </>
+  );
+}
+
+/**
  * Main App component
- * Orchestrates all presentation components and injects dependencies
+ * Orchestrates all presentation components and routing
  */
 function App() {
   return (
-    <div className="min-h-screen bg-dark-bg">
-      <Header />
-      <main>
-        <Hero />
-        <WorkSection repository={workItemRepository} />
-        <AboutSection repository={aboutContentRepository} />
-      </main>
-      <Footer />
-    </div>
+    <Router>
+      <div className="min-h-screen bg-dark-bg">
+        <Header />
+        <main>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route 
+              path="/work/:slug" 
+              element={<WorkItemDetail repository={workItemRepository} />} 
+            />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
   );
 }
 

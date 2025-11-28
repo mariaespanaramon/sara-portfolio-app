@@ -1,8 +1,24 @@
+import { useNavigate, useLocation } from 'react-router-dom';
+
 /**
  * Header component with navigation
  * Features a fixed, fully transparent header
  */
 export function Header() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (location.pathname === '/') {
+      // If already on home page, scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      // If on detail page, navigate to home
+      navigate('/');
+    }
+  };
+
   return (
     <header
       className="fixed top-0 left-0 right-0 z-50 bg-transparent"
@@ -12,10 +28,7 @@ export function Header() {
           {/* Logo/Brand */}
           <a
             href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
+            onClick={handleLogoClick}
             className="font-heading text-xl lg:text-2xl font-light tracking-tight hover:opacity-70 transition-opacity"
           >
             sara ramon

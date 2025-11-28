@@ -57,7 +57,7 @@ export function AboutSection({ repository }: AboutSectionProps) {
 
             {/* Skills */}
             <div>
-              <h3 className="text-sm font-light tracking-widest uppercase text-dark-text-muted mb-6">
+              <h3 className="text-2xl font-title tracking-widest uppercase text-dark-text-muted mb-6">
                 Expertise
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
