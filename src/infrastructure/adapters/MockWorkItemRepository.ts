@@ -17,6 +17,7 @@ const MOCK_WORK_ITEMS: WorkItem[] = [
     description: 'A comprehensive brand identity system for a leading technology startup, including logo design, color palette, typography, and brand guidelines.',
     year: '2024',
     imageUrl: 'https://images.unsplash.com/photo-1558655146-d09347e92766?w=1200&h=800&fit=crop',
+    gifUrl: 'https://media.giphy.com/media/l0HlQXlQ3nHyLMvte/giphy.gif',
     tags: ['Brand Design', 'Identity', 'Visual System'],
   },
   {
@@ -26,6 +27,7 @@ const MOCK_WORK_ITEMS: WorkItem[] = [
     description: 'End-to-end design and development of a modern e-commerce platform with seamless user experience and conversion-optimized checkout flow.',
     year: '2024',
     imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=800&fit=crop',
+    gifUrl: 'https://media.giphy.com/media/xT9IgzoKnwFNmISR8I/giphy.gif',
     tags: ['UX/UI Design', 'Development', 'E-Commerce'],
   },
   {
@@ -35,6 +37,7 @@ const MOCK_WORK_ITEMS: WorkItem[] = [
     description: 'A premium editorial design project featuring minimalist layouts, sophisticated typography, and thoughtful content hierarchy.',
     year: '2023',
     imageUrl: 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=1200&h=800&fit=crop',
+    gifUrl: 'https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif',
     tags: ['Editorial', 'Typography', 'Layout'],
   },
   {
@@ -44,6 +47,7 @@ const MOCK_WORK_ITEMS: WorkItem[] = [
     description: 'Native mobile application design focusing on intuitive interactions, smooth animations, and delightful micro-interactions.',
     year: '2023',
     imageUrl: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1200&h=800&fit=crop',
+    gifUrl: 'https://media.giphy.com/media/l46Cy1rHbQ92uuLXa/giphy.gif',
     tags: ['Mobile Design', 'UX', 'Prototyping'],
   },
 ];

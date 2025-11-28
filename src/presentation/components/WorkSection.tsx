@@ -35,10 +35,15 @@ export function WorkSection({ repository }: WorkSectionProps) {
   }
 
   return (
-    <section id="work" className="relative">
-      {workItems.map((item, index) => (
-        <WorkItemCard key={item.id} item={item} index={index} />
-      ))}
+    <section id="work" className="py-20 lg:py-32">
+      <div className="container mx-auto px-6 lg:px-12">
+        {/* Grid of work items */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          {workItems.map((item) => (
+            <WorkItemCard key={item.id} item={item} />
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

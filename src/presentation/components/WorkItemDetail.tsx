@@ -1,0 +1,123 @@
+import { useParams, useNavigate } from 'react-router-dom';
+import { useWorkItems } from '../../application/service/useWorkItems';
+import type { WorkItemRepository } from '../../infrastructure/ports/repositories';
+
+interface WorkItemDetailProps {
+  repository: WorkItemRepository;
+}
+
+/**
+ * Work item detail page component
+ * Displays full project details with image on left and info on right
+ */
+export function WorkItemDetail({ repository }: WorkItemDetailProps) {
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const { workItems, loading, error } = useWorkItems(repository);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-dark-text-muted border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-dark-text-secondary font-light">Loading project...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 font-light">Error: {error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Find the work item by slug
+  const workItem = workItems.find(
+    (item) => item.title.toLowerCase().replace(/\s+/g, '-') === slug
+  );
+
+  if (!workItem) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-dark-text-secondary font-light mb-4">Project not found</p>
+          <button
+            onClick={() => navigate('/#work')}
+            className="px-6 py-2 border border-dark-border hover:border-dark-text-muted transition-colors"
+          >
+            Back to Work
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen pt-32 pb-20">
+      <div className="container mx-auto px-6 lg:px-12">
+        {/* Back button */}
+        <button
+          onClick={() => navigate('/#work')}
+          className="mb-8 text-dark-text-secondary hover:text-dark-text-primary transition-colors flex items-center gap-2"
+        >
+          <span>←</span>
+          <span>Back to Work</span>
+        </button>
+
+        {/* Two-column layout: Image left, Details right */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+          {/* Left: Image */}
+          <div className="aspect-[4/3] overflow-hidden bg-dark-surface">
+            <img
+              src={workItem.imageUrl}
+              alt={workItem.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Right: Details */}
+          <div className="space-y-8">
+            {/* Category and Year */}
+            <div className="flex items-center gap-4 text-sm text-dark-text-muted font-light tracking-widest uppercase">
+              <span>{workItem.category}</span>
+              <span>•</span>
+              <span>{workItem.year}</span>
+            </div>
+
+            {/* Title */}
+            <h1 className="font-title text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight leading-tight">
+              {workItem.title}
+            </h1>
+
+            {/* Description */}
+            <p className="text-lg lg:text-xl text-dark-text-secondary font-light leading-relaxed">
+              {workItem.description}
+            </p>
+
+            {/* Tags */}
+            <div>
+              <h3 className="text-sm font-light tracking-widest uppercase text-dark-text-muted mb-4">
+                Tags
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {workItem.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-4 py-2 text-xs font-light tracking-wide border border-dark-border text-dark-text-secondary"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
