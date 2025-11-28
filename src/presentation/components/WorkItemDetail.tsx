@@ -99,17 +99,17 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
 
           {/* Right: Details */}
           <div className="space-y-8">
+            {/* Title */}
+            <h1 className="font-title text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight leading-tight">
+              {workItem.title}
+            </h1>
+
             {/* Category and Year */}
             <div className="flex items-center gap-4 text-sm text-dark-text-muted font-light tracking-widest uppercase">
               <span>{workItem.category}</span>
               <span>•</span>
               <span>{workItem.year}</span>
             </div>
-
-            {/* Title */}
-            <h1 className="font-title text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight leading-tight">
-              {workItem.title}
-            </h1>
 
             {/* Description */}
             <p className="text-lg lg:text-xl text-dark-text-secondary font-light leading-relaxed">
@@ -118,9 +118,6 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
 
             {/* Tags */}
             <div>
-              <h3 className="text-sm font-light tracking-widest uppercase text-dark-text-muted mb-4">
-                Tags
-              </h3>
               <div className="flex flex-wrap gap-3">
                 {workItem.tags.map((tag) => (
                   <span
