@@ -35,7 +35,7 @@ export function WorkSection({ repository }: WorkSectionProps) {
   }
 
   return (
-    <section id="work" className="py-20 lg:py-32">
+    <section id="work">
       <div className="w-full max-w-full">
         {/* Grid of work items - 1 column on mobile, 3 columns on desktop, no gaps */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
