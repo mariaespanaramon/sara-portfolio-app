@@ -27,24 +27,24 @@ export function Header() {
           {/* Logo/Brand */}
           <a
             href="#"
-            className="text-xl lg:text-2xl font-light tracking-tight hover:opacity-70 transition-opacity"
+            className="font-heading text-xl lg:text-2xl font-light tracking-tight hover:opacity-70 transition-opacity"
           >
-            Portfolio
+            sara ramon
           </a>
 
-          {/* Navigation Links - Always visible, not a hamburger menu */}
+          {/* Navigation Links*/}
           <div className="flex items-center gap-8 lg:gap-12">
             <a
               href="#work"
               className="text-sm lg:text-base font-light tracking-wide hover:text-dark-text-secondary transition-colors"
             >
-              Work
+              work
             </a>
             <a
               href="#about"
               className="text-sm lg:text-base font-light tracking-wide hover:text-dark-text-secondary transition-colors"
             >
-              About
+              about
             </a>
           </div>
         </div>
