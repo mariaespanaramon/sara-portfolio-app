@@ -29,7 +29,7 @@ export function Header() {
           <a
             href="#"
             onClick={handleLogoClick}
-            className="font-heading text-xl lg:text-2xl font-light tracking-tight hover:opacity-70 transition-opacity"
+            className="text-3xl lg:text-3xl font-heading tracking-tight hover:opacity-70 transition-opacity leading-none"
           >
             sara ramon
           </a>
@@ -38,13 +38,13 @@ export function Header() {
           <div className="flex items-center gap-8 lg:gap-12">
             <a
               href="#work"
-              className="text-sm lg:text-base font-light tracking-wide hover:text-dark-text-secondary transition-colors"
+              className="text-xl lg:text-xl font-light tracking-wide hover:text-dark-text-secondary transition-colors leading-none"
             >
               work
             </a>
             <a
               href="#about"
-              className="text-sm lg:text-base font-light tracking-wide hover:text-dark-text-secondary transition-colors"
+              className="text-xl lg:text-xl font-light tracking-wide hover:text-dark-text-secondary transition-colors leading-none"
             >
               about
             </a>

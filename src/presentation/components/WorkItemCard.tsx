@@ -79,7 +79,7 @@ export function WorkItemCard({ item }: WorkItemCardProps) {
           {item.tags.map((tag) => (
             <span
               key={tag}
-              className="px-3 py-2 text-sm font-light tracking-wide border border-dark-text-muted text-dark-text-secondary"
+              className="px-3 py-2 text-sm font-bold tracking-wide text-dark-text-primary uppercase"
             >
               {tag}
             </span>
