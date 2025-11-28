@@ -6,18 +6,17 @@ import type { AboutContentRepository } from '../ports/repositories';
  */
 const MOCK_ABOUT_CONTENT: AboutContent = {
   id: '1',
-  name: 'Creative Professional',
-  role: 'Designer & Developer',
-  bio: 'A multidisciplinary creative with a passion for crafting exceptional digital experiences. Specializing in brand identity, user interface design, and frontend development with a focus on minimalism and attention to detail.',
-  email: 'hello@example.com',
-  location: 'San Francisco, CA',
+  name: 'About Sara',
+  role: 'Design student at BAU, College of Arts & Design Barcelona',
+  bio: 'Born in Barcelona, Sara is a multidisciplinary designer, with a passion for crafting engaging visual experiences.\nSpecializing in photography, short film design, and brand identity, with a strong focus on storytelling and visual coherence.\n\nOpen to new projects and eager to explore professional opportunities in design and media.',
+  email: 'hello@example.com', // TODO update email
+  location: 'Barcelona, Spain',
   skills: [
-    'Brand Identity',
-    'UI/UX Design',
-    'Frontend Development',
-    'Typography',
+    'Photography',
     'Art Direction',
     'Motion Design',
+    'Brand Identity',
+    'UI/UX Design',
   ],
 };
 
@@ -25,7 +24,7 @@ const MOCK_ABOUT_CONTENT: AboutContent = {
  * Adapter for AboutContent repository - Mock implementation
  * Simulates an asynchronous API call to fetch about content
  * 
- * In production, replace with actual API endpoint
+ * Once content is finalized, replace with actual API endpoint
  */
 export class MockAboutContentRepository implements AboutContentRepository {
   async get(): Promise<AboutContent> {

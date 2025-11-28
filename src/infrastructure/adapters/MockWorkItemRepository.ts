@@ -12,31 +12,31 @@ import type { WorkItemRepository } from '../ports/repositories';
 const MOCK_WORK_ITEMS: WorkItem[] = [
   {
     id: '1',
-    title: 'Brand Identity System',
-    category: 'Branding',
-    description: 'A comprehensive brand identity system for a leading technology startup, including logo design, color palette, typography, and brand guidelines.',
-    year: '2024',
-    imageUrl: 'https://images.unsplash.com/photo-1558655146-d09347e92766?w=1200&h=800&fit=crop',
+    title: 'Nostalgic City',
+    category: 'Photography',
+    description: 'A compelling series of nostalgic black and white photography, capturing fleeting moments of memory and time.\nThe collection features intimate portraiture, timeless urban landscapes, subtle grain textures, with use of chiaroscuro to evoke a sense of history and reflection.',
+    year: '2025',
+    imageUrl: 'https://images.pexels.com/photos/17932022/pexels-photo-17932022.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop',
     gifUrl: 'https://media.giphy.com/media/l0HlQXlQ3nHyLMvte/giphy.gif',
-    tags: ['Brand Design', 'Identity', 'Visual System'],
+    tags: ['Photography', 'Black and White', 'Portraiture'],
   },
   {
     id: '2',
-    title: 'E-Commerce Platform',
-    category: 'Digital Product',
-    description: 'End-to-end design and development of a modern e-commerce platform with seamless user experience and conversion-optimized checkout flow.',
+    title: 'Playing With Colors',
+    category: 'Rendering',
+    description: 'A vibrant and hyper-realistic rendering project, exploring the intersection of digital texture and dynamic color fields.\nThe work features complex geometric structures, a rich and saturated color palette, advanced lighting simulations, and a sharp attention to material reflectivity to create an immersive visual impact.',
     year: '2024',
-    imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=800&fit=crop',
+    imageUrl: 'https://images.pexels.com/photos/15863496/pexels-photo-15863496.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop',
     gifUrl: 'https://media.giphy.com/media/xT9IgzoKnwFNmISR8I/giphy.gif',
-    tags: ['UX/UI Design', 'Development', 'E-Commerce'],
+    tags: ['3D', 'Design'],
   },
   {
     id: '3',
-    title: 'Editorial Design',
+    title: 'A Modern Editorial',
     category: 'Print',
     description: 'A premium editorial design project featuring minimalist layouts, sophisticated typography, and thoughtful content hierarchy.',
     year: '2023',
-    imageUrl: 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=1200&h=800&fit=crop',
+    imageUrl: 'https://images.pexels.com/photos/2333332/pexels-photo-2333332.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop',
     gifUrl: 'https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif',
     tags: ['Editorial', 'Typography', 'Layout'],
   },
@@ -56,7 +56,7 @@ const MOCK_WORK_ITEMS: WorkItem[] = [
  * Adapter for WorkItem repository - Mock implementation
  * Simulates an asynchronous API call to fetch work items
  * 
- * In production, replace with actual API endpoint:
+ * Once content is finalized, replace with actual API endpoint:
  * const API_KEY = process.env.VITE_CMS_API_KEY;
  * const response = await fetch(`${API_URL}/work-items`, {
  *   headers: { 'Authorization': `Bearer ${API_KEY}` }
