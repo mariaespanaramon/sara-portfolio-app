@@ -12,6 +12,7 @@ import { Header } from './presentation/components/Header';
 import { Hero } from './presentation/components/Hero';
 import { WorkSection } from './presentation/components/WorkSection';
 import { AboutSection } from './presentation/components/AboutSection';
+import { ContactSection } from './presentation/components/ContactSection';
 import { Footer } from './presentation/components/Footer';
 import { WorkItemDetail } from './presentation/components/WorkItemDetail';
 import { MockWorkItemRepository } from './infrastructure/adapters/MockWorkItemRepository';
@@ -31,6 +32,7 @@ function HomePage() {
       <Hero />
       <WorkSection repository={workItemRepository} />
       <AboutSection repository={aboutContentRepository} />
+      <ContactSection repository={aboutContentRepository} />
     </>
   );
 }

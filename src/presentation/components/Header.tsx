@@ -40,13 +40,19 @@ export function Header() {
               href="#work"
               className="text-xl lg:text-xl font-light tracking-wide hover:text-dark-text-secondary transition-colors leading-none"
             >
-              work
+              Work
             </a>
             <a
               href="#about"
               className="text-xl lg:text-xl font-light tracking-wide hover:text-dark-text-secondary transition-colors leading-none"
             >
-              about
+              About
+            </a>
+            <a
+              href="#contact"
+              className="text-xl lg:text-xl font-light tracking-wide hover:text-dark-text-secondary transition-colors leading-none"
+            >
+              Contact
             </a>
           </div>
         </div>

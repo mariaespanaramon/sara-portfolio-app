@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Noto Sans', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        title: ['Geo', 'cursive'],
+        sans: ['Lexend Sans', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        title: ['Lexend', 'cursive'],
         heading: ['UnifrakturMaguntia', 'Georgia', 'serif'],
       },
       colors: {
