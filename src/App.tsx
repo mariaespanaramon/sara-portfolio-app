@@ -17,11 +17,13 @@ import { Footer } from './presentation/components/Footer';
 import { WorkItemDetail } from './presentation/components/WorkItemDetail';
 import { MockWorkItemRepository } from './infrastructure/adapters/MockWorkItemRepository';
 import { MockAboutContentRepository } from './infrastructure/adapters/MockAboutContentRepository';
+import { MockContactDetailsRepository } from './infrastructure/adapters/MockContactDetailsRepository';
 
 // Initialize repositories (dependency injection)
 // In a larger application, you might use a DI container or React Context
 const workItemRepository = new MockWorkItemRepository();
 const aboutContentRepository = new MockAboutContentRepository();
+const contactDetailsRepository = new MockContactDetailsRepository();
 
 /**
  * Home page component
@@ -32,7 +34,7 @@ function HomePage() {
       <Hero />
       <WorkSection repository={workItemRepository} />
       <AboutSection repository={aboutContentRepository} />
-      <ContactSection repository={aboutContentRepository} />
+      <ContactSection repository={contactDetailsRepository} />
     </>
   );
 }

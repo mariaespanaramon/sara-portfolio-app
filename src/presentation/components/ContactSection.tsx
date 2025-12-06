@@ -1,8 +1,8 @@
-import { useAboutContent } from '../../application/service/useAboutContent';
-import type { AboutContentRepository } from '../../infrastructure/ports/repositories';
+import { useContactDetails } from '../../application/service/useContactDetails';
+import type { ContactDetailsRepository } from '../../infrastructure/ports/repositories';
 
 interface ContactSectionProps {
-  repository: AboutContentRepository;
+  repository: ContactDetailsRepository;
 }
 
 /**
@@ -10,7 +10,7 @@ interface ContactSectionProps {
  * Displays contact information
  */
 export function ContactSection({ repository }: ContactSectionProps) {
-  const { aboutContent, loading, error } = useAboutContent(repository);
+  const { contactDetails, loading, error } = useContactDetails(repository);
 
   if (loading) {
     return (
@@ -23,7 +23,7 @@ export function ContactSection({ repository }: ContactSectionProps) {
     );
   }
 
-  if (error || !aboutContent) {
+  if (error || !contactDetails) {
     return (
       <section id="contact" className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -55,17 +55,17 @@ export function ContactSection({ repository }: ContactSectionProps) {
                   Email
                 </h3>
                 <a
-                  href={`mailto:${aboutContent.email}`}
+                  href={`mailto:${contactDetails.email}`}
                   className="text-lg font-light hover:text-dark-text-secondary transition-colors"
                 >
-                  {aboutContent.email}
+                  {contactDetails.email}
                 </a>
               </div>
               <div>
                 <h3 className="text-sm font-light tracking-widest uppercase text-dark-text-muted mb-3">
                   Location
                 </h3>
-                <p className="text-lg font-light text-dark-text-secondary">{aboutContent.location}</p>
+                <p className="text-lg font-light text-dark-text-secondary">{contactDetails.location}</p>
               </div>
             </div>
           </div>
