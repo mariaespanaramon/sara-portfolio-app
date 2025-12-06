@@ -34,7 +34,7 @@ export function AboutSection({ repository }: AboutSectionProps) {
   }
 
   return (
-    <section id="about" className="min-h-screen flex items-center py-20 lg:py-32">
+    <section id="about" className="flex items-center pt-20 lg:pt-32 pb-10 lg:pb-16">
       <div className="container mx-auto px-6 lg:px-12">
         <div className="max-w-4xl mx-auto">
           <div className="space-y-16 lg:space-y-24">
@@ -69,27 +69,6 @@ export function AboutSection({ repository }: AboutSectionProps) {
                     {skill}
                   </div>
                 ))}
-              </div>
-            </div>
-
-            {/* Contact Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-dark-border">
-              <div>
-                <h3 className="text-sm font-light tracking-widest uppercase text-dark-text-muted mb-3">
-                  Email
-                </h3>
-                <a
-                  href={`mailto:${aboutContent.email}`}
-                  className="text-lg font-light hover:text-dark-text-secondary transition-colors"
-                >
-                  {aboutContent.email}
-                </a>
-              </div>
-              <div>
-                <h3 className="text-sm font-light tracking-widest uppercase text-dark-text-muted mb-3">
-                  Location
-                </h3>
-                <p className="text-lg font-light text-dark-text-secondary">{aboutContent.location}</p>
               </div>
             </div>
           </div>
