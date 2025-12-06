@@ -86,13 +86,17 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
           <span>Back to Work</span>
         </button>
 
-        {/* Two-column layout: Image left, Details right */}
+        {/* Two-column layout: Video left, Details right */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-          {/* Left: Image */}
+          {/* Left: Video */}
           <div className="aspect-[4/3] overflow-hidden bg-dark-surface">
-            <img
-              src={workItem.imageUrl}
-              alt={workItem.title}
+            <video
+              src={workItem.videoUrl}
+              poster={workItem.imageUrl}
+              controls
+              loop
+              muted
+              playsInline
               className="w-full h-full object-cover"
             />
           </div>

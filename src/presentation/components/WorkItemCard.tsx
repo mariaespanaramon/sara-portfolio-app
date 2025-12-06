@@ -4,7 +4,7 @@ import type { WorkItem } from '../../application/domain/WorkItem';
 
 /**
  * Work item card component
- * Displays an interactive card with gif on hover
+ * Displays an interactive card with looping video on hover
  */
 interface WorkItemCardProps {
   item: WorkItem;
@@ -12,21 +12,23 @@ interface WorkItemCardProps {
 
 export function WorkItemCard({ item }: WorkItemCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const gifRef = useRef<HTMLImageElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
 
   const handleMouseEnter = () => {
     setIsHovered(true);
-    if (gifRef.current) {
-      // Restart the GIF by reloading the src
-      const src = gifRef.current.src;
-      gifRef.current.src = '';
-      gifRef.current.src = src;
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play();
     }
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
   };
 
   const handleClick = () => {
@@ -42,23 +44,17 @@ export function WorkItemCard({ item }: WorkItemCardProps) {
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
     >
-      {/* Static image (visible when not hovering) */}
-      <img
-        src={item.imageUrl}
-        alt={item.title}
+      {/* Video element - browser generates thumbnail from first frame */}
+      <video
+        ref={videoRef}
+        src={item.videoUrl}
         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-          isHovered ? 'opacity-0' : 'opacity-100'
+          isHovered ? 'opacity-100' : 'opacity-100'
         }`}
-      />
-
-      {/* GIF (visible on hover) */}
-      <img
-        ref={gifRef}
-        src={item.gifUrl}
-        alt={item.title}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-          isHovered ? 'opacity-100' : 'opacity-0'
-        }`}
+        loop
+        muted
+        playsInline
+        preload="metadata"
       />
 
       {/* Overlay with title and tags (visible on hover) */}

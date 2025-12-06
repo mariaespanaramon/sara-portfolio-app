@@ -82,7 +82,7 @@ export class NetlifyBlobsWorkItemRepository implements WorkItemRepository {
       if (!this.isValidWorkItem(item)) {
         throw new Error(
           `Invalid work item at index ${index}: Missing required fields. ` +
-          'Expected: id, title, category, description, year, imageUrl, gifUrl, tags'
+          'Expected: id, title, category, description, year, imageUrl, videoUrl, tags'
         );
       }
       return item as WorkItem;
@@ -108,7 +108,7 @@ export class NetlifyBlobsWorkItemRepository implements WorkItemRepository {
       typeof workItem.description === 'string' &&
       typeof workItem.year === 'string' &&
       typeof workItem.imageUrl === 'string' &&
-      typeof workItem.gifUrl === 'string' &&
+      typeof workItem.videoUrl === 'string' &&
       Array.isArray(workItem.tags) &&
       workItem.tags.every((tag) => typeof tag === 'string')
     );
