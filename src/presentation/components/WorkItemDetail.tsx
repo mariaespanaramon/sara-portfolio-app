@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useWorkItems } from '../../application/service/useWorkItems';
 import type { WorkItemRepository } from '../../infrastructure/ports/repositories';
+import { WorkItemDetailFactory } from './workItemDetails/WorkItemDetailFactory';
 
 interface WorkItemDetailProps {
   repository: WorkItemRepository;
@@ -86,22 +87,14 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
           <span>Back to Work</span>
         </button>
 
-        {/* Two-column layout: Video left, Details right */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-          {/* Left: Video */}
-          <div className="aspect-[4/3] overflow-hidden bg-dark-surface">
-            <video
-              src={workItem.videoUrl}
-              poster={workItem.imageUrl}
-              controls
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-            />
+        {/* Single column layout: Media on top, centered */}
+        <div className="max-w-4xl mx-auto space-y-12">
+          {/* Media Section - Rendered by type-specific implementation */}
+          <div className="aspect-video overflow-hidden bg-dark-surface">
+            {WorkItemDetailFactory.getRenderer(workItem.type).renderMedia(workItem)}
           </div>
 
-          {/* Right: Details */}
+          {/* Details Section */}
           <div className="space-y-8">
             {/* Title */}
             <h1 className="font-title text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight leading-tight">
@@ -116,7 +109,7 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
             </div>
 
             {/* Description */}
-            <p className="text-lg lg:text-xl text-dark-text-secondary font-light leading-relaxed">
+            <p className="text-lg lg:text-xl text-dark-text-secondary font-light leading-relaxed whitespace-pre-line">
               {workItem.description}
             </p>
 

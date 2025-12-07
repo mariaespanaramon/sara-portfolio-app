@@ -82,7 +82,7 @@ export class NetlifyBlobsWorkItemRepository implements WorkItemRepository {
       if (!this.isValidWorkItem(item)) {
         throw new Error(
           `Invalid work item at index ${index}: Missing required fields. ` +
-          'Expected: id, title, category, description, year, imageUrl, videoUrl, tags'
+          'Expected: id, title, category, description, year, type, imageUrl (for image type), videoUrl (for video type), galleryImages (for gallery type), tags'
         );
       }
       return item as WorkItem;
@@ -101,16 +101,33 @@ export class NetlifyBlobsWorkItemRepository implements WorkItemRepository {
 
     const workItem = item as Record<string, unknown>;
 
-    return (
+    const baseValid =
       typeof workItem.id === 'string' &&
       typeof workItem.title === 'string' &&
       typeof workItem.category === 'string' &&
       typeof workItem.description === 'string' &&
       typeof workItem.year === 'string' &&
-      typeof workItem.imageUrl === 'string' &&
-      typeof workItem.videoUrl === 'string' &&
+      (workItem.type === 'image' || workItem.type === 'video' || workItem.type === 'gallery') &&
       Array.isArray(workItem.tags) &&
-      workItem.tags.every((tag) => typeof tag === 'string')
-    );
+      workItem.tags.every((tag) => typeof tag === 'string');
+
+    if (!baseValid) {
+      return false;
+    }
+
+    // Validate type-specific fields
+    if (workItem.type === 'video') {
+      return typeof workItem.videoUrl === 'string';
+    } else if (workItem.type === 'image') {
+      return typeof workItem.imageUrl === 'string';
+    } else if (workItem.type === 'gallery') {
+      return (
+        Array.isArray(workItem.galleryImages) &&
+        workItem.galleryImages.length > 0 &&
+        workItem.galleryImages.every((url) => typeof url === 'string')
+      );
+    }
+
+    return false;
   }
 }

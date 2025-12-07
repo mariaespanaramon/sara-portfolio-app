@@ -7,7 +7,9 @@ export interface WorkItem {
   category: string;
   description: string;
   year: string;
-  imageUrl: string;
-  videoUrl: string;
+  type: 'image' | 'video' | 'gallery';
+  imageUrl?: string;
+  videoUrl?: string;
+  galleryImages?: string[];
   tags: string[];
 }
