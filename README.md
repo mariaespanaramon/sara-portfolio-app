@@ -248,6 +248,123 @@ async function getWorkItems(): Promise<WorkItem[]> {
 - **Vite 5**: Next-generation frontend tooling
 - **ESLint**: Code quality and consistency
 
+## 🔌 Extending Work Item Types
+
+The application uses an extensible architecture for work item types, following the Strategy pattern and Open/Closed Principle. Currently supported types: `image`, `video`, and `gallery`.
+
+### Adding a New Work Item Type
+
+To add a new work item type (e.g., audio, PDF, 3D model):
+
+**1. Update the Domain Model**
+
+Add your new type to `src/application/domain/WorkItem.ts`:
+
+```typescript
+export interface WorkItem {
+  // ... existing fields
+  type: 'image' | 'video' | 'gallery' | 'audio'; // Add your type
+  audioUrl?: string; // Add type-specific fields
+}
+```
+
+**2. Create Card Renderer**
+
+Create `src/presentation/components/workItemCards/AudioItemCard.tsx`:
+
+```typescript
+import type { WorkItem } from '../../../application/domain/WorkItem';
+import type { IWorkItemCard } from './IWorkItemCard';
+
+export class AudioItemCard implements IWorkItemCard {
+  renderMedia(workItem: WorkItem, isHovered: boolean): JSX.Element {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-dark-surface">
+        <audio src={workItem.audioUrl} controls className="w-full px-8" />
+      </div>
+    );
+  }
+}
+```
+
+**3. Create Detail Renderer**
+
+Create `src/presentation/components/workItemDetails/AudioItemDetail.tsx`:
+
+```typescript
+import type { WorkItem } from '../../../application/domain/WorkItem';
+import type { IWorkItemDetail } from './IWorkItemDetail';
+
+export class AudioItemDetail implements IWorkItemDetail {
+  renderMedia(workItem: WorkItem): JSX.Element {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-dark-surface">
+        <audio src={workItem.audioUrl} controls className="w-full max-w-2xl" />
+      </div>
+    );
+  }
+}
+```
+
+**4. Register with Factories**
+
+Update `src/presentation/components/workItemCards/WorkItemCardFactory.ts`:
+
+```typescript
+import { AudioItemCard } from './AudioItemCard';
+
+export class WorkItemCardFactory {
+  private static renderers: Map<string, IWorkItemCard> = new Map([
+    ['video', new VideoItemCard()],
+    ['image', new ImageItemCard()],
+    ['gallery', new GalleryItemCard()],
+    ['audio', new AudioItemCard()], // Add this line
+  ]);
+  // ...
+}
+```
+
+Update `src/presentation/components/workItemDetails/WorkItemDetailFactory.ts` similarly.
+
+**5. Update Validation**
+
+Update `src/infrastructure/adapters/NetlifyBlobsWorkItemRepository.ts`:
+
+```typescript
+private isValidWorkItem(item: unknown): item is WorkItem {
+  // ... existing code
+  const baseValid = 
+    // ... existing checks
+    (workItem.type === 'image' || workItem.type === 'video' || 
+     workItem.type === 'gallery' || workItem.type === 'audio') && // Add type
+    // ... rest of validation
+  
+  // Add type-specific validation
+  if (workItem.type === 'audio') {
+    return typeof workItem.audioUrl === 'string';
+  }
+}
+```
+
+**6. Add Sample Data**
+
+Add a sample item to `src/infrastructure/adapters/MockWorkItemRepository.ts`:
+
+```typescript
+{
+  id: '6',
+  title: 'Sound Design Reel',
+  category: 'Audio',
+  description: 'A collection of sound design work...',
+  year: '2024',
+  type: 'audio',
+  audioUrl: 'https://example.com/audio.mp3',
+  tags: ['Sound Design', 'Audio'],
+}
+```
+
+That's it! The new type is now fully integrated with automatic routing, validation, and rendering.
+
 ## 📄 License
 
 This project is open source and available under the MIT License.

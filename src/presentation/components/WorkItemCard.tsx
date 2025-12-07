@@ -1,10 +1,11 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { WorkItem } from '../../application/domain/WorkItem';
+import { WorkItemCardFactory } from './workItemCards/WorkItemCardFactory';
 
 /**
  * Work item card component
- * Displays an interactive card with looping video on hover
+ * Displays an interactive card with type-specific rendering behavior
  */
 interface WorkItemCardProps {
   item: WorkItem;
@@ -12,23 +13,18 @@ interface WorkItemCardProps {
 
 export function WorkItemCard({ item }: WorkItemCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const mediaRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
+  const renderer = WorkItemCardFactory.getRenderer(item.type);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play();
-    }
+    renderer.onMouseEnter?.(item, mediaRef);
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
+    renderer.onMouseLeave?.(item, mediaRef);
   };
 
   const handleClick = () => {
@@ -44,18 +40,8 @@ export function WorkItemCard({ item }: WorkItemCardProps) {
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
     >
-      {/* Video element - browser generates thumbnail from first frame */}
-      <video
-        ref={videoRef}
-        src={item.videoUrl}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-          isHovered ? 'opacity-100' : 'opacity-100'
-        }`}
-        loop
-        muted
-        playsInline
-        preload="metadata"
-      />
+      {/* Media element - rendered by type-specific implementation */}
+      {renderer.renderMedia(item, isHovered, mediaRef)}
 
       {/* Overlay with title and tags (visible on hover) */}
       <div
