@@ -119,7 +119,108 @@ This application is deployed using **Netlify**.
 
 
 ## 📚 Adding Content
-Once the content is ready, replace mock data in the Infrastructure layer (`MOCK_WORK_ITEMS`, `MOCK_ABOUT_CONTENT`) or connect to a Headless CMS:
+
+This application uses **Netlify Blobs** for content storage, providing a simple and efficient way to manage portfolio work items and videos.
+
+### Adding Videos and Work Items
+
+#### 1. Upload a Video to Netlify Blobs
+
+First, upload your video file to the `videos` store:
+
+```bash
+# Make sure you're in the project directory and logged into Netlify CLI
+netlify link
+
+# Upload a video (replace with your video path)
+netlify blobs:set videos your-video-name.mp4 ~/path/to/your-video.mp4
+```
+
+#### 2. Update Work Items
+
+Work items are stored as JSON in the `work-items` store. To add or update work items:
+
+**Step 1:** Download the current work items (if any exist):
+```bash
+netlify blobs:get work-items items.json > items.json
+```
+
+**Step 2:** Edit `items.json` and add your new work item following this structure:
+
+```json
+[
+  {
+    "id": "1",
+    "title": "Your Project Title",
+    "category": "Photography",
+    "description": "A detailed description of your project.\nYou can use \\n for line breaks.",
+    "year": "2025",
+    "imageUrl": "",
+    "videoUrl": "https://yoursitename.netlify.app/.netlify/blobs/serve/videos/your-video-name.mp4",
+    "tags": ["Tag1", "Tag2", "Tag3"]
+  }
+]
+```
+
+**Field Descriptions:**
+- `id`: Unique identifier (string)
+- `title`: Project title
+- `category`: Project category (e.g., Photography, Design, Video)
+- `description`: Full project description (use `\n` for line breaks)
+- `year`: Project year
+- `imageUrl`: Leave empty to use video's first frame as thumbnail, or provide a custom poster image URL
+- `videoUrl`: Full URL to your video in Netlify Blobs
+- `tags`: Array of tags for the project
+
+**Step 3:** Upload the updated JSON file:
+```bash
+netlify blobs:set work-items items.json items.json
+```
+
+#### 3. Video URL Format
+
+Your video URL should follow this pattern:
+```
+https://[your-site-name].netlify.app/.netlify/blobs/serve/videos/[video-filename].mp4
+```
+
+Replace `[your-site-name]` with your Netlify site name and `[video-filename]` with the name you used when uploading.
+
+#### 4. Verify Your Changes
+
+After uploading, deploy your site or wait for the next build. Your new work items will appear automatically.
+
+### Managing Content via Netlify CLI
+
+**List all blobs in a store:**
+```bash
+netlify blobs:list videos
+netlify blobs:list work-items
+```
+
+**Delete a blob:**
+```bash
+netlify blobs:delete videos your-video-name.mp4
+netlify blobs:delete work-items items.json
+```
+
+**View a blob:**
+```bash
+netlify blobs:get work-items items.json
+```
+
+### Environment Variables
+
+The application requires the `NETLIFY_BLOB_ACCESS` environment variable to be set in your Netlify dashboard:
+
+1. Go to your Netlify site dashboard
+2. Navigate to **Site settings** → **Environment variables**
+3. Add `NETLIFY_BLOB_ACCESS` with your Netlify Blobs access token
+4. Get your token from: https://app.netlify.com/user/applications#personal-access-tokens
+
+### Alternative: API Integration
+
+If you prefer using a Headless CMS instead of Netlify Blobs, replace mock data in the Infrastructure layer (`MOCK_WORK_ITEMS`, `MOCK_ABOUT_CONTENT`) or connect to a Headless CMS:
 
 ### API Integration
 Add the following environment variables to Netlify:

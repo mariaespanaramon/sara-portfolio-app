@@ -16,12 +16,21 @@ import { ContactSection } from './presentation/components/ContactSection';
 import { Footer } from './presentation/components/Footer';
 import { WorkItemDetail } from './presentation/components/WorkItemDetail';
 import { MockWorkItemRepository } from './infrastructure/adapters/MockWorkItemRepository';
+import { NetlifyBlobsWorkItemRepository } from './infrastructure/adapters/NetlifyBlobsWorkItemRepository';
 import { MockAboutContentRepository } from './infrastructure/adapters/MockAboutContentRepository';
 import { MockContactDetailsRepository } from './infrastructure/adapters/MockContactDetailsRepository';
+import { createNetlifyBlobsConfig, isNetlifyBlobsConfigured } from './infrastructure/config/netlify.config';
 
 // Initialize repositories (dependency injection)
 // In a larger application, you might use a DI container or React Context
-const workItemRepository = new MockWorkItemRepository();
+
+// Work Item Repository: Use Netlify Blobs if configured, otherwise use Mock
+// This follows the Dependency Inversion Principle - the app depends on the
+// WorkItemRepository interface, not the concrete implementation
+const workItemRepository = isNetlifyBlobsConfigured()
+  ? new NetlifyBlobsWorkItemRepository(createNetlifyBlobsConfig())
+  : new MockWorkItemRepository();
+
 const aboutContentRepository = new MockAboutContentRepository();
 const contactDetailsRepository = new MockContactDetailsRepository();
 
