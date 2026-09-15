@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { WorkItem } from '../../application/domain/WorkItem';
 import { WorkItemCardFactory } from './workItemCards/WorkItemCardFactory';
+import { toSlug } from '../../application/domain/slug';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 /**
@@ -44,8 +45,7 @@ export function WorkItemCard({ item }: WorkItemCardProps) {
 
   const handleClick = () => {
     // Navigate to detail page based on title slug
-    const slug = item.title.toLowerCase().replace(/\s+/g, '-');
-    navigate(`/work/${slug}`);
+    navigate(`/work/${toSlug(item.title)}`);
   };
 
   return (

@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useWorkItems } from '../../application/service/useWorkItems';
 import type { WorkItemRepository } from '../../infrastructure/ports/repositories';
 import { WorkItemDetailFactory } from './workItemDetails/WorkItemDetailFactory';
+import { toSlug } from '../../application/domain/slug';
 
 interface WorkItemDetailProps {
   repository: WorkItemRepository;
@@ -55,9 +56,7 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
   }
 
   // Find the work item by slug
-  const workItem = workItems.find(
-    (item) => item.title.toLowerCase().replace(/\s+/g, '-') === slug
-  );
+  const workItem = workItems.find((item) => toSlug(item.title) === slug);
 
   if (!workItem) {
     return (

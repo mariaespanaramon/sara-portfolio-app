@@ -16,6 +16,7 @@ import { AboutSection } from './presentation/components/AboutSection';
 import { ContactSection } from './presentation/components/ContactSection';
 import { Footer } from './presentation/components/Footer';
 import { WorkItemDetail } from './presentation/components/WorkItemDetail';
+import { SectionPage } from './presentation/components/SectionPage';
 import { MockWorkItemRepository } from './infrastructure/adapters/MockWorkItemRepository';
 import { NetlifyBlobsWorkItemRepository } from './infrastructure/adapters/NetlifyBlobsWorkItemRepository';
 import { MockSectionRepository } from './infrastructure/adapters/MockSectionRepository';
@@ -67,6 +68,15 @@ function App() {
         <main>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route
+              path="/section/:slug"
+              element={
+                <SectionPage
+                  sectionRepository={sectionRepository}
+                  workItemRepository={workItemRepository}
+                />
+              }
+            />
             <Route 
               path="/work/:slug" 
               element={<WorkItemDetail repository={workItemRepository} />} 

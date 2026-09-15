@@ -371,11 +371,33 @@ y al salir vuelve a la imagen; en móvil una columna sin vídeos; click navega a
 
 **`SectionPage` — cabecera con solapamiento:**
 - Requisito: *"la mitad derecha del título, superpuesto a la esquina superior izquierda de la imagen"*.
-- Implementación: contenedor `relative`. La imagen ocupa el 70 % derecho
-  (`ml-auto w-full md:w-[70%] aspect-[4/3] object-cover`). El título va en
-  `absolute top-[8%] left-0 z-10 md:w-[60%]`, de forma que su mitad derecha cae
-  encima del borde superior-izquierdo de la imagen.
-- El título usa `font-title text-5xl md:text-7xl lg:text-8xl` + `text-white mix-blend-exclusion`,
+- Implementación final, tras varias rondas de revisión visual:
+  - La imagen se envuelve en un `div.relative.md:ml-auto.md:w-[70%]`. El título se
+    posiciona contra **ese contenedor, no contra el `<header>`**: el header lleva padding
+    superior, así que sus porcentajes no coinciden con los de la imagen.
+  - Título en `md:absolute md:top-0 md:left-0 md:-translate-x-1/2 md:-translate-y-1/2`.
+    `top-0 left-0` es la esquina superior izquierda de la imagen y los dos
+    desplazamientos del 50 % **centran el título en esa esquina**: media altura del texto
+    cuelga por encima y medio largo queda a la izquierda.
+  - **`md:whitespace-nowrap` es lo que hace exacta la geometría, y es la clave.**
+    Una caja posicionada en absoluto se encoge hasta su contenido, así que con una sola
+    línea media caja **es** medio texto. Si se permite que el título se parta, la caja se
+    queda al ancho máximo mientras las líneas acaban antes, y la proporción de letras que
+    cae sobre la imagen empieza a depender del largo de cada título.
+    Se intentó compensar eso con `-translate-x-1/4` y luego con `text-right`, y ambos
+    arreglaban un título rompiendo los otros.
+  - Por eso el tamaño es **relativo al viewport**, `md:text-[min(4.5vw,80px)]`, en vez de
+    los escalones `md:text-7xl lg:text-8xl`: el título más largo tiene que caber en una
+    línea con su mitad izquierda dentro del margen blanco. Coste asumido: en desktop los
+    títulos son menores que con `text-8xl`.
+  - `pt-40 lg:pt-56` en el `<header>`: con media altura del título colgando por encima de
+    la imagen, con menos padding se metía por debajo del header fijo.
+- **Sin `z-index`** en el título, al contrario de lo que decía la versión inicial del plan:
+  no hace falta (un elemento posicionado ya se pinta sobre un hermano estático) y cuanto
+  menos stacking context se cree, menos riesgo de repetir el problema del Commit 3.
+- El título va **antes** que la imagen en el DOM: así en móvil, donde no se posiciona,
+  se apila encima sin más. Los `md:` lo sacan del flujo solo en desktop.
+- El título usa `font-title font-bold` + `text-white mix-blend-exclusion`,
   así se lee tanto sobre el blanco del margen izquierdo como sobre la imagen —
   reaprovecha la misma técnica del header.
 - En móvil (< `md`) se apila: título encima, imagen debajo, sin solapamiento
