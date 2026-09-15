@@ -40,7 +40,9 @@ export function AboutSection({ repository }: AboutSectionProps) {
           <div className="space-y-16 lg:space-y-24">
             {/* Title */}
             <div>
-              <h2 className="font-title text-4xl sm:text-6xl lg:text-7xl font-light tracking-tight leading-tight mb-4">
+              {/* Lower case as a presentation rule rather than in the content: the
+                  title is data, so its casing should not depend on how it was typed. */}
+              <h2 className="font-title text-3xl sm:text-5xl lg:text-6xl font-bold lowercase tracking-tight leading-tight mb-4">
                 {aboutContent.name}
               </h2>
               <p className="text-2xl lg:text-2xl text-site-text-secondary font-light">
@@ -58,7 +60,7 @@ export function AboutSection({ repository }: AboutSectionProps) {
             {/* Skills */}
             <div>
               <h3 className="text-2xl font-title tracking-widest uppercase text-site-text-muted mb-6">
-                Expertise
+                Skills
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {aboutContent.skills.map((skill) => (

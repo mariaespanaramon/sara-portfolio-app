@@ -40,7 +40,9 @@ export function ContactSection({ repository }: ContactSectionProps) {
           <div className="space-y-16 lg:space-y-24">
             {/* Title */}
             <div>
-              <h2 className="font-title text-4xl sm:text-6xl lg:text-7xl font-light tracking-tight leading-tight mb-4">
+              {/* Lower cased with a class to match the About heading, whose title
+                  comes from data and so cannot be lower cased at the source. */}
+              <h2 className="font-title text-3xl sm:text-5xl lg:text-6xl font-bold lowercase tracking-tight leading-tight mb-4">
                 Get in Touch
               </h2>
               <p className="text-2xl lg:text-2xl text-site-text-secondary font-light">

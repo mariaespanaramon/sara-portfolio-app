@@ -9,7 +9,7 @@ const MOCK_ABOUT_CONTENT: AboutContent = {
   name: 'About Sara',
   role: 'Design student at BAU, College of Arts & Design Barcelona',
   bio: 'Born in Barcelona, Sara is a multidisciplinary designer, with a passion for crafting engaging visual experiences.\nSpecializing in photography, short film design, and brand identity, with a strong focus on storytelling and visual coherence.\n\nOpen to new projects and eager to explore professional opportunities in design and media.',
-  email: 'hello@example.com', // TODO update email
+  email: 'sararamon222@icloud.com',
   location: 'Barcelona, Spain',
   skills: [
     'Photography',

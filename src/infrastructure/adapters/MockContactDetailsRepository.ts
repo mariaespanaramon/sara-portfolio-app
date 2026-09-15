@@ -5,7 +5,7 @@ import type { ContactDetailsRepository } from '../ports/repositories';
  * Mock data for contact details
  */
 const MOCK_CONTACT_DETAILS: ContactDetails = {
-  email: 'hello@example.com', // TODO update email
+  email: 'sararamon222@icloud.com',
   location: 'Barcelona, Spain',
 };
 
