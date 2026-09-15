@@ -60,7 +60,7 @@ export function WorkItemCard({ item }: WorkItemCardProps) {
 
   return (
     <article
-      className="relative aspect-[16/9] overflow-hidden bg-dark-surface cursor-pointer group"
+      className="relative aspect-[16/9] overflow-hidden bg-site-surface cursor-pointer group"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
@@ -71,7 +71,7 @@ export function WorkItemCard({ item }: WorkItemCardProps) {
       {/* Overlay with title and tags */}
       {/* Mobile: always visible | Desktop: visible on hover */}
       <div
-        className={`absolute inset-0 bg-dark-bg/60 flex flex-col items-center justify-between py-8 transition-opacity duration-300 ${
+        className={`absolute inset-0 bg-site-bg/60 flex flex-col items-center justify-between py-8 transition-opacity duration-300 ${
           isMobile ? 'opacity-100' : isHovered ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -87,7 +87,7 @@ export function WorkItemCard({ item }: WorkItemCardProps) {
           {item.tags.map((tag) => (
             <span
               key={tag}
-              className="px-3 py-2 text-sm font-bold tracking-wide text-dark-text-primary uppercase"
+              className="px-3 py-2 text-sm font-bold tracking-wide text-site-text-primary uppercase"
             >
               {tag}
             </span>

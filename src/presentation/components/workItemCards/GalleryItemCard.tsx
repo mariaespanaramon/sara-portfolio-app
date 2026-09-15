@@ -11,8 +11,8 @@ export class GalleryItemCard implements IWorkItemCard {
     
     if (!firstImage) {
       return (
-        <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-dark-surface">
-          <span className="text-dark-text-secondary">No images available</span>
+        <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-site-surface">
+          <span className="text-site-text-secondary">No images available</span>
         </div>
       );
     }

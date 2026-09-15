@@ -55,7 +55,7 @@ function HomePage() {
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-dark-bg">
+      <div className="min-h-screen bg-site-bg">
         <Header />
         <main>
           <Routes>

@@ -12,8 +12,8 @@ export class GalleryItemDetail implements IWorkItemDetail {
     
     if (images.length === 0) {
       return (
-        <div className="w-full h-full flex items-center justify-center bg-dark-surface">
-          <span className="text-dark-text-secondary">No images available</span>
+        <div className="w-full h-full flex items-center justify-center bg-site-surface">
+          <span className="text-site-text-secondary">No images available</span>
         </div>
       );
     }
@@ -117,14 +117,14 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
           <>
             <button
               onClick={goToPrevious}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-dark-bg/80 hover:bg-dark-bg/90 text-dark-text-primary transition-all opacity-0 group-hover:opacity-100"
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-site-bg/80 hover:bg-site-bg/90 text-site-text-primary transition-all opacity-0 group-hover:opacity-100"
               aria-label="Previous image"
             >
               <span className="text-2xl">‹</span>
             </button>
             <button
               onClick={goToNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-dark-bg/80 hover:bg-dark-bg/90 text-dark-text-primary transition-all opacity-0 group-hover:opacity-100"
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-site-bg/80 hover:bg-site-bg/90 text-site-text-primary transition-all opacity-0 group-hover:opacity-100"
               aria-label="Next image"
             >
               <span className="text-2xl">›</span>
@@ -135,7 +135,7 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
         {/* Fullscreen Button */}
         <button
           onClick={toggleFullscreen}
-          className="absolute bottom-4 right-4 w-10 h-10 flex items-center justify-center bg-dark-bg/80 hover:bg-dark-bg/90 text-dark-text-primary transition-all opacity-0 group-hover:opacity-100"
+          className="absolute bottom-4 right-4 w-10 h-10 flex items-center justify-center bg-site-bg/80 hover:bg-site-bg/90 text-site-text-primary transition-all opacity-0 group-hover:opacity-100"
           aria-label="View fullscreen"
           title="View fullscreen"
         >
@@ -156,7 +156,7 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
         </button>
 
         {/* Image Counter */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-dark-bg/80 text-dark-text-primary text-sm font-light tracking-wide">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-site-bg/80 text-site-text-primary text-sm font-light tracking-wide">
           {currentIndex + 1} / {images.length}
         </div>
 
@@ -169,8 +169,8 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
                 onClick={() => goToSlide(index)}
                 className={`w-2 h-2 rounded-full transition-all ${
                   index === currentIndex
-                    ? 'bg-dark-text-primary w-6'
-                    : 'bg-dark-text-secondary hover:bg-dark-text-muted'
+                    ? 'bg-site-text-primary w-6'
+                    : 'bg-site-text-secondary hover:bg-site-text-muted'
                 }`}
                 aria-label={`Go to image ${index + 1}`}
               />

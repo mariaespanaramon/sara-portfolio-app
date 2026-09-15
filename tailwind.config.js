@@ -12,14 +12,14 @@ export default {
         heading: ['Nunito Sans', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       colors: {
-        dark: {
-          bg: '#0a0a0a',
-          surface: '#131313',
-          border: '#1a1a1a',
+        site: {
+          bg: '#ffffff',
+          surface: '#f5f5f5',
+          border: '#e5e5e5',
           text: {
-            primary: '#ffffff',
-            secondary: '#a0a0a0',
-            muted: '#666666',
+            primary: '#0a0a0a',
+            secondary: '#4a4a4a',
+            muted: '#8a8a8a',
           }
         }
       }

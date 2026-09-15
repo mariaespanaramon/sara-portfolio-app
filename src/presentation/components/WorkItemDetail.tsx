@@ -37,8 +37,8 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-dark-text-muted border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-dark-text-secondary font-light">Loading project...</p>
+          <div className="w-8 h-8 border-2 border-site-text-muted border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-site-text-secondary font-light">Loading project...</p>
         </div>
       </div>
     );
@@ -63,10 +63,10 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-dark-text-secondary font-light mb-4">Project not found</p>
+          <p className="text-site-text-secondary font-light mb-4">Project not found</p>
           <button
             onClick={handleBackToWork}
-            className="px-6 py-2 border border-dark-border hover:border-dark-text-muted transition-colors"
+            className="px-6 py-2 border border-site-border hover:border-site-text-muted transition-colors"
           >
             Back to Work
           </button>
@@ -81,7 +81,7 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
         {/* Back button */}
         <button
           onClick={handleBackToWork}
-          className="mb-8 text-dark-text-secondary hover:text-dark-text-primary transition-colors flex items-center gap-2"
+          className="mb-8 text-site-text-secondary hover:text-site-text-primary transition-colors flex items-center gap-2"
         >
           <span>←</span>
           <span>Back to Work</span>
@@ -90,7 +90,7 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
         {/* Single column layout: Media on top, centered */}
         <div className="max-w-4xl mx-auto space-y-12">
           {/* Media Section - Rendered by type-specific implementation */}
-          <div className="aspect-video overflow-hidden bg-dark-surface">
+          <div className="aspect-video overflow-hidden bg-site-surface">
             {WorkItemDetailFactory.getRenderer(workItem.type).renderMedia(workItem)}
           </div>
 
@@ -102,14 +102,14 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
             </h1>
 
             {/* Category and Year */}
-            <div className="flex items-center gap-4 text-sm text-dark-text-muted font-light tracking-widest uppercase">
+            <div className="flex items-center gap-4 text-sm text-site-text-muted font-light tracking-widest uppercase">
               <span>{workItem.category}</span>
               <span>•</span>
               <span>{workItem.year}</span>
             </div>
 
             {/* Description */}
-            <p className="text-lg lg:text-xl text-dark-text-secondary font-light leading-relaxed whitespace-pre-line">
+            <p className="text-lg lg:text-xl text-site-text-secondary font-light leading-relaxed whitespace-pre-line">
               {workItem.description}
             </p>
 
@@ -119,7 +119,7 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
                 {workItem.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-4 py-2 text-sm font-bold tracking-wide text-dark-text-primary uppercase"
+                    className="px-4 py-2 text-sm font-bold tracking-wide text-site-text-primary uppercase"
                   >
                     {tag}
                   </span>

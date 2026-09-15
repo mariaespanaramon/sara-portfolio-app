@@ -17,8 +17,8 @@ export function WorkSection({ repository }: WorkSectionProps) {
     return (
       <section id="work" className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-dark-text-muted border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-dark-text-secondary font-light">Loading projects...</p>
+          <div className="w-8 h-8 border-2 border-site-text-muted border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-site-text-secondary font-light">Loading projects...</p>
         </div>
       </section>
     );
