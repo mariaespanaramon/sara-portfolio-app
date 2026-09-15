@@ -11,13 +11,14 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header } from './presentation/components/Header';
 import { IntroSplash } from './presentation/components/IntroSplash';
 import { Hero } from './presentation/components/Hero';
-import { WorkSection } from './presentation/components/WorkSection';
+import { SectionGrid } from './presentation/components/SectionGrid';
 import { AboutSection } from './presentation/components/AboutSection';
 import { ContactSection } from './presentation/components/ContactSection';
 import { Footer } from './presentation/components/Footer';
 import { WorkItemDetail } from './presentation/components/WorkItemDetail';
 import { MockWorkItemRepository } from './infrastructure/adapters/MockWorkItemRepository';
 import { NetlifyBlobsWorkItemRepository } from './infrastructure/adapters/NetlifyBlobsWorkItemRepository';
+import { MockSectionRepository } from './infrastructure/adapters/MockSectionRepository';
 import { MockAboutContentRepository } from './infrastructure/adapters/MockAboutContentRepository';
 import { MockContactDetailsRepository } from './infrastructure/adapters/MockContactDetailsRepository';
 import { createNetlifyBlobsConfig, isNetlifyBlobsConfigured } from './infrastructure/config/netlify.config';
@@ -32,6 +33,10 @@ const workItemRepository = isNetlifyBlobsConfigured()
   ? new NetlifyBlobsWorkItemRepository(createNetlifyBlobsConfig())
   : new MockWorkItemRepository();
 
+// Sections are mock-only for now. They will move to the same backing store as
+// work items once Sara's own cover material is in place.
+const sectionRepository = new MockSectionRepository();
+
 const aboutContentRepository = new MockAboutContentRepository();
 const contactDetailsRepository = new MockContactDetailsRepository();
 
@@ -42,7 +47,7 @@ function HomePage() {
   return (
     <>
       <Hero />
-      <WorkSection repository={workItemRepository} />
+      <SectionGrid repository={sectionRepository} />
       <AboutSection repository={aboutContentRepository} />
       <ContactSection repository={contactDetailsRepository} />
     </>

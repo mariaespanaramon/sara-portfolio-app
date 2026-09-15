@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { WorkItem } from '../../application/domain/WorkItem';
 import { WorkItemCardFactory } from './workItemCards/WorkItemCardFactory';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 /**
  * Work item card component
@@ -15,21 +16,10 @@ interface WorkItemCardProps {
 
 export function WorkItemCard({ item }: WorkItemCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const mediaRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
   const renderer = WorkItemCardFactory.getRenderer(item.type);
-
-  // Detect mobile devices
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768); // md breakpoint
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const isMobile = useIsMobile();
 
   // Auto-play video on mobile
   useEffect(() => {
