@@ -595,8 +595,16 @@ ellos el trabajo de tamaño y minúsculas que se hizo en el Commit 3.
 
 **Archivos modificados:**
 - `src/presentation/components/Header.tsx` — enlaces en línea a `hidden md:flex`,
-  disparador `md:hidden`, y estado `isMenuOpen` elevado aquí (o a un hook propio) porque
-  header y overlay lo comparten.
+  disparador `md:hidden`.
+- `src/App.tsx` — **aquí vive el estado `isMenuOpen`, no en `Header`.** Corrección sobre
+  el plan inicial: el overlay tiene que ser **hermano** del header, no hijo. Anidado
+  dentro heredaría dos cosas del `<header>`: su stacking context (el overlay se pintaría
+  por encima del propio logo, tapándolo) y su `mix-blend-exclusion` (el fondo blanco del
+  overlay saldría invertido). Al ser hermanos, los dos necesitan el mismo estado y sube a
+  `App`.
+  Los dos handlers van en `useCallback`: `FullscreenMenu` se cierra solo al cambiar de
+  ruta, y con una identidad nueva en cada render ese efecto se dispararía sin parar,
+  cerrando el menú justo al abrirlo.
 
 **Verificación:** a 375 px el header no desborda; abrir y cerrar por los cuatro caminos;
 sin scroll de fondo con el menú abierto; en desktop nada cambia respecto al Commit 3;

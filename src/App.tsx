@@ -7,9 +7,11 @@
 // - Infrastructure: Adapters and ports (src/infrastructure)
 // - Presentation: React components (src/presentation/components)
 
+import { useCallback, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header } from './presentation/components/Header';
 import { IntroSplash } from './presentation/components/IntroSplash';
+import { FullscreenMenu } from './presentation/components/FullscreenMenu';
 import { Hero } from './presentation/components/Hero';
 import { SectionGrid } from './presentation/components/SectionGrid';
 import { AboutSection } from './presentation/components/AboutSection';
@@ -60,11 +62,21 @@ function HomePage() {
  * Orchestrates all presentation components and routing
  */
 function App() {
+  // Held here, not in Header: the overlay has to be a sibling of the header
+  // rather than a child of it, so both need access to the same state.
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Stable identities: FullscreenMenu closes itself on route changes, and a
+  // handler recreated on every render would make that effect fire constantly.
+  const toggleMenu = useCallback(() => setIsMenuOpen((open) => !open), []);
+  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+
   return (
     <Router>
       <div className="min-h-screen bg-site-bg">
         <IntroSplash />
-        <Header />
+        <Header isMenuOpen={isMenuOpen} onToggleMenu={toggleMenu} />
+        <FullscreenMenu isOpen={isMenuOpen} onClose={closeMenu} />
         <main>
           <Routes>
             <Route path="/" element={<HomePage />} />

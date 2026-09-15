@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 // TODO: replace with the final logo gif served from /public
 const INTRO_GIF_URL = 'https://media.giphy.com/media/3o6nVbF4uoHsV6Vqne/giphy.gif';
@@ -104,19 +105,7 @@ export function IntroSplash() {
     };
   }, [skipped, phase]);
 
-  // Prevent scrolling behind the overlay.
-  useEffect(() => {
-    if (!isOnScreen) {
-      return undefined;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isOnScreen]);
+  useScrollLock(isOnScreen);
 
   if (!isOnScreen) {
     return null;

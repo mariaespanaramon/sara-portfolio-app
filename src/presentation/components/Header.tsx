@@ -1,10 +1,20 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import { FULLSCREEN_MENU_ID } from './FullscreenMenu';
+
+interface HeaderProps {
+  isMenuOpen: boolean;
+  onToggleMenu: () => void;
+}
 
 /**
  * Header component with navigation
  * Features a fixed, fully transparent header
+ *
+ * The menu state lives above this component because the overlay it controls has to
+ * be rendered outside the header: this element is a stacking context and carries a
+ * blend mode, both of which an overlay nested inside it would inherit.
  */
-export function Header() {
+export function Header({ isMenuOpen, onToggleMenu }: HeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,8 +49,35 @@ export function Header() {
             sara ramon
           </a>
 
-          {/* Navigation Links*/}
-          <div className="flex items-center gap-8 lg:gap-12">
+          {/* Menu trigger, mobile only. `menu` and `close` share one grid cell so
+              the button is as wide as the longer word and neither shifts the layout
+              as they swap; the overflow mask turns the swap into a vertical slide. */}
+          <button
+            type="button"
+            onClick={onToggleMenu}
+            aria-expanded={isMenuOpen}
+            aria-controls={FULLSCREEN_MENU_ID}
+            className="md:hidden grid overflow-hidden font-title font-bold text-[1.75rem] leading-none hover:opacity-60 transition-opacity"
+          >
+            <span
+              className={`col-start-1 row-start-1 transition-transform duration-500 ease-out ${
+                isMenuOpen ? '-translate-y-full' : 'translate-y-0'
+              }`}
+            >
+              menu
+            </span>
+            <span
+              aria-hidden="true"
+              className={`col-start-1 row-start-1 transition-transform duration-500 ease-out ${
+                isMenuOpen ? 'translate-y-0' : 'translate-y-full'
+              }`}
+            >
+              close
+            </span>
+          </button>
+
+          {/* Navigation Links, from `md` up. Below that the menu above replaces them. */}
+          <div className="hidden md:flex items-center gap-8 lg:gap-12">
             <a
               href="#work"
               className="font-title font-bold text-[1.75rem] tracking-wide hover:opacity-60 transition-opacity leading-none"
