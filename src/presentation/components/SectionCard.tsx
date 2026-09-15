@@ -59,7 +59,7 @@ export function SectionCard({ section }: SectionCardProps) {
   };
 
   const goToSection = () => {
-    navigate(`/section/${section.slug}`);
+    navigate(`/section/${section.id}`);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {

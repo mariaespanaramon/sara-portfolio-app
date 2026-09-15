@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useWorkItems } from '../../application/service/useWorkItems';
 import type { WorkItemRepository } from '../../infrastructure/ports/repositories';
 import { WorkItemDetailFactory } from './workItemDetails/WorkItemDetailFactory';
-import { toSlug } from '../../application/domain/slug';
+import { toUrlId } from '../../application/domain/urlId';
 import { RevealOnScroll } from './RevealOnScroll';
 
 interface WorkItemDetailProps {
@@ -35,14 +35,14 @@ function BackButton({ onClick }: { onClick: () => void }) {
  * text and any further media as the page scrolls.
  */
 export function WorkItemDetail({ repository }: WorkItemDetailProps) {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { workItems, loading, error } = useWorkItems(repository);
 
-  // Scroll to top when component mounts or slug changes
+  // Scroll to top when component mounts or id changes
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [slug]);
+  }, [id]);
 
   const handleBack = () => {
     // Going back through history returns to the section the visitor came from.
@@ -75,8 +75,8 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
     );
   }
 
-  // Find the work item by slug
-  const workItem = workItems.find((item) => toSlug(item.title) === slug);
+  // Find the work item by its URL id
+  const workItem = workItems.find((item) => toUrlId(item.title) === id);
 
   if (!workItem) {
     return (

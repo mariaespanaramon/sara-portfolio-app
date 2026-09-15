@@ -9,9 +9,9 @@ import type { WorkItemRepository } from '../ports/repositories';
  * - Strapi
  * - Custom REST/GraphQL API
  *
- * TODO: the sectionSlug of every item below is provisional. These are placeholder
+ * TODO: the sectionId of every item below is provisional. These are placeholder
  * projects, so they were matched to the closest section by category; Sara needs to
- * confirm the real mapping. Slugs must match MockSectionRepository.
+ * confirm the real mapping. Keys must match MockSectionRepository.
  */
 const MOCK_WORK_ITEMS: WorkItem[] = [
   {
@@ -24,7 +24,7 @@ const MOCK_WORK_ITEMS: WorkItem[] = [
     videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
     imageUrl: 'https://images.pexels.com/photos/325185/pexels-photo-325185.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop',
     tags: ['Photography', 'Black and White', 'Portraiture'],
-    sectionSlug: 'black-and-white',
+    sectionId: 'black-and-white',
   },
   {
     id: '2',
@@ -36,7 +36,7 @@ const MOCK_WORK_ITEMS: WorkItem[] = [
     videoUrl: 'https://mdn.github.io/shared-assets/videos/flower.mp4',
     imageUrl: 'https://images.pexels.com/photos/2088205/pexels-photo-2088205.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop',
     tags: ['3D', 'Design'],
-    sectionSlug: '3d-modeling',
+    sectionId: '3d-modeling',
   },
   {
     id: '3',
@@ -47,7 +47,7 @@ const MOCK_WORK_ITEMS: WorkItem[] = [
     type: 'image',
     imageUrl: 'https://images.pexels.com/photos/2333332/pexels-photo-2333332.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop',
     tags: ['Editorial', 'Typography', 'Layout'],
-    sectionSlug: 'exhibitions',
+    sectionId: 'exhibitions',
   },
   {
     id: '4',
@@ -59,7 +59,7 @@ const MOCK_WORK_ITEMS: WorkItem[] = [
     videoUrl: 'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4',
     imageUrl: 'https://images.pexels.com/photos/1144176/pexels-photo-1144176.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop',
     tags: ['Mobile Design', 'UX', 'Prototyping'],
-    sectionSlug: 'awards-and-recognition',
+    sectionId: 'awards-and-recognition',
   },
   {
     id: '5',
@@ -81,7 +81,7 @@ const MOCK_WORK_ITEMS: WorkItem[] = [
       'https://images.pexels.com/photos/2422588/pexels-photo-2422588.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop',
     ],
     tags: ['Photography', 'Architecture', 'Urban', 'Series'],
-    sectionSlug: 'black-and-white',
+    sectionId: 'black-and-white',
   },
   {
     id: '6',
@@ -93,7 +93,7 @@ const MOCK_WORK_ITEMS: WorkItem[] = [
     videoUrl: 'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4',
     imageUrl: 'https://images.pexels.com/photos/3889742/pexels-photo-3889742.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop',
     tags: ['Videoclip', 'Music', 'Direction'],
-    sectionSlug: 'videoclips',
+    sectionId: 'videoclips',
   },
   {
     id: '7',
@@ -105,7 +105,7 @@ const MOCK_WORK_ITEMS: WorkItem[] = [
     imageUrl: 'https://images.pexels.com/photos/2246476/pexels-photo-2246476.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop',
     gifUrl: 'https://media.giphy.com/media/3o6nVbF4uoHsV6Vqne/giphy.gif',
     tags: ['3D', 'Blender', 'Simulation'],
-    sectionSlug: '3d-modeling',
+    sectionId: '3d-modeling',
   },
 ];
 

@@ -18,11 +18,11 @@ interface SectionPageProps {
  * project in that section, one per row on alternating sides.
  */
 export function SectionPage({ sectionRepository, workItemRepository }: SectionPageProps) {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { section, loading: sectionLoading, error: sectionError } = useSection(
     sectionRepository,
-    slug
+    id
   );
   const { workItems, loading: itemsLoading, error: itemsError } = useWorkItems(
     workItemRepository
@@ -31,7 +31,7 @@ export function SectionPage({ sectionRepository, workItemRepository }: SectionPa
   // Scroll to top when arriving or when moving between sections.
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [slug]);
+  }, [id]);
 
   const loading = sectionLoading || itemsLoading;
   const error = sectionError ?? itemsError;
@@ -73,7 +73,7 @@ export function SectionPage({ sectionRepository, workItemRepository }: SectionPa
     );
   }
 
-  const projects = workItems.filter((item) => item.sectionSlug === section.slug);
+  const projects = workItems.filter((item) => item.sectionId === section.id);
 
   return (
     <div className="min-h-screen pb-24 lg:pb-32">

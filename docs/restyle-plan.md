@@ -44,7 +44,7 @@ Para **cada uno** de los 10 commits, en este orden y sin saltarse pasos:
   el 6 y el 7), se parte en dos y se avisa, en lugar de pedir una revisión de 300 líneas.
 - Los commits sin nada visible que revisar (el **4**, dominio de `Section`, y el **9**,
   README) se entregan igualmente para lectura del diff: en el 4 lo que hay que validar
-  son los nombres de las secciones, los slugs y el reparto de proyectos.
+  son los nombres de las secciones, sus ids y el reparto de proyectos.
 - Si un refinamiento contradice algo escrito en este plan, se actualiza el plan en el
   mismo commit. Un plan desactualizado a mitad de PR es peor que no tenerlo.
 
@@ -63,7 +63,7 @@ Para **cada uno** de los 10 commits, en este orden y sin saltarse pasos:
   `workItemCards/` (`IWorkItemCard` + `WorkItemCardFactory`) y
   `workItemDetails/` (`IWorkItemDetail` + `WorkItemDetailFactory`), con
   implementaciones `Video*`, `Image*`, `Gallery*`. **Lo reutilizamos, no lo sustituimos.**
-- **Rutas actuales:** `/` (Hero + Work + About + Contact) y `/work/:slug`.
+- **Rutas actuales:** `/` (Hero + Work + About + Contact) y `/work/:id`.
 - **Fuentes:** ya migradas a Nunito Sans (títulos/logo/menú) y Source Sans 3 (texto)
   en el commit previo de esta rama.
 
@@ -78,9 +78,10 @@ Para **cada uno** de los 10 commits, en este orden y sin saltarse pasos:
 | Fondo blanco | Tema claro completo: fondo blanco **y texto oscuro** en toda la web (home, sección, proyecto, footer). Un fondo blanco con el texto blanco actual sería ilegible, así que se invierte la paleta entera. |
 | Logo/menú que cambia de color | `mix-blend-mode: exclusion` sobre texto blanco, **aplicado al `<header>` mismo**. Es el modo que usa valleeduhamel.com. El texto se calcula como inverso de lo que tiene detrás, sin JS. |
 | Nombres de tokens de color | Se renombra `dark.*` → `site.*`. Dejar `dark-bg: #ffffff` sería una mentira que confundiría cualquier trabajo futuro. |
-| Modelado de secciones | Nueva entidad de dominio `Section` + puerto `SectionRepository` + adaptador mock, siguiendo el patrón hexagonal existente. `WorkItem` gana `sectionSlug`. |
+| Modelado de secciones | Nueva entidad de dominio `Section` + puerto `SectionRepository` + adaptador mock, siguiendo el patrón hexagonal existente. `WorkItem` gana `sectionId`. |
 | Home | Solo cambia el bloque de trabajo (proyectos → secciones). Hero, About y Contact se mantienen. |
 | Botón "Back" del proyecto | Además de renombrarlo, pasa a `navigate(-1)`: entrando desde una sección, volver a la home sería desorientador. |
+| Identificador de URL | Se llama **`id`**, no `slug`. `Section.id` **es** el segmento de URL (`'3d-modeling'`), y `WorkItem.sectionId` apunta a él; el puerto expone `getById()`. Se descartó `slug` por ser jerga de CMS, y `name` porque chocaría con `title`, que es el nombre legible. También se descartó tener `id` numérico **y** un identificador de URL aparte: eran dos campos para una sola cosa, y obligaba a elegir cuál usar en cada sitio. El identificador de URL de un proyecto sí se deriva de su título, con `toUrlId()`. |
 | Idioma del código | **Todo el código en inglés**: nombres de variables, funciones, componentes, tipos, comentarios, JSDoc, mensajes de `TODO`, mensajes de error y de commit. Sin excepciones. Es lo que ya hace el repo entero. Este documento de plan se mantiene en español porque es material de trabajo, no código — pero cada snippet que contiene va en inglés, tal cual se va a escribir. |
 
 ---
@@ -92,9 +93,9 @@ Para **cada uno** de los 10 commits, en este orden y sin saltarse pasos:
    Si aparece el problema, añadir un `drop-shadow` sutil detrás del texto.
 2. **El gif de Giphy es un hotlink de 2,5 MB a un tercero.** Sirve como placeholder,
    no para producción. Se aísla en una constante para cambiarlo en una línea.
-3. **`items.json` de producción (Netlify Blobs) no tiene ni `type` ni `sectionSlug`.**
+3. **`items.json` de producción (Netlify Blobs) no tiene ni `type` ni `sectionId`.**
    El validador actual de `NetlifyBlobsWorkItemRepository` ya lanzaría error con ese dato.
-   → `sectionSlug` se valida como **opcional** para no romper el deploy.
+   → `sectionId` se valida como **opcional** para no romper el deploy.
 4. **Interacciones de hover no existen en táctil.** Toda reproducción "al pasar el ratón"
    necesita fallback móvil (autoplay o imagen estática), como ya hace `WorkItemCard`.
 5. **5 secciones en grid de 3 columnas** dejan 2 huecos en la última fila.
@@ -134,7 +135,7 @@ y revisar el diff a mano (hay un `bg-dark-bg/60` en `WorkItemCard` que pasa a `b
 ese overlay se replantea en el Commit 5).
 
 **Verificación:** `npx tsc --noEmit`, `npm run build`, `grep -rn 'dark-' src/` sin resultados.
-Visual: home, `/work/:slug` y footer legibles en claro.
+Visual: home, `/work/:id` y footer legibles en claro.
 
 ---
 
@@ -255,8 +256,7 @@ el texto del header debe invertirse solo. Comprobar en Safari y Chrome
 - `src/application/domain/Section.ts`
   ```ts
   export interface Section {
-    id: string;
-    slug: string;
+    id: string;              // also the URL segment, e.g. '3d-modeling'
     title: string;
     order: number;
     coverImageUrl: string;   // static image shown at rest
@@ -265,7 +265,7 @@ el texto del header debe invertirse solo. Comprobar en Safari y Chrome
   }
   ```
 - `src/infrastructure/adapters/MockSectionRepository.ts` — las 5 secciones con
-  slugs `3d-modeling`, `videoclips`, `black-and-white`, `exhibitions`,
+  ids `3d-modeling`, `videoclips`, `black-and-white`, `exhibitions`,
   `awards-and-recognition`, y `order` 1..5. Media de placeholder (Pexels/Giphy)
   con `TODO` para sustituir por material real de Sara.
 - `src/application/service/useSections.ts` — hook `useSections(repository)` con
@@ -277,16 +277,16 @@ el texto del header debe invertirse solo. Comprobar en Safari y Chrome
   ```ts
   export interface SectionRepository {
     getAll(): Promise<Section[]>;
-    getBySlug(slug: string): Promise<Section | null>;
+    getById(id: string): Promise<Section | null>;
   }
   ```
-- `src/application/domain/WorkItem.ts` — añadir `sectionSlug?: string;` y `gifUrl?: string;`
+- `src/application/domain/WorkItem.ts` — añadir `sectionId?: string;` y `gifUrl?: string;`
   (el gif de preview para proyectos de Blender/3D; para vídeos se usa `imageUrl` como foto estática).
-- `src/infrastructure/adapters/MockWorkItemRepository.ts` — asignar `sectionSlug` a los
+- `src/infrastructure/adapters/MockWorkItemRepository.ts` — asignar `sectionId` a los
   5 items existentes y añadir 2–3 más para que cada sección tenga al menos un proyecto.
 - `src/infrastructure/adapters/NetlifyBlobsWorkItemRepository.ts` — en `isValidWorkItem`,
-  validar `sectionSlug` y `gifUrl` como **opcionales**
-  (`workItem.sectionSlug === undefined || typeof workItem.sectionSlug === 'string'`).
+  validar `sectionId` y `gifUrl` como **opcionales**
+  (`workItem.sectionId === undefined || typeof workItem.sectionId === 'string'`).
   No hacerlos obligatorios: el `items.json` que ya está en producción no los tiene.
 - **`src/App.tsx` NO se toca en este commit.** Corrección sobre el plan inicial:
   `tsconfig.json` tiene `noUnusedLocals: true`, así que declarar
@@ -335,7 +335,7 @@ vídeos de las cards vuelven a reproducirse.
   al 60 % y solo lo muestran en hover): banda inferior con degradado
   `bg-gradient-to-t from-black/70 to-transparent` y `h3 font-title text-white`
   con `text-2xl md:text-3xl`. Sin overlay que cubra toda la card.
-- `onClick` → `navigate('/section/' + section.slug)`.
+- `onClick` → `navigate('/section/' + section.id)`.
 - Accesible: `role="link"`, `tabIndex={0}` y `onKeyDown` para Enter/Space.
 
 **`SectionGrid` — detalle:**
@@ -355,7 +355,7 @@ vídeos de las cards vuelven a reproducirse.
 
 **Verificación:** home con 5 secciones en 2 filas; título legible siempre; hover reproduce
 y al salir vuelve a la imagen; en móvil una columna sin vídeos; click navega a
-`/section/:slug` (que aún no existe → pantalla en blanco, se resuelve en el commit siguiente).
+`/section/:id` (que aún no existe → pantalla en blanco, se resuelve en el commit siguiente).
 
 ---
 
@@ -364,8 +364,8 @@ y al salir vuelve a la imagen; en móvil una columna sin vídeos; click navega a
 **Objetivo:** pantalla de sección con título solapando la imagen, y todos los proyectos de la sección uno por fila en costados alternos.
 
 **Archivos nuevos:**
-- `src/application/service/useSection.ts` — `useSection(repository, slug)` →
-  `{ section, loading, error }` usando `getBySlug`.
+- `src/application/service/useSection.ts` — `useSection(repository, id)` →
+  `{ section, loading, error }` usando `getById`.
 - `src/presentation/components/SectionPage.tsx`
 - `src/presentation/components/ProjectRow.tsx`
 
@@ -402,7 +402,7 @@ y al salir vuelve a la imagen; en móvil una columna sin vídeos; click navega a
   reaprovecha la misma técnica del header.
 - En móvil (< `md`) se apila: título encima, imagen debajo, sin solapamiento
   (el solape a ancho de móvil hace el título ilegible).
-- `useEffect` para `window.scrollTo(0, 0)` al cambiar de slug.
+- `useEffect` para `window.scrollTo(0, 0)` al cambiar de id.
 - Estado "sección no encontrada" con enlace a `/`.
 
 **`ProjectRow` — detalle:**
@@ -418,28 +418,28 @@ y al salir vuelve a la imagen; en móvil una columna sin vídeos; click navega a
     no en el factory: es lógica de preview de fila, no de card.
 - Lado del texto: `h3 font-title` con el título, `p` con la descripción,
   y `category · year` en pequeño con `tracking-widest uppercase text-site-text-muted`.
-- Toda la fila es clicable → `/work/:slug` con el mismo slug que ya genera
+- Toda la fila es clicable → `/work/:id` con el mismo id que ya genera
   `WorkItemCard` (`title.toLowerCase().replace(/\s+/g, '-')`).
-  **Extraer ese slug a un helper** `src/application/domain/slug.ts` (`toSlug(title)`),
+  **Extraer ese id a un helper** `src/application/domain/urlId.ts` (`toUrlId(title)`),
   porque ahora mismo la misma expresión está duplicada en `WorkItemCard` y `WorkItemDetail`,
   y con una tercera copia se acaba rompiendo.
 
 **Filtrado de proyectos:** `useWorkItems(workItemRepository)` y filtrar por
-`item.sectionSlug === slug`. Mensaje explícito si la sección no tiene proyectos todavía
+`item.sectionId === id`. Mensaje explícito si la sección no tiene proyectos todavía
 (caso real de Exhibitions / Awards al principio).
 
 **Archivos modificados:**
 - `src/App.tsx` — nueva ruta:
   ```tsx
-  <Route path="/section/:slug" element={
+  <Route path="/section/:id" element={
     <SectionPage sectionRepository={sectionRepository} workItemRepository={workItemRepository} />
   } />
   ```
-- `src/presentation/components/WorkItemCard.tsx` y `WorkItemDetail.tsx` — usar `toSlug`.
+- `src/presentation/components/WorkItemCard.tsx` y `WorkItemDetail.tsx` — usar `toUrlId`.
 
 **Verificación:** entrar a cada una de las 5 secciones; comprobar el solape del título en
 desktop y el apilado en móvil; que las filas alternan costado; que los vídeos muestran foto
-estática; que el click abre `/work/:slug` correcto.
+estática; que el click abre `/work/:id` correcto.
 
 ---
 
@@ -621,10 +621,10 @@ navegación por teclado completa; con "reducir movimiento" no hay animación.
   - "Theme Colors": documentar la paleta clara y el renombrado `dark.*` → `site.*`.
   - Nueva subsección sobre `Section`: entidad, puerto, adaptador mock y cómo añadir
     o reordenar secciones.
-  - Documentar el campo `sectionSlug` (y `gifUrl`) en los ejemplos de `items.json`
-    de la sección "Adding Content", avisando de que `sectionSlug` es opcional pero
+  - Documentar el campo `sectionId` (y `gifUrl`) en los ejemplos de `items.json`
+    de la sección "Adding Content", avisando de que `sectionId` es opcional pero
     necesario para que un proyecto aparezca en su sección.
-  - Rutas actualizadas: `/`, `/section/:slug`, `/work/:slug`.
+  - Rutas actualizadas: `/`, `/section/:id`, `/work/:id`.
   - Mencionar `IntroSplash` y el `sessionStorage` key, para que nadie se pelee con
     "no me sale el gif".
   - Documentar `FullscreenMenu` y a partir de qué breakpoint sustituye a los enlaces
@@ -644,7 +644,7 @@ navegación por teclado completa; con "reducir movimiento" no hay animación.
 4 (dominio Section)   ← base de 5 y 6
 5 (grid de secciones) ← depende de 4
 6 (pantalla sección)  ← depende de 4 y 5
-7 (pantalla proyecto) ← depende de 6 (helper toSlug) y de 1
+7 (pantalla proyecto) ← depende de 6 (helper toUrlId) y de 1
 8 (footer + email)    ← independiente
 9 (menú pantalla completa) ← depende de 3 (header) y de 2 (patrón de bloqueo de scroll)
 10 (README)           ← al final, cuando todo lo demás está cerrado
@@ -684,7 +684,7 @@ sección, el timing del splash, y que los vídeos arranquen y paren donde deben.
 1. **Gif de logo definitivo** para el splash → a `public/`, sustituyendo el de Giphy.
 2. **Imagen estática + vídeo/gif de portada** para cada una de las 5 secciones.
 3. **URLs reales** de Instagram, Vimeo y Behance.
-4. **Asignación de cada proyecto a su sección** (`sectionSlug`), y `gifUrl` para los de Blender/3D.
+4. **Asignación de cada proyecto a su sección** (`sectionId`), y `gifUrl` para los de Blender/3D.
 5. **Fotos estáticas (poster)** de los proyectos de vídeo, para las filas de sección.
 6. Decidir si Exhibitions y Awards & Recognition van a tener proyectos con la misma
    estructura o necesitan un formato propio — hasta entonces se comportan igual que las demás.

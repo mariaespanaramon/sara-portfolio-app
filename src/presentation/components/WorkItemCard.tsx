@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { WorkItem } from '../../application/domain/WorkItem';
 import { WorkItemCardFactory } from './workItemCards/WorkItemCardFactory';
-import { toSlug } from '../../application/domain/slug';
+import { toUrlId } from '../../application/domain/urlId';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 /**
@@ -44,8 +44,8 @@ export function WorkItemCard({ item }: WorkItemCardProps) {
   };
 
   const handleClick = () => {
-    // Navigate to detail page based on title slug
-    navigate(`/work/${toSlug(item.title)}`);
+    // Navigate to detail page based on the id derived from the title
+    navigate(`/work/${toUrlId(item.title)}`);
   };
 
   return (

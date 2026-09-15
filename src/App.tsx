@@ -81,7 +81,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route
-              path="/section/:slug"
+              path="/section/:id"
               element={
                 <SectionPage
                   sectionRepository={sectionRepository}
@@ -90,7 +90,7 @@ function App() {
               }
             />
             <Route 
-              path="/work/:slug" 
+              path="/work/:id" 
               element={<WorkItemDetail repository={workItemRepository} />} 
             />
           </Routes>

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import type { WorkItem } from '../../application/domain/WorkItem';
-import { toSlug } from '../../application/domain/slug';
+import { toUrlId } from '../../application/domain/urlId';
 
 interface ProjectRowProps {
   item: WorkItem;
@@ -37,7 +37,7 @@ export function ProjectRow({ item, index }: ProjectRowProps) {
   const isReversed = index % 2 === 1;
 
   const goToProject = () => {
-    navigate(`/work/${toSlug(item.title)}`);
+    navigate(`/work/${toUrlId(item.title)}`);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {

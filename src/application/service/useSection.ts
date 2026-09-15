@@ -3,12 +3,12 @@ import type { Section } from '../domain/Section';
 import type { SectionRepository } from '../../infrastructure/ports/repositories';
 
 /**
- * Custom hook for resolving a single section from its slug.
+ * Custom hook for resolving a single section from its id.
  *
- * `section` is null both while loading and when the slug matches nothing, so
+ * `section` is null both while loading and when the id matches nothing, so
  * callers must check `loading` before treating null as "not found".
  */
-export function useSection(repository: SectionRepository, slug: string | undefined) {
+export function useSection(repository: SectionRepository, id: string | undefined) {
   const [section, setSection] = useState<Section | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +17,7 @@ export function useSection(repository: SectionRepository, slug: string | undefin
     let isMounted = true;
 
     const fetchSection = async () => {
-      if (!slug) {
+      if (!id) {
         setSection(null);
         setLoading(false);
         return;
@@ -26,7 +26,7 @@ export function useSection(repository: SectionRepository, slug: string | undefin
       try {
         setLoading(true);
         setError(null);
-        const found = await repository.getBySlug(slug);
+        const found = await repository.getById(id);
         if (isMounted) {
           setSection(found);
         }
@@ -46,7 +46,7 @@ export function useSection(repository: SectionRepository, slug: string | undefin
     return () => {
       isMounted = false;
     };
-  }, [repository, slug]);
+  }, [repository, id]);
 
   return { section, loading, error };
 }

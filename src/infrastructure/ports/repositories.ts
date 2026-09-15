@@ -17,7 +17,7 @@ export interface WorkItemRepository {
  */
 export interface SectionRepository {
   getAll(): Promise<Section[]>;
-  getBySlug(slug: string): Promise<Section | null>;
+  getById(id: string): Promise<Section | null>;
 }
 
 /**

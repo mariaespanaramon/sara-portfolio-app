@@ -5,7 +5,7 @@ import type { SectionRepository } from '../ports/repositories';
  * Mock data for portfolio sections.
  *
  * TODO: every coverImageUrl / coverVideoUrl / coverGifUrl below is a placeholder.
- * Replace them with Sara's own material. The titles, slugs and order are final.
+ * Replace them with Sara's own material. The titles, ids and order are final.
  *
  * The three cover shapes are all represented on purpose, so the section card can
  * be reviewed against each of them:
@@ -15,8 +15,7 @@ import type { SectionRepository } from '../ports/repositories';
  */
 const MOCK_SECTIONS: Section[] = [
   {
-    id: '1',
-    slug: '3d-modeling',
+    id: '3d-modeling',
     title: '3D Modeling',
     order: 1,
     coverImageUrl:
@@ -25,8 +24,7 @@ const MOCK_SECTIONS: Section[] = [
       'https://mdn.github.io/shared-assets/videos/flower.mp4',
   },
   {
-    id: '2',
-    slug: 'videoclips',
+    id: 'videoclips',
     title: 'Videoclips',
     order: 2,
     coverImageUrl:
@@ -35,8 +33,7 @@ const MOCK_SECTIONS: Section[] = [
       'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4',
   },
   {
-    id: '3',
-    slug: 'black-and-white',
+    id: 'black-and-white',
     title: 'Black & White',
     order: 3,
     coverImageUrl:
@@ -45,16 +42,14 @@ const MOCK_SECTIONS: Section[] = [
       'https://www.w3schools.com/html/mov_bbb.mp4',
   },
   {
-    id: '4',
-    slug: 'exhibitions',
+    id: 'exhibitions',
     title: 'Exhibitions',
     order: 4,
     coverImageUrl:
       'https://images.pexels.com/photos/2190283/pexels-photo-2190283.jpeg?auto=compress&cs=tinysrgb&w=900&h=1200&fit=crop',
   },
   {
-    id: '5',
-    slug: 'awards-and-recognition',
+    id: 'awards-and-recognition',
     title: 'Awards & Recognition',
     order: 5,
     coverImageUrl:
@@ -77,8 +72,8 @@ export class MockSectionRepository implements SectionRepository {
     return [...MOCK_SECTIONS].sort((a, b) => a.order - b.order);
   }
 
-  async getBySlug(slug: string): Promise<Section | null> {
+  async getById(id: string): Promise<Section | null> {
     const sections = await this.getAll();
-    return sections.find((section) => section.slug === slug) ?? null;
+    return sections.find((section) => section.id === id) ?? null;
   }
 }
