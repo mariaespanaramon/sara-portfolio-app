@@ -38,19 +38,19 @@ export function Header() {
           <div className="flex items-center gap-8 lg:gap-12">
             <a
               href="#work"
-              className="text-xl lg:text-xl font-light tracking-wide hover:text-dark-text-secondary transition-colors leading-none"
+              className="font-title text-xl lg:text-xl font-light tracking-wide hover:text-dark-text-secondary transition-colors leading-none"
             >
               Work
             </a>
             <a
               href="#about"
-              className="text-xl lg:text-xl font-light tracking-wide hover:text-dark-text-secondary transition-colors leading-none"
+              className="font-title text-xl lg:text-xl font-light tracking-wide hover:text-dark-text-secondary transition-colors leading-none"
             >
               About
             </a>
             <a
               href="#contact"
-              className="text-xl lg:text-xl font-light tracking-wide hover:text-dark-text-secondary transition-colors leading-none"
+              className="font-title text-xl lg:text-xl font-light tracking-wide hover:text-dark-text-secondary transition-colors leading-none"
             >
               Contact
             </a>
