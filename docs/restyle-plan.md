@@ -11,7 +11,7 @@ Cada commit debe dejar el proyecto compilando (`npx tsc --noEmit` + `npm run bui
 
 ## 0. Ciclo de revisión antes de cada commit
 
-Para **cada uno** de los 9 commits, en este orden y sin saltarse pasos:
+Para **cada uno** de los 10 commits, en este orden y sin saltarse pasos:
 
 1. **Implementar** solo ese commit. No adelantar trabajo de los siguientes:
    si el diff mezcla dos commits, la revisión deja de ser útil.
@@ -76,7 +76,7 @@ Para **cada uno** de los 9 commits, en este orden y sin saltarse pasos:
 | Secciones | Las **5** enumeradas: 3D Modeling, Videoclips, Black & White, Exhibitions, Awards & Recognition. En grid de 3 columnas → 2 filas (3 + 2). |
 | Gif de intro | Se muestra **una vez por pestaña** (`sessionStorage`). Recargar la misma pestaña no lo repite; abrir una pestaña nueva sí, porque `sessionStorage` está aislado por pestaña, no compartido por el navegador. |
 | Fondo blanco | Tema claro completo: fondo blanco **y texto oscuro** en toda la web (home, sección, proyecto, footer). Un fondo blanco con el texto blanco actual sería ilegible, así que se invierte la paleta entera. |
-| Logo/menú que cambia de color | `mix-blend-mode: difference` sobre texto blanco — es la técnica que usa valleeduhamel.com. El texto se calcula como inverso real de lo que tiene detrás, sin JS. |
+| Logo/menú que cambia de color | `mix-blend-mode: exclusion` sobre texto blanco, **aplicado al `<header>` mismo**. Es el modo que usa valleeduhamel.com. El texto se calcula como inverso de lo que tiene detrás, sin JS. |
 | Nombres de tokens de color | Se renombra `dark.*` → `site.*`. Dejar `dark-bg: #ffffff` sería una mentira que confundiría cualquier trabajo futuro. |
 | Modelado de secciones | Nueva entidad de dominio `Section` + puerto `SectionRepository` + adaptador mock, siguiendo el patrón hexagonal existente. `WorkItem` gana `sectionSlug`. |
 | Home | Solo cambia el bloque de trabajo (proyectos → secciones). Hero, About y Contact se mantienen. |
@@ -87,7 +87,7 @@ Para **cada uno** de los 9 commits, en este orden y sin saltarse pasos:
 
 ## 3. Riesgos y puntos a vigilar
 
-1. **`mix-blend-mode: difference` sobre gris medio (~#808080) da gris medio** → contraste casi nulo.
+1. **`mix-blend-mode: exclusion` sobre gris medio (~#808080) da gris medio** → contraste casi nulo.
    Mitigación: las imágenes de fondo del header deben ser claras u oscuras, no grises planas.
    Si aparece el problema, añadir un `drop-shadow` sutil detrás del texto.
 2. **El gif de Giphy es un hotlink de 2,5 MB a un tercero.** Sirve como placeholder,
@@ -179,34 +179,67 @@ abrir en ventana nueva sí; con "reducir movimiento" activo no aparece.
 
 ---
 
-### Commit 3 — `Invert header logo and menu colors over background`
+### Commit 3 — `Restyle header and hero type with inverted colours`
 
-**Objetivo:** logo y menú en Nunito Sans Black (900) y con color inverso al fondo.
+**Objetivo:** logo en Nunito Sans Black (900), menú en Bold (700), y ambos con color
+inverso al fondo. El título del Hero recibe el mismo tratamiento, y su descripción pasa a
+subtítulo.
 
 **Archivos:**
 - `src/presentation/components/Header.tsx`
+- `src/presentation/components/Hero.tsx`
 
 **Detalle:**
-- **Peso 900 (Black) en logo y menú**: clase `font-black` de Tailwind
-  (su escala mapea `black` → `font-weight: 900`).
-  - Logo: `font-heading` → `font-title font-black`. Hoy no lleva clase de peso,
-    así que hereda el 400 normal; hay que añadirla explícitamente.
-  - Menú: `font-light` → `font-black` en los tres enlaces.
-  - Nunito Sans se carga como fuente variable en rango `200..1000`, así que el 900 es
-    un peso real del archivo, no una negrita sintética del navegador. Ya está cubierto
+- **Pesos distintos para logo y menú**, ajustados durante la revisión visual:
+  - Logo: `font-heading` → `font-title font-black` (**900**). Antes no llevaba clase de
+    peso, así que heredaba el 400 normal; hay que ponerla explícitamente.
+  - Menú: `font-light` → `font-bold` (**700**) en los tres enlaces. Se probó primero en
+    900 igual que el logo y pesaba demasiado con los enlaces ya a `text-3xl`;
+    el 700 mantiene la jerarquía a favor del logo.
+  - Nunito Sans se carga como fuente variable en rango `200..1000`, así que 700 y 900 son
+    pesos reales del archivo, no negritas sintéticas del navegador. Ya está cubierto
     por el `<link>` de Google Fonts que hay en `index.html`; no hay que tocarlo.
   - Con peso 900 conviene revisar el `tracking-tight` del logo: a ese grosor las letras
     se juntan mucho. Si se ve apretado, subir a `tracking-normal` — a validar en la
     revisión visual.
-- Envolver el contenido del `<nav>` en un contenedor con
-  `text-white mix-blend-difference`. Sobre blanco da negro, sobre negro da blanco,
-  sobre una imagen da el inverso exacto — que es el efecto de valleeduhamel.com.
+- **Tamaño y caja del menú**, también de la revisión: los enlaces pasan de
+  `text-xl` a `text-3xl` (el mismo del logo) y su texto se escribe en minúsculas
+  (`work` / `about` / `contact`) en lugar de aplicar la utilidad `lowercase`, para seguir
+  la convención del logo, que ya escribe `sara ramon` en minúsculas en el propio código.
+  A 375 px esto desborda el header: lo resuelve el Commit 9.
+- `text-white mix-blend-exclusion` **en el elemento `<header>`**, no en un contenedor
+  interno. Sobre blanco da negro, sobre negro da blanco, sobre una imagen da el inverso.
+  - **Esto es un error corregido durante la implementación, y el motivo importa.**
+    El primer intento puso el blend en un `div` dentro del `<nav>` y salía todo blanco:
+    `position: fixed` + `z-index` convierten al `<header>` en un *stacking context*, así que
+    el backdrop de cualquier hijo es solo lo pintado **dentro** del header — o sea, nada.
+    Blanco mezclado con un backdrop vacío sigue siendo blanco.
+    En el `<header>` el backdrop es la página de detrás, y el efecto funciona.
+  - Se usa `exclusion` y no `difference` porque es el modo del sitio de referencia.
+    Con texto blanco ambos coinciden en los extremos (`blanco→negro`, `negro→blanco`);
+    `exclusion` es algo más suave en los tonos medios.
 - Quitar de los enlaces los `hover:text-site-text-secondary`: con blend de diferencia
   un cambio de color en hover produce saltos raros. Sustituir por `hover:opacity-60`
   (el logo ya usaba `hover:opacity-70`, así queda coherente).
 - El `<header>` mantiene `fixed z-50 bg-transparent`. **No** añadir `isolate` ni
   `backdrop-*` a ningún ancestro: aislarían el stacking context y el blend dejaría
   de ver el fondo.
+
+**Hero (`Hero.tsx`) — mismo tratamiento tipográfico:**
+- Título `Design State Of Mind`: `font-light` → `font-bold` (**700**) más
+  `text-white mix-blend-exclusion`. Se probó en 900 como el logo y resultaba demasiado
+  pesado a `text-8xl`; el 700 deja el 900 reservado al logo.
+- La descripción de debajo pasa a ser un **subtítulo**: se le añade `font-title` (antes
+  heredaba Source Sans 3, la fuente de texto), `font-light` → `font-bold` (700) y
+  `text-white` fijo. **No** lleva blend: es blanca siempre, por decisión de María.
+- **Hay que quitar el `z-10` del contenedor del contenido** (`div.relative.z-10`).
+  Es la misma trampa del header en otra forma: `z-index: 10` sobre un elemento posicionado
+  abre un stacking context, y entonces el `h1` blendeado solo vería ese contenedor como
+  backdrop, no la imagen de fondo — saldría blanco.
+  Sin `z-index`, el contenedor sigue pintándose sobre la imagen: ambos son hermanos
+  posicionados y este va después en el árbol.
+  Queda un comentario en el componente explicando el porqué, para que nadie lo "arregle"
+  devolviendo el `z-10`.
 
 **Verificación:** scroll por la home cruzando el hero (imagen) y las secciones blancas —
 el texto del header debe invertirse solo. Comprobar en Safari y Chrome
@@ -328,7 +361,7 @@ y al salir vuelve a la imagen; en móvil una columna sin vídeos; click navega a
   (`ml-auto w-full md:w-[70%] aspect-[4/3] object-cover`). El título va en
   `absolute top-[8%] left-0 z-10 md:w-[60%]`, de forma que su mitad derecha cae
   encima del borde superior-izquierdo de la imagen.
-- El título usa `font-title text-5xl md:text-7xl lg:text-8xl` + `text-white mix-blend-difference`,
+- El título usa `font-title text-5xl md:text-7xl lg:text-8xl` + `text-white mix-blend-exclusion`,
   así se lee tanto sobre el blanco del margen izquierdo como sobre la imagen —
   reaprovecha la misma técnica del header.
 - En móvil (< `md`) se apila: título encima, imagen debajo, sin solapamiento
@@ -409,8 +442,10 @@ estática; que el click abre `/work/:slug` correcto.
 - Botón: texto **`Back`** (no "Back to Work"), y `onClick` → `navigate(-1)` con fallback a
   `navigate('/')` si no hay historial (`window.history.length <= 1`).
   Se puede eliminar el `setTimeout` + `scrollIntoView` de `handleBackToWork`.
-  Posición `fixed top-24 left-6 z-40` con `text-white mix-blend-difference`,
+  Posición `fixed top-24 left-6 z-40` con `text-white mix-blend-exclusion`,
   para que se lea sobre el hero a pantalla completa.
+  **Ojo:** el blend va en el propio elemento posicionado, nunca en un hijo suyo —
+  misma trampa de stacking context que se resolvió en el Commit 3.
 - Mismo texto `Back` en el estado "Project not found".
 
 **Verificación:** un proyecto de imagen, uno de vídeo y uno de galería.
@@ -440,7 +475,88 @@ el bloque de About dice "Skills"; `grep -rn 'Expertise' src/` sin resultados.
 
 ---
 
-### Commit 9 — `Update README for new structure`
+### Commit 9 — `Add fullscreen menu for mobile navigation`
+
+**Objetivo:** sustituir los enlaces en línea del header por un menú a pantalla completa
+en móvil, al estilo de valleeduhamel.com. Nace de un problema concreto: con el menú a
+`text-3xl` y peso 900, a 375 px el logo y los tres enlaces no caben en una fila.
+
+**Qué hace realmente la web de referencia** (extraído de su HTML, no de memoria):
+
+- **El disparador no es un icono de hamburguesa.** Es la palabra `menu`, que voltea a
+  `close` con un `rotateX` 3D: `menu` gira 90° y desaparece mientras `close` entra desde
+  −90°. Cada letra lleva además un `top` distinto (`5px`, `-3px`, `0`, `-8px`), lo que da
+  ese aire de rótulo compuesto a mano.
+- **Overlay** `position: fixed`, `100%`×`100%`, `z-index: 9999`, fondo con degradado,
+  `opacity` 0.3 s y `pointer-events: none` mientras está cerrado.
+- **Enlaces enormes centrados en columna**: `5vw` en desktop, `10vw` bajo 768 px y
+  `13vw` bajo 480 px.
+- **Al pasar el ratón por un enlace aparecen 3 imágenes** colocadas en posiciones fijas
+  distintas (`top: 10%; right: 10%; width: 50vw`, etc.), entrando escalonadas a 0,1 s /
+  0,3 s / 0,5 s. En ≤768 px las desactivan con `display: none !important`.
+- Ese hover también aplica `mix-blend-mode: exclusion` al texto del enlace, para que se
+  invierta contra las imágenes que acaban de aparecer.
+
+**Decisión de alcance — leer antes de implementar:**
+
+Hay una tensión que conviene resolver explícitamente. La referencia usa el menú a
+pantalla completa **en todos los tamaños**, y ahí el header solo tiene logo + disparador.
+Si lo copiamos así, los enlaces `work / about / contact` en línea desaparecen — y con
+ellos el trabajo de tamaño y minúsculas que se hizo en el Commit 3.
+
+- **Opción elegida: solo en móvil** (`< md`). Los enlaces en línea se mantienen en
+  desktop (`hidden md:flex`) y el disparador es `md:hidden`. Resuelve el desbordamiento,
+  que es el problema real, y no tira nada de lo ya hecho.
+- **Alternativa**: menú a pantalla completa en todos los tamaños, más fiel a la
+  referencia. Requiere decidir a la vez si el header desktop pierde los enlaces.
+  Queda a criterio de María; si se elige esta, el efecto de imágenes al hover sí tendría
+  sentido implementarlo.
+
+**Archivos nuevos:**
+- `src/presentation/components/FullscreenMenu.tsx`
+- `src/presentation/hooks/useScrollLock.ts` — el bloqueo de scroll del body pasa a ser
+  el segundo uso del mismo patrón (el primero es `IntroSplash`), así que se extrae en
+  vez de duplicarlo.
+
+**`FullscreenMenu` — detalle:**
+- Overlay `fixed inset-0 z-40` con `bg-site-bg`. **Va por debajo del header** (`z-50`),
+  no por encima: así el logo y el disparador siguen visibles y clicables sin necesidad
+  de los `z-index` de 10000 de la referencia. El contenido de la página no tiene
+  `z-index`, así que queda tapado.
+- Transición de `opacity` + `pointer-events-none` mientras está cerrado, igual que la
+  referencia.
+- Enlaces en columna centrada, `font-title font-black`, `text-[10vw]` y
+  `max-[480px]:text-[13vw]` para replicar la escala de la referencia.
+- El header lleva `mix-blend-exclusion`: sobre el overlay blanco, su texto se leerá en
+  negro. Hay que confirmarlo visualmente, no darlo por hecho.
+- **Fuera de alcance**: las 3 imágenes al hover. Con el menú limitado a móvil no habría
+  ratón que las dispare, y la propia referencia las desactiva bajo 768 px. Se documenta
+  como posible extensión si se adopta la alternativa de todos los tamaños.
+- Cierre: al pulsar el disparador, con `Escape`, al clicar un enlace, y al cambiar de ruta.
+- Accesibilidad: `aria-expanded` y `aria-controls` en el disparador, `aria-hidden` en el
+  overlay cerrado, foco al primer enlace al abrir y devuelto al disparador al cerrar.
+- `prefers-reduced-motion`: sin volteo ni fundido, aparición directa.
+
+**Disparador — detalle:**
+- Texto `menu` / `close` en lugar de las tres rayas, para ser fiel a la referencia.
+  Si María prefiere el icono clásico de hamburguesa, es un cambio contenido en este mismo
+  componente.
+- El volteo `rotateX` por letra con los `top` escalonados es *polish* opcional: se
+  implementa primero un cambio de texto con fundido simple, y el volteo se añade solo
+  si compensa. Conviene decirlo por adelantado en vez de prometer la animación completa.
+
+**Archivos modificados:**
+- `src/presentation/components/Header.tsx` — enlaces en línea a `hidden md:flex`,
+  disparador `md:hidden`, y estado `isMenuOpen` elevado aquí (o a un hook propio) porque
+  header y overlay lo comparten.
+
+**Verificación:** a 375 px el header no desborda; abrir y cerrar por los cuatro caminos;
+sin scroll de fondo con el menú abierto; en desktop nada cambia respecto al Commit 3;
+navegación por teclado completa; con "reducir movimiento" no hay animación.
+
+---
+
+### Commit 10 — `Update README for new structure`
 
 **Objetivo:** que el README no quede desfasado respecto al código.
 
@@ -455,6 +571,8 @@ el bloque de About dice "Skills"; `grep -rn 'Expertise' src/` sin resultados.
   - Rutas actualizadas: `/`, `/section/:slug`, `/work/:slug`.
   - Mencionar `IntroSplash` y el `sessionStorage` key, para que nadie se pelee con
     "no me sale el gif".
+  - Documentar `FullscreenMenu` y a partir de qué breakpoint sustituye a los enlaces
+    en línea.
 - `docs/restyle-plan.md` — este archivo; se puede dejar como registro de la PR.
 
 **Verificación:** lectura del README de arriba abajo comparando con el código.
@@ -472,11 +590,15 @@ el bloque de About dice "Skills"; `grep -rn 'Expertise' src/` sin resultados.
 6 (pantalla sección)  ← depende de 4 y 5
 7 (pantalla proyecto) ← depende de 6 (helper toSlug) y de 1
 8 (footer + email)    ← independiente
-9 (README)            ← al final, cuando todo lo demás está cerrado
+9 (menú pantalla completa) ← depende de 3 (header) y de 2 (patrón de bloqueo de scroll)
+10 (README)           ← al final, cuando todo lo demás está cerrado
 ```
 
 El 1 debe ir primero: cambia tokens que todos los commits posteriores usan, y hacerlo
 después obligaría a repasar el mismo código dos veces.
+
+El README se mantiene como último commit aunque el menú se haya añadido después:
+documenta el resto, así que ponerlo antes lo dejaría desfasado el mismo día.
 
 ---
 
@@ -496,7 +618,7 @@ Revisión visual mínima en cada commit: home, una pantalla de sección, un proy
 imagen, uno de vídeo, y todo en viewport móvil (375 px) además de desktop.
 
 Ojo con lo que el tooling **no** detecta, y que por tanto siempre necesita revisión humana:
-contraste real del `mix-blend-difference`, el solapamiento título/imagen de la pantalla de
+contraste real del `mix-blend-exclusion`, el solapamiento título/imagen de la pantalla de
 sección, el timing del splash, y que los vídeos arranquen y paren donde deben.
 
 ---

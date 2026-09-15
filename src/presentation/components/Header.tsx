@@ -21,7 +21,12 @@ export function Header() {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 bg-transparent"
+      // The blend mode has to sit on the fixed header itself, not on an inner
+      // element. `position: fixed` combined with a z-index makes this header a
+      // stacking context, so a blended child would only ever see the header's
+      // own (transparent) contents as its backdrop and would stay plain white.
+      // On the header, the backdrop is the page painted behind it.
+      className="fixed top-0 left-0 right-0 z-50 bg-transparent text-white mix-blend-exclusion"
     >
       <nav className="container mx-auto px-6 lg:px-12 py-6 lg:py-8">
         <div className="flex items-center justify-between">
@@ -29,7 +34,7 @@ export function Header() {
           <a
             href="#"
             onClick={handleLogoClick}
-            className="text-3xl lg:text-3xl font-heading tracking-tight hover:opacity-70 transition-opacity leading-none"
+            className="text-3xl font-title font-black tracking-tight hover:opacity-60 transition-opacity leading-none"
           >
             sara ramon
           </a>
@@ -38,21 +43,21 @@ export function Header() {
           <div className="flex items-center gap-8 lg:gap-12">
             <a
               href="#work"
-              className="font-title text-xl lg:text-xl font-light tracking-wide hover:text-site-text-secondary transition-colors leading-none"
+              className="font-title font-bold text-[1.75rem] tracking-wide hover:opacity-60 transition-opacity leading-none"
             >
-              Work
+              work
             </a>
             <a
               href="#about"
-              className="font-title text-xl lg:text-xl font-light tracking-wide hover:text-site-text-secondary transition-colors leading-none"
+              className="font-title font-bold text-[1.75rem] tracking-wide hover:opacity-60 transition-opacity leading-none"
             >
-              About
+              about
             </a>
             <a
               href="#contact"
-              className="font-title text-xl lg:text-xl font-light tracking-wide hover:text-site-text-secondary transition-colors leading-none"
+              className="font-title font-bold text-[1.75rem] tracking-wide hover:opacity-60 transition-opacity leading-none"
             >
-              Contact
+              contact
             </a>
           </div>
         </div>
