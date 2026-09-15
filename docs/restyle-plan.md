@@ -74,7 +74,7 @@ Para **cada uno** de los 9 commits, en este orden y sin saltarse pasos:
 | Tema | Decisión |
 |---|---|
 | Secciones | Las **5** enumeradas: 3D Modeling, Videoclips, Black & White, Exhibitions, Awards & Recognition. En grid de 3 columnas → 2 filas (3 + 2). |
-| Gif de intro | Se muestra **una vez por sesión** de navegador (`sessionStorage`). |
+| Gif de intro | Se muestra **una vez por pestaña** (`sessionStorage`). Recargar la misma pestaña no lo repite; abrir una pestaña nueva sí, porque `sessionStorage` está aislado por pestaña, no compartido por el navegador. |
 | Fondo blanco | Tema claro completo: fondo blanco **y texto oscuro** en toda la web (home, sección, proyecto, footer). Un fondo blanco con el texto blanco actual sería ilegible, así que se invierte la paleta entera. |
 | Logo/menú que cambia de color | `mix-blend-mode: difference` sobre texto blanco — es la técnica que usa valleeduhamel.com. El texto se calcula como inverso real de lo que tiene detrás, sin JS. |
 | Nombres de tokens de color | Se renombra `dark.*` → `site.*`. Dejar `dark-bg: #ffffff` sería una mentira que confundiría cualquier trabajo futuro. |
@@ -140,7 +140,7 @@ Visual: home, `/work/:slug` y footer legibles en claro.
 
 ### Commit 2 — `Add intro splash with animated logo`
 
-**Objetivo:** al entrar por primera vez en la sesión, logo animado centrado a pantalla completa unos segundos; luego se desvanece y aparece la home.
+**Objetivo:** al abrir la web en una pestaña, logo animado centrado a pantalla completa unos segundos; luego se desvanece y aparece la home. No se repite al recargar ni al navegar dentro de la SPA.
 
 **Archivos nuevos:**
 - `src/presentation/components/IntroSplash.tsx`
@@ -159,6 +159,11 @@ Visual: home, `/work/:slug` y footer legibles en claro.
   Limpiar ambos timers en el cleanup.
 - No se monta si `sessionStorage.getItem(SESSION_KEY)` existe o si
   `matchMedia('(prefers-reduced-motion: reduce)').matches`.
+- **Ámbito real de `sessionStorage`:** una pestaña, no el navegador. Cada pestaña nueva
+  parte con almacenamiento vacío y vuelve a ver el gif — que es el comportamiento buscado.
+  Única excepción del estándar: si la pestaña se **duplica** o se abre con
+  `target="_blank"` desde la propia web, el navegador copia el `sessionStorage` del
+  origen y el gif no sale. No merece la pena forzarlo.
 - Overlay `fixed inset-0 z-[100] bg-site-bg flex items-center justify-center`,
   gif con `max-w-[70vw] max-h-[70vh] object-contain`, `alt="Sara Ramon"`.
 - Bloquear scroll mientras está visible (`document.body.style.overflow = 'hidden'`,

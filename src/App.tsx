@@ -9,6 +9,7 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header } from './presentation/components/Header';
+import { IntroSplash } from './presentation/components/IntroSplash';
 import { Hero } from './presentation/components/Hero';
 import { WorkSection } from './presentation/components/WorkSection';
 import { AboutSection } from './presentation/components/AboutSection';
@@ -56,6 +57,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-site-bg">
+        <IntroSplash />
         <Header />
         <main>
           <Routes>
