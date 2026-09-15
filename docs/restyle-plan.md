@@ -465,7 +465,18 @@ estática; que el click abre `/work/:slug` correcto.
     **sin `muted` y sin autoplay**: el requisito es que se pueda reproducir.
     Quitar también el `loop` del hero (molesta con controles).
   - `GalleryItemDetail` → primera imagen de la galería.
-- `renderMedia` se mantiene para el resto de medios del cuerpo.
+- **`renderMedia` se sustituye por `renderBodyMedia`, no se mantiene.** Corrección sobre
+  el plan inicial: dejar `renderMedia` con el significado difuso de "los demás medios"
+  obligaba a que el componente supiera qué esperar de cada tipo. Con dos métodos de
+  contrato explícito (`renderHeroMedia` y `renderBodyMedia`, que puede devolver `null`),
+  cada renderer decide qué va arriba y qué abajo, incluido su propio tamaño.
+  `renderMedia` solo se usaba desde `WorkItemDetail`, así que el cambio no afecta a nadie
+  más — el `renderMedia` de `workItemCards/` es otra interfaz y no se toca.
+  - `ImageItemDetail` / `VideoItemDetail` → `gifUrl` si existe, `null` si no.
+    Para vídeo no se repite la imagen abajo: el `poster` ya la muestra.
+  - `GalleryItemDetail` → **el carrusel existente** (con su visor a pantalla completa y
+    navegación por teclado) envuelto en `aspect-video`, o `null` si la galería tiene una
+    sola imagen. Así no se pierde funcionalidad ya construida.
 
 **`WorkItemDetail.tsx` — reescritura del layout:**
 - Bloque hero: `h-screen w-full p-4 md:p-8` (el padding **es** el marco) con un hijo
@@ -478,8 +489,9 @@ estática; que el click abre `/work/:slug` correcto.
 - Botón: texto **`Back`** (no "Back to Work"), y `onClick` → `navigate(-1)` con fallback a
   `navigate('/')` si no hay historial (`window.history.length <= 1`).
   Se puede eliminar el `setTimeout` + `scrollIntoView` de `handleBackToWork`.
-  Posición `fixed top-24 left-6 z-40` con `text-white mix-blend-exclusion`,
-  para que se lea sobre el hero a pantalla completa.
+  Posición `fixed top-28 left-6 lg:left-12 z-40` con `text-white mix-blend-exclusion`,
+  para que se lea sobre el hero a pantalla completa. `top-28` y no `top-24`: con el
+  padding vertical del header en `lg`, a 24 el botón quedaba pegado al menú.
   **Ojo:** el blend va en el propio elemento posicionado, nunca en un hijo suyo —
   misma trampa de stacking context que se resolvió en el Commit 3.
 - Mismo texto `Back` en el estado "Project not found".

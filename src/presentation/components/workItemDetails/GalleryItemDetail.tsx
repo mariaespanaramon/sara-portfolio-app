@@ -4,13 +4,15 @@ import type { IWorkItemDetail } from './IWorkItemDetail';
 
 /**
  * Gallery work item detail renderer
- * Displays an image carousel with navigation controls and fullscreen support
+ *
+ * The hero shows the opening image on its own; the carousel, with its navigation
+ * and fullscreen viewer, is revealed further down the page.
  */
 export class GalleryItemDetail implements IWorkItemDetail {
-  renderMedia(workItem: WorkItem): JSX.Element {
-    const images = workItem.galleryImages || [];
-    
-    if (images.length === 0) {
+  renderHeroMedia(workItem: WorkItem): JSX.Element {
+    const firstImage = workItem.galleryImages?.[0];
+
+    if (!firstImage) {
       return (
         <div className="w-full h-full flex items-center justify-center bg-site-surface">
           <span className="text-site-text-secondary">No images available</span>
@@ -18,7 +20,24 @@ export class GalleryItemDetail implements IWorkItemDetail {
       );
     }
 
-    return <ImageCarousel images={images} title={workItem.title} />;
+    return (
+      <img src={firstImage} alt={workItem.title} className="w-full h-full object-cover" />
+    );
+  }
+
+  renderBodyMedia(workItem: WorkItem): JSX.Element | null {
+    const images = workItem.galleryImages || [];
+
+    // A single image is already the hero; a carousel of one would add nothing.
+    if (images.length <= 1) {
+      return null;
+    }
+
+    return (
+      <div className="aspect-video overflow-hidden border border-site-border bg-site-surface">
+        <ImageCarousel images={images} title={workItem.title} />
+      </div>
+    );
   }
 }
 

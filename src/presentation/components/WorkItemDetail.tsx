@@ -4,14 +4,35 @@ import { useWorkItems } from '../../application/service/useWorkItems';
 import type { WorkItemRepository } from '../../infrastructure/ports/repositories';
 import { WorkItemDetailFactory } from './workItemDetails/WorkItemDetailFactory';
 import { toSlug } from '../../application/domain/slug';
+import { RevealOnScroll } from './RevealOnScroll';
 
 interface WorkItemDetailProps {
   repository: WorkItemRepository;
 }
 
 /**
+ * Floating back control.
+ *
+ * The blend sits on the button, which is the positioned element: its backdrop is
+ * then the page behind it. On a child it would only ever see the button.
+ */
+function BackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="fixed top-28 left-6 lg:left-12 z-40 flex items-center gap-2 font-title font-bold text-white mix-blend-exclusion hover:opacity-60 transition-opacity"
+    >
+      <span aria-hidden="true">&larr;</span>
+      <span>Back</span>
+    </button>
+  );
+}
+
+/**
  * Work item detail page component
- * Displays full project details with image on left and info on right
+ *
+ * Opens on the project's media full screen inside a frame, then reveals the title,
+ * text and any further media as the page scrolls.
  */
 export function WorkItemDetail({ repository }: WorkItemDetailProps) {
   const { slug } = useParams<{ slug: string }>();
@@ -23,15 +44,14 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
     window.scrollTo(0, 0);
   }, [slug]);
 
-  const handleBackToWork = () => {
-    navigate('/');
-    // Use setTimeout to ensure navigation completes before scrolling
-    setTimeout(() => {
-      const workSection = document.getElementById('work');
-      if (workSection) {
-        workSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
+  const handleBack = () => {
+    // Going back through history returns to the section the visitor came from.
+    // Landing here directly (a shared link) has no history to return to.
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
   };
 
   if (loading) {
@@ -64,68 +84,64 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
         <div className="text-center">
           <p className="text-site-text-secondary font-light mb-4">Project not found</p>
           <button
-            onClick={handleBackToWork}
+            onClick={handleBack}
             className="px-6 py-2 border border-site-border hover:border-site-text-muted transition-colors"
           >
-            Back to Work
+            Back
           </button>
         </div>
       </div>
     );
   }
 
+  const renderer = WorkItemDetailFactory.getRenderer(workItem.type);
+  const bodyMedia = renderer.renderBodyMedia(workItem);
+
   return (
-    <div className="min-h-screen pt-32 pb-20">
+    <div className="min-h-screen">
+      <BackButton onClick={handleBack} />
+
+      {/* Media full screen. The section's padding is the frame. */}
+      <section className="h-screen w-full p-4 md:p-8">
+        <div className="w-full h-full overflow-hidden border border-site-border bg-site-surface">
+          {renderer.renderHeroMedia(workItem)}
+        </div>
+      </section>
+
       <div className="container mx-auto px-6 lg:px-12">
-        {/* Back button */}
-        <button
-          onClick={handleBackToWork}
-          className="mb-8 text-site-text-secondary hover:text-site-text-primary transition-colors flex items-center gap-2"
-        >
-          <span>←</span>
-          <span>Back to Work</span>
-        </button>
-
-        {/* Single column layout: Media on top, centered */}
-        <div className="max-w-4xl mx-auto space-y-12">
-          {/* Media Section - Rendered by type-specific implementation */}
-          <div className="aspect-video overflow-hidden bg-site-surface">
-            {WorkItemDetailFactory.getRenderer(workItem.type).renderMedia(workItem)}
-          </div>
-
-          {/* Details Section */}
-          <div className="space-y-8">
-            {/* Title */}
-            <h1 className="font-title text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight leading-tight">
+        <div className="max-w-4xl mx-auto py-24 lg:py-32 space-y-20 lg:space-y-28">
+          <RevealOnScroll>
+            <h1 className="font-title font-bold text-4xl sm:text-5xl lg:text-6xl tracking-tight leading-tight mb-6">
               {workItem.title}
             </h1>
 
-            {/* Category and Year */}
             <div className="flex items-center gap-4 text-sm text-site-text-muted font-light tracking-widest uppercase">
               <span>{workItem.category}</span>
-              <span>•</span>
+              <span>&bull;</span>
               <span>{workItem.year}</span>
             </div>
+          </RevealOnScroll>
 
-            {/* Description */}
+          <RevealOnScroll>
             <p className="text-lg lg:text-xl text-site-text-secondary font-light leading-relaxed whitespace-pre-line">
               {workItem.description}
             </p>
+          </RevealOnScroll>
 
-            {/* Tags */}
-            <div>
-              <div className="flex flex-wrap gap-3">
-                {workItem.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-4 py-2 text-sm font-bold tracking-wide text-site-text-primary uppercase"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+          {bodyMedia && <RevealOnScroll>{bodyMedia}</RevealOnScroll>}
+
+          <RevealOnScroll>
+            <div className="flex flex-wrap gap-3">
+              {workItem.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-4 py-2 text-sm font-bold tracking-wide text-site-text-primary uppercase"
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
-          </div>
+          </RevealOnScroll>
         </div>
       </div>
     </div>
