@@ -115,6 +115,18 @@ export class NetlifyBlobsWorkItemRepository implements WorkItemRepository {
       return false;
     }
 
+    // sectionId and gifUrl are validated as optional deliberately: the
+    // items.json already published to Netlify Blobs predates both fields, and
+    // requiring them would reject live data. An item without a sectionId just
+    // does not appear on any section page.
+    const optionalValid =
+      (workItem.sectionId === undefined || typeof workItem.sectionId === 'string') &&
+      (workItem.gifUrl === undefined || typeof workItem.gifUrl === 'string');
+
+    if (!optionalValid) {
+      return false;
+    }
+
     // Validate type-specific fields
     if (workItem.type === 'video') {
       return typeof workItem.videoUrl === 'string';

@@ -16,8 +16,8 @@ export function ContactSection({ repository }: ContactSectionProps) {
     return (
       <section id="contact" className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-dark-text-muted border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="font-title text-dark-text-secondary font-light">Loading contact info...</p>
+          <div className="w-8 h-8 border-2 border-site-text-muted border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="font-title text-site-text-secondary font-light">Loading contact info...</p>
         </div>
       </section>
     );
@@ -40,32 +40,34 @@ export function ContactSection({ repository }: ContactSectionProps) {
           <div className="space-y-16 lg:space-y-24">
             {/* Title */}
             <div>
-              <h2 className="font-title text-4xl sm:text-6xl lg:text-7xl font-light tracking-tight leading-tight mb-4">
+              {/* Lower cased with a class to match the About heading, whose title
+                  comes from data and so cannot be lower cased at the source. */}
+              <h2 className="font-title text-3xl sm:text-5xl lg:text-6xl font-bold lowercase tracking-tight leading-tight mb-4">
                 Get in Touch
               </h2>
-              <p className="text-2xl lg:text-2xl text-dark-text-secondary font-light">
+              <p className="text-2xl lg:text-2xl text-site-text-secondary font-light">
                 Let's connect and discuss your next project
               </p>
             </div>
 
             {/* Contact Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-dark-border">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-site-border">
               <div>
-                <h3 className="text-sm font-light tracking-widest uppercase text-dark-text-muted mb-3">
+                <h3 className="text-sm font-light tracking-widest uppercase text-site-text-muted mb-3">
                   Email
                 </h3>
                 <a
                   href={`mailto:${contactDetails.email}`}
-                  className="text-lg font-light hover:text-dark-text-secondary transition-colors"
+                  className="text-lg font-light hover:text-site-text-secondary transition-colors"
                 >
                   {contactDetails.email}
                 </a>
               </div>
               <div>
-                <h3 className="text-sm font-light tracking-widest uppercase text-dark-text-muted mb-3">
+                <h3 className="text-sm font-light tracking-widest uppercase text-site-text-muted mb-3">
                   Location
                 </h3>
-                <p className="text-lg font-light text-dark-text-secondary">{contactDetails.location}</p>
+                <p className="text-lg font-light text-site-text-secondary">{contactDetails.location}</p>
               </div>
             </div>
           </div>

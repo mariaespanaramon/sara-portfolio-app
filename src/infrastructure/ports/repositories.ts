@@ -1,4 +1,5 @@
 import type { WorkItem } from '../../application/domain/WorkItem';
+import type { Section } from '../../application/domain/Section';
 import type { AboutContent } from '../../application/domain/AboutContent';
 import type { ContactDetails } from '../../application/domain/ContactDetails';
 
@@ -8,6 +9,15 @@ import type { ContactDetails } from '../../application/domain/ContactDetails';
  */
 export interface WorkItemRepository {
   getAll(): Promise<WorkItem[]>;
+}
+
+/**
+ * Port (Interface) for Section repository
+ * Defines the contract for data access operations
+ */
+export interface SectionRepository {
+  getAll(): Promise<Section[]>;
+  getById(id: string): Promise<Section | null>;
 }
 
 /**

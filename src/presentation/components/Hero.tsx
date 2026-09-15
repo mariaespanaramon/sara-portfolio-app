@@ -13,12 +13,19 @@ export function Hero() {
         />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-5xl mx-auto text-center">
-        <h1 className="font-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light tracking-tight leading-none mb-6 lg:mb-8">
+      {/*
+        Content. Deliberately without a z-index: any value other than `auto` on a
+        positioned element opens a new stacking context, and the blended title
+        below would then only see this container as its backdrop instead of the
+        background image, rendering as plain white. Paint order still puts this
+        above the image because both are positioned siblings and this one comes
+        later in the tree.
+      */}
+      <div className="relative max-w-5xl mx-auto text-center">
+        <h1 className="font-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-none mb-6 lg:mb-8 text-white mix-blend-exclusion">
           Design State Of Mind
         </h1>
-        <p className="text-lg sm:text-xl lg:text-2xl font-light max-w-3xl mx-auto leading-relaxed">
+        <p className="font-title text-lg sm:text-xl lg:text-2xl font-bold max-w-3xl mx-auto leading-relaxed text-white">
           A collection of selected works in photography, short film production, and branding
         </p>
       </div>

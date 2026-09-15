@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { WorkItem } from '../../application/domain/WorkItem';
 import { WorkItemCardFactory } from './workItemCards/WorkItemCardFactory';
+import { toUrlId } from '../../application/domain/urlId';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 /**
  * Work item card component
@@ -15,21 +17,10 @@ interface WorkItemCardProps {
 
 export function WorkItemCard({ item }: WorkItemCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const mediaRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
   const renderer = WorkItemCardFactory.getRenderer(item.type);
-
-  // Detect mobile devices
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768); // md breakpoint
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const isMobile = useIsMobile();
 
   // Auto-play video on mobile
   useEffect(() => {
@@ -53,14 +44,13 @@ export function WorkItemCard({ item }: WorkItemCardProps) {
   };
 
   const handleClick = () => {
-    // Navigate to detail page based on title slug
-    const slug = item.title.toLowerCase().replace(/\s+/g, '-');
-    navigate(`/work/${slug}`);
+    // Navigate to detail page based on the id derived from the title
+    navigate(`/work/${toUrlId(item.title)}`);
   };
 
   return (
     <article
-      className="relative aspect-[16/9] overflow-hidden bg-dark-surface cursor-pointer group"
+      className="relative aspect-[16/9] overflow-hidden bg-site-surface cursor-pointer group"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
@@ -71,7 +61,7 @@ export function WorkItemCard({ item }: WorkItemCardProps) {
       {/* Overlay with title and tags */}
       {/* Mobile: always visible | Desktop: visible on hover */}
       <div
-        className={`absolute inset-0 bg-dark-bg/60 flex flex-col items-center justify-between py-8 transition-opacity duration-300 ${
+        className={`absolute inset-0 bg-site-bg/60 flex flex-col items-center justify-between py-8 transition-opacity duration-300 ${
           isMobile ? 'opacity-100' : isHovered ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -87,7 +77,7 @@ export function WorkItemCard({ item }: WorkItemCardProps) {
           {item.tags.map((tag) => (
             <span
               key={tag}
-              className="px-3 py-2 text-sm font-bold tracking-wide text-dark-text-primary uppercase"
+              className="px-3 py-2 text-sm font-bold tracking-wide text-site-text-primary uppercase"
             >
               {tag}
             </span>
