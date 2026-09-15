@@ -115,6 +115,18 @@ export class NetlifyBlobsWorkItemRepository implements WorkItemRepository {
       return false;
     }
 
+    // sectionSlug and gifUrl are validated as optional deliberately: the
+    // items.json already published to Netlify Blobs predates both fields, and
+    // requiring them would reject live data. An item without a sectionSlug just
+    // does not appear on any section page.
+    const optionalValid =
+      (workItem.sectionSlug === undefined || typeof workItem.sectionSlug === 'string') &&
+      (workItem.gifUrl === undefined || typeof workItem.gifUrl === 'string');
+
+    if (!optionalValid) {
+      return false;
+    }
+
     // Validate type-specific fields
     if (workItem.type === 'video') {
       return typeof workItem.videoUrl === 'string';

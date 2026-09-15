@@ -288,9 +288,23 @@ el texto del header debe invertirse solo. Comprobar en Safari y Chrome
   validar `sectionSlug` y `gifUrl` como **opcionales**
   (`workItem.sectionSlug === undefined || typeof workItem.sectionSlug === 'string'`).
   No hacerlos obligatorios: el `items.json` que ya está en producción no los tiene.
-- `src/App.tsx` — instanciar `const sectionRepository = new MockSectionRepository();`
+- **`src/App.tsx` NO se toca en este commit.** Corrección sobre el plan inicial:
+  `tsconfig.json` tiene `noUnusedLocals: true`, así que declarar
+  `const sectionRepository = new MockSectionRepository();` sin consumirlo todavía rompe
+  la compilación (`TS6133`). El wiring se hace en el Commit 5, donde `SectionGrid` lo usa.
 
-**Verificación:** `npx tsc --noEmit` y `npm run build`. La web sigue exactamente igual.
+**Arreglo de datos que entra aquí (no estaba planificado):**
+Todas las URLs de vídeo del repo apuntaban a `commondatastorage.googleapis.com/gtv-videos-bucket`,
+que **ha dejado de ser público**: responde `403 AccessDenied` para llamadas anónimas.
+O sea que los vídeos de las cards y de las pantallas de proyecto no se veían desde antes de
+esta PR. Se sustituyen por tres fuentes verificadas (`mdn.github.io/shared-assets`,
+`test-videos.co.uk`, `w3schools.com`). Siguen siendo placeholders.
+Aparte, el vídeo real de Sara referenciado en `items.json`
+(`sararamon.netlify.app/.netlify/blobs/serve/videos/moonshoe_3.mp4`) responde **404**;
+queda anotado en la sección 7 porque es contenido de producción, no de este repo.
+
+**Verificación:** `npx tsc --noEmit` y `npm run build`. La web sigue igual, salvo que los
+vídeos de las cards vuelven a reproducirse.
 
 ---
 
@@ -632,4 +646,8 @@ sección, el timing del splash, y que los vídeos arranquen y paren donde deben.
 5. **Fotos estáticas (poster)** de los proyectos de vídeo, para las filas de sección.
 6. Decidir si Exhibitions y Awards & Recognition van a tener proyectos con la misma
    estructura o necesitan un formato propio — hasta entonces se comportan igual que las demás.
+7. **El vídeo de producción da 404.** `items.json` apunta a
+   `https://sararamon.netlify.app/.netlify/blobs/serve/videos/moonshoe_3.mp4` y esa URL
+   responde 404 desde fuera. Hay que comprobar si el blob sigue subido y si esa ruta
+   `blobs/serve` necesita token — afecta al sitio publicado, no al desarrollo local.
 
