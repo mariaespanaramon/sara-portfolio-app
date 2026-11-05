@@ -1,5 +1,6 @@
 [build]
-  command = "npm run build"
+  # Lint first: a style error fails the deploy instead of reaching the site.
+  command = "npm run lint && npm run build"
   publish = "dist"
   # Every production deploy costs credits, so commits that cannot change the
   # site skip the build. Exit 0 means skip. The first check makes sure a build

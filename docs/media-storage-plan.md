@@ -423,7 +423,7 @@ steps 2 and 3.
 - [ ] Upload Sara's real projects and section covers; check them on the preview.
 - [ ] Delete the old `videos` and `work-items` stores, and the sample copies of
       `media` and `content` left in `us-east-2`.
-- [ ] Update the README: the new content workflow, the skills and the
+- [x] Update the README: the new content workflow, the skills and the
       prerequisites. Remove the obsolete Blobs instructions.
 - [ ] Enable credit usage notifications in Netlify.
 - [ ] Delete this document.
