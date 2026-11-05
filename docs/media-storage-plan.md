@@ -281,12 +281,28 @@ steps 2 and 3.
       env typings, the unused `WorkItemCard`, `workItemCards/`,
       `workItemDetails/` and the root `items.json`.
 - [ ] Review locally with the mocks.
-- [ ] Hand-make one sample project (images and a loop) plus a sample
+- [x] Hand-make one sample project (images and a loop) plus a sample
       `sections.json`, and upload them to the `media` and `content` stores.
-- [ ] Push and open a draft PR; on the Deploy Preview check rendering, cache
-      headers, `Cache-Status`, 304s and how the CDN answers `Range` requests.
+      Uploading needs the CLI token; the permission classifier blocks Claude
+      from reading it, so Maria ran the upload herself.
+- [x] Push and open draft PR #11. The first preview failed: the edge bundler
+      evaluates modules at build time, so `getStore` must not run at import.
+- [x] Preview checks with curl:
+  - SPA fallback works for deep links; `/media/../x` is rejected.
+  - Headers are as designed. `Netlify-CDN-Cache-Control` does not reach the
+    browser. Netlify weakens the ETag of compressed JSON (`W/`).
+  - 304 on `If-None-Match`.
+  - CDN caching works (`Cache-Status: hit`, growing `age`), but each edge node
+    caches on its own, so repeated requests often miss at first. Static assets
+    behave the same way.
+  - `Range` returns 206 with the right bytes, both before and after a full
+    fetch; partial responses are never cached.
+- [ ] Visual check on the preview, including a loop on Safari or iOS.
 
 ### Step 2: Images
+
+- [ ] Missing content documents read as empty content; real failures show a
+      neutral message and log the details to the console, not to visitors.
 
 - [ ] `scripts/content/` core: Blobs client, content-hashed keys, reading and
       writing the JSON with ETag-based conditional writes (`onlyIfMatch`) so two

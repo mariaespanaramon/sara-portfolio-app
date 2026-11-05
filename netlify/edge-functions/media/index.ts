@@ -13,13 +13,13 @@ import { serveBlob, type CachePolicy } from './serveBlob.ts';
  */
 
 interface Route {
-  source: NetlifyBlobSource;
+  storeName: string;
   cache: CachePolicy;
 }
 
 const ROUTES: Record<string, Route> = {
   media: {
-    source: new NetlifyBlobSource('media'),
+    storeName: 'media',
     // Keys change whenever the file does, so a key's bytes never change.
     cache: {
       browser: 'public, max-age=31536000, immutable',
@@ -27,7 +27,7 @@ const ROUTES: Record<string, Route> = {
     },
   },
   content: {
-    source: new NetlifyBlobSource('content'),
+    storeName: 'content',
     // Browsers always revalidate (cheap, thanks to the ETag); the CDN holds a
     // copy for a minute, so an upload shows up within about that long.
     cache: {
@@ -49,7 +49,7 @@ export default async function handler(request: Request): Promise<Response> {
     return new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
   }
 
-  return serveBlob(request, route.source, key, route.cache);
+  return serveBlob(request, new NetlifyBlobSource(route.storeName), key, route.cache);
 }
 
 export const config: Config = {

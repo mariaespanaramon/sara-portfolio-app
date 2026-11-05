@@ -8,17 +8,16 @@ import type { BlobInfo, BlobSource } from './BlobSource.ts';
  * nothing secret is configured here.
  */
 export class NetlifyBlobSource implements BlobSource {
-  private storeInstance?: ReturnType<typeof getStore>;
-
-  constructor(private readonly storeName: string) {}
+  private readonly store;
 
   /**
-   * Created on first use, not in the constructor: the bundler evaluates this
-   * module at build time, where the Blobs environment does not exist yet.
+   * Create one per request. The store carries the Blobs token Netlify provides
+   * for the current request, and that token expires: a store kept across
+   * requests fails with "Token expired". Creating it at import time fails the
+   * build instead, since the bundler evaluates modules where no token exists.
    */
-  private get store() {
-    this.storeInstance ??= getStore(this.storeName);
-    return this.storeInstance;
+  constructor(storeName: string) {
+    this.store = getStore(storeName);
   }
 
   async info(key: string): Promise<BlobInfo | null> {
