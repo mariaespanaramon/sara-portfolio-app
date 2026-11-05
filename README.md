@@ -4,99 +4,52 @@ A portfolio application built with React, TypeScript, and Tailwind CSS, implemen
 
 If you see something strange, no you did not. I am a Backend Engineer attempting to build a Frontend application 😛
 
-Feel free to visit the application at [sararamon.com](https://sararamon.netlify.app/)
+Feel free to visit the application at [sararamon.netlify.app](https://sararamon.netlify.app/)
 
 ## 🎯 Features
 
-- **Modern Tech Stack**: React 18 with functional components and Hooks, TypeScript for type safety, Tailwind CSS for styling
-- **Hexagonal Architecture**: Clean separation of concerns with Domain, Infrastructure, Application, and Presentation layers
-- **Light Theme**: Minimalist design on white, with header and hero type inverting
-  against whatever sits behind it
-- **Fully Responsive**: Optimized for mobile, tablet, and desktop viewports
-- **Smooth Scrolling**: Seamless navigation between sections with anchor links
-- **Sections**: The home lists sections rather than individual projects; each section
-  has its own page listing its work
-- **Type-Safe**: TypeScript implementation for strict type checking
+- React 18, TypeScript and Tailwind CSS
+- Hexagonal architecture
+- Light, responsive design
+- Home organised by sections
+- Content managed without deploys (Netlify Blobs + Claude Code skills)
+- Optimised images, adaptive video and GIFs as light loops
 
 ## 🏗️ Architecture
 
-### Domain Layer (Core)
-- Pure business logic and entity definitions
-- Interface definitions: `WorkItem`, `Section`, `AboutContent`, `ContactDetails`
-- No external dependencies
+### Domain Layer
+- Entities (`WorkItem`, `Section`, `MediaAsset`, `SiteIdentity`, …), no dependencies
 
-### Infrastructure Layer (Adapters)
-- Data fetching and external service integration
-- Mock API functions simulating Headless CMS
-- Ready for integration with real APIs (Contentful, Sanity, Strapi, etc.)
-- Security: Prepared for environment variable configuration
+### Application Layer
+- Use-case hooks (`useWorkItems`, `useSections`, `useSiteIdentity`, …)
 
-### Application Layer (Use Cases)
-- Business logic orchestration
-- Custom Hooks: `useWorkItems`, `useSections`, `useSection`, `useAboutContent`,
-  `useContactDetails`
-- State management and data flow control
+### Infrastructure Layer
+- Ports and adapters: HTTP repositories over the content store, mocks for development
 
-### Presentation Layer (Components)
-- React UI components
-- Components: `Header`, `FullscreenMenu`, `IntroSplash`, `Hero`, `SectionGrid`,
-  `SectionCard`, `SectionPage`, `ProjectRow`, `WorkItemDetail`, `AboutSection`,
-  `ContactSection`, `Footer`
-- Presentation hooks: `useIsMobile`, `useScrollLock`, `useRevealOnScroll`
-- Only interacts with Application layer hooks
+### Presentation Layer
+- React components; media rendered per kind by `MediaView`
+
+The media Edge Function and the content scripts follow the same layering.
 
 ### Folder Structure
 ```
 src/
 ├── application/
-│   ├── domain/                    # Domain Layer (Anemic approach)
-│   │   ├── WorkItem.ts           # WorkItem entity interface
-│   │   ├── Section.ts            # Section entity interface
-│   │   ├── AboutContent.ts      # AboutContent entity interface
-│   │   ├── ContactDetails.ts    # ContactDetails entity interface
-│   │   └── urlId.ts             # Title to URL id helper
-│   └── service/                   # Application Services (Use Cases)
-│       ├── useWorkItems.ts       # Use case for fetching work items
-│       ├── useSections.ts        # Use case for fetching all sections
-│       ├── useSection.ts         # Use case for resolving one section by id
-│       ├── useAboutContent.ts    # Use case for fetching about content
-│       └── useContactDetails.ts  # Use case for fetching contact details
-├── infrastructure/                # Infrastructure Layer
-│   ├── ports/                     # Ports (Interfaces)
-│   │   └── repositories.ts       # Repository interfaces
-│   ├── config/
-│   │   └── netlify.config.ts     # Netlify Blobs configuration
-│   └── adapters/                  # Adapters (Implementations)
-│       ├── MockWorkItemRepository.ts
-│       ├── NetlifyBlobsWorkItemRepository.ts
-│       ├── MockSectionRepository.ts
-│       ├── MockAboutContentRepository.ts
-│       └── MockContactDetailsRepository.ts
-├── presentation/                  # Presentation Layer
-│   ├── hooks/                     # Reusable UI behaviour
-│   │   ├── useIsMobile.ts        # Viewport narrower than the md breakpoint
-│   │   ├── useScrollLock.ts      # Freeze the page behind an overlay
-│   │   └── useRevealOnScroll.ts  # Reveal an element once it scrolls into view
-│   └── components/                # React components
-│       ├── IntroSplash.tsx       # Animated logo on first load of a tab
-│       ├── Header.tsx
-│       ├── FullscreenMenu.tsx    # Mobile navigation overlay
-│       ├── Hero.tsx
-│       ├── SectionGrid.tsx       # Home grid of sections
-│       ├── SectionCard.tsx
-│       ├── SectionPage.tsx       # One section and its projects
-│       ├── ProjectRow.tsx        # A project inside a section page
-│       ├── WorkItemCard.tsx
-│       ├── WorkItemDetail.tsx    # A project page
-│       ├── RevealOnScroll.tsx
-│       ├── AboutSection.tsx
-│       ├── ContactSection.tsx
-│       ├── Footer.tsx
-│       ├── workItemCards/         # Per-type card renderers
-│       └── workItemDetails/       # Per-type detail renderers
-├── App.tsx                        # Application entry point (wiring, routes)
-├── main.tsx
-└── index.css
+│   ├── domain/
+│   └── service/
+├── infrastructure/
+│   ├── ports/
+│   ├── content/            # Stored format, validation, key-to-URL mapping
+│   └── adapters/           # Http*, Mock*
+├── presentation/
+│   ├── hooks/
+│   └── components/
+│       └── media/          # ResponsiveImage, VideoPlayer, LoopVideo, MediaView
+└── App.tsx                 # Wiring and routes
+
+netlify/edge-functions/media/   # Serves /media/* and /content/* from Blobs
+scripts/content/                # Content CLI: domain, application, infrastructure
+.claude/skills/                 # Content skills
 ```
 
 ### Routes
@@ -110,7 +63,8 @@ src/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ and npm/yarn/pnpm
+- Node.js 22.18+ (the content scripts run TypeScript directly)
+- ffmpeg, only to publish videos and GIFs (`brew install ffmpeg`)
 
 ### Installation
 
@@ -118,7 +72,7 @@ src/
 # Install dependencies
 npm install
 
-# Start development server
+# Start development server (placeholder content from the mock adapters)
 npm run dev
 
 # Build for production
@@ -128,15 +82,23 @@ npm run build
 npm run preview
 ```
 
+`npm run dev` serves mock content. Set `VITE_CONTENT_SOURCE=http` under `netlify dev`
+to read the content store instead (a local, empty Blobs sandbox).
+
+### Other scripts
+
+| Script | Does |
+|---|---|
+| `npm run content -- <command>` | The content CLI; see [Managing content](#-managing-content) |
+| `npm run test:tools` | Tests for the content use cases, with in-memory adapters |
+| `npm run typecheck:tools` | Type-checks the scripts and the Edge Function |
+| `npm run lint` | Lints the app, the scripts and the Edge Function |
+
 ## 🔒 Security & Best Practices
 
-- No hardcoded API keys or sensitive information
-- Environment variables ready for integration (use `.env` file)
-- For production API integration, use:
-  ```typescript
-  const API_KEY = import.meta.env.VITE_API_KEY;
-  // Or for Netlify: process.env.NEXT_PUBLIC_API_KEY
-  ```
+- No token in the browser bundle: Blobs are read server side
+- Stored content is validated before use
+- Content writes are conditional, so concurrent uploads cannot overwrite each other
 
 ## 🎨 Customization
 
@@ -154,309 +116,106 @@ colors: {
 }
 ```
 
-The tokens are named `site.*`, not `dark.*`. They were renamed when the site moved to
-a light theme, so that the names do not contradict their values.
-
 ### Intro Splash
 
-`IntroSplash` shows an animated logo the first time the site loads **in a tab**, then
-fades out. It is skipped when:
+Shown once per tab, unless the visitor prefers reduced motion or there is no intro
+animation. Replay it with `sessionStorage.removeItem('sara-intro-seen')`; change it
+with `/set-site-identity`.
 
-- `sessionStorage` already holds the `sara-intro-seen` key, which is set as soon as the
-  intro starts. Reloading the same tab therefore does not replay it, while a new tab
-  does, because `sessionStorage` is scoped per tab and not shared across the browser
-- the visitor prefers reduced motion
+### Loop background
 
-To see it again in the same tab, clear the flag from the console:
-
-```js
-sessionStorage.removeItem('sara-intro-seen')
-```
-
-The gif URL is the `INTRO_GIF_URL` constant at the top of the component. It currently
-points at a placeholder hosted elsewhere; replace it with a file in `public/`.
+`LOOP_BACKGROUND` in `scripts/content/domain/mediaRules.ts` fills transparency in loops
+and must match `site.bg` in `tailwind.config.js`.
 
 ### Mobile Navigation
 
-Below the `md` breakpoint the inline header links are replaced by `FullscreenMenu`, a
-full-screen overlay opened by a `menu` / `close` trigger. Its state lives in `App`,
-because the overlay has to be a sibling of the header: nested inside it would inherit the
-header's stacking context and its blend mode.
+Below `md`, `FullscreenMenu` replaces the header links. Its state lives in `App`, since
+the overlay must be a sibling of the header to escape its stacking context.
 
 ## 📦 Deployment
 
-This application is deployed using **Netlify**.
+Netlify, configured in `netlify.toml`:
 
-## 🔌 Adding Work Item Types
+- Lint gates the build
+- Client-side routes fall back to `index.html`
+- Commits touching only `docs/`, `.claude/`, `scripts/` or Markdown skip the build
+- Deploy Previews cost no credits and show production content
 
-The application uses an extensible architecture for work item types, following the Strategy pattern and Open/Closed Principle. Currently supported types: `image`, `video`, and `gallery`.
+## 🔌 Adding a Media Kind
 
-### Adding a New Work Item Type
+1. Add the asset type to `MediaAsset` (`src/application/domain/MediaAsset.ts`).
+2. Add its stored shape, validation and mapping in `src/infrastructure/content/`.
+3. Add a component in `presentation/components/media/` and a case in `MediaView`.
+4. Teach the scripts its file extensions, an encoder and a role in `MediaPublisher`.
 
-To add a new work item type (e.g., audio, PDF, 3D model):
+## 📚 Managing Content
 
-**1. Update the Domain Model**
+Projects, sections, the hero and the intro live in **Netlify Blobs**; publishing needs
+no deploy.
 
-Add your new type to `src/application/domain/WorkItem.ts`:
+### With Claude Code skills
 
-```typescript
-export interface WorkItem {
-  // ... existing fields
-  type: 'image' | 'video' | 'gallery' | 'audio'; // Add your type
-  audioUrl?: string; // Add type-specific fields
-}
-```
+The skills talk in plain Spanish: drop a folder into the chat, answer, confirm.
 
-**2. Create Card Renderer**
+| Skill | Use it to |
+|---|---|
+| `/check-setup` | Check a computer is ready, once, before the first upload |
+| `/add-project` | Publish a project from a folder of images, videos and GIFs |
+| `/add-media` | Add pieces to an existing project |
+| `/edit-project` | Change texts, section, cover, order or alt texts, or take pieces out |
+| `/remove-project` | Take a project off the site |
+| `/set-section` | Create a section, or change its title, order, cover or hover loop |
+| `/set-site-identity` | Replace the hero image or the intro animation |
+| `/undo-last-change` | Undo the last change, whatever it was |
 
-Create `src/presentation/components/workItemCards/AudioItemCard.tsx`:
+Pieces appear in file name order (`2-…` before `10-…`). Every skill does a dry run
+first and publishes only after an explicit yes.
 
-```typescript
-import type { WorkItem } from '../../../application/domain/WorkItem';
-import type { IWorkItemCard } from './IWorkItemCard';
+### What happens to the files
 
-export class AudioItemCard implements IWorkItemCard {
-  renderMedia(workItem: WorkItem, isHovered: boolean): JSX.Element {
-    return (
-      <div className="absolute inset-0 flex items-center justify-center bg-site-surface">
-        <audio src={workItem.audioUrl} controls className="w-full px-8" />
-      </div>
-    );
-  }
-}
-```
+| Input | Output |
+|---|---|
+| Images (JPG, PNG, WebP, AVIF, TIFF) | AVIF + WebP at 640–3200 px, sRGB, no metadata, blurred placeholder |
+| Videos (MP4, MOV, M4V, WebM) | HLS in H.264 at 1080/720/480p, 4 s preview, poster; silent audio dropped |
+| Loops (GIFs, clips marked as loops) | One muted MP4, up to 1920 px and 16 MB |
+| Transparent GIFs | Filled, or an animated WebP when asked |
 
-**3. Create Detail Renderer**
+Originals are never uploaded. Keys are content hashes, so re-uploads are skipped and a
+failed run can be repeated.
 
-Create `src/presentation/components/workItemDetails/AudioItemDetail.tsx`:
+### How it is served
 
-```typescript
-import type { WorkItem } from '../../../application/domain/WorkItem';
-import type { IWorkItemDetail } from './IWorkItemDetail';
+| Store (eu-central-1) | Holds | Served at | Cache |
+|---|---|---|---|
+| `media` | Images, streams, loops | `/media/<key>` | One year, immutable |
+| `content` | `work-items.json`, `sections.json`, `site.json`, `last-change.json` | `/content/<key>` | CDN 60 s, browsers revalidate |
 
-export class AudioItemDetail implements IWorkItemDetail {
-  // Fills the framed, full-screen block at the top of the project page.
-  renderHeroMedia(workItem: WorkItem): JSX.Element {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-site-surface">
-        <audio src={workItem.audioUrl} controls className="w-full max-w-2xl" />
-      </div>
-    );
-  }
+Unreferenced media is deleted one change later (so undo works) and never within 24
+hours of upload.
 
-  // Anything revealed further down the page, or null when there is nothing more.
-  // Unlike the hero, this element carries its own sizing.
-  renderBodyMedia(): JSX.Element | null {
-    return null;
-  }
-}
-```
-
-**4. Register with Factories**
-
-Update `src/presentation/components/workItemCards/WorkItemCardFactory.ts`:
-
-```typescript
-import { AudioItemCard } from './AudioItemCard';
-
-export class WorkItemCardFactory {
-  private static renderers: Map<string, IWorkItemCard> = new Map([
-    ['video', new VideoItemCard()],
-    ['image', new ImageItemCard()],
-    ['gallery', new GalleryItemCard()],
-    ['audio', new AudioItemCard()], // Add this line
-  ]);
-  // ...
-}
-```
-
-Update `src/presentation/components/workItemDetails/WorkItemDetailFactory.ts` similarly.
-
-**5. Update Validation**
-
-Update `src/infrastructure/adapters/NetlifyBlobsWorkItemRepository.ts`:
-
-```typescript
-private isValidWorkItem(item: unknown): item is WorkItem {
-  // ... existing code
-  const baseValid = 
-    // ... existing checks
-    (workItem.type === 'image' || workItem.type === 'video' || 
-     workItem.type === 'gallery' || workItem.type === 'audio') && // Add type
-    // ... rest of validation
-  
-  // Add type-specific validation
-  if (workItem.type === 'audio') {
-    return typeof workItem.audioUrl === 'string';
-  }
-}
-```
-
-**6. Add Sample Data**
-
-Add a sample item to `src/infrastructure/adapters/MockWorkItemRepository.ts`:
-
-```typescript
-{
-  id: '6',
-  title: 'Sound Design Reel',
-  category: 'Audio',
-  description: 'A collection of sound design work...',
-  year: '2024',
-  type: 'audio',
-  audioUrl: 'https://example.com/audio.mp3',
-  tags: ['Sound Design', 'Audio'],
-}
-```
-
-That's it! The new type is now fully integrated with automatic routing, validation, and rendering.
-
-
-## 📚 Adding Content
-
-This application uses **Netlify Blobs** for content storage, providing a simple and efficient way to manage portfolio work items and videos.
-
-### Adding Videos and Work Items
-
-#### 1. Upload a Video to Netlify Blobs
-
-First, upload your video file to the `videos` store:
+### From the command line
 
 ```bash
-# Make sure you're in the project directory and logged into Netlify CLI
-netlify link
-
-# Upload a video (replace with your video path)
-netlify blobs:set videos your-video-name.mp4 ~/path/to/your-video.mp4
+npm run --silent content -- check-setup
+npm run --silent content -- list-projects
+npm run --silent content -- add-project --folder ./my-project --metadata ./project.json --dry-run
 ```
 
-#### 2. Update Work Items
+Run it without a command for the list; `cli.ts` documents every option. Output is
+JSON, with a stable error `code`.
 
-Work items are stored as JSON in the `work-items` store. To add or update work items:
+### Free plan limits
 
-**Step 1:** Download the current work items (if any exist):
-```bash
-netlify blobs:get work-items items.json > items.json
-```
-
-**Step 2:** Edit `items.json` and add your new work item following this structure:
-
-```json
-[
-  {
-    "id": "1",
-    "title": "Your Project Title",
-    "category": "Photography",
-    "description": "A detailed description of your project.\nYou can use \\n for line breaks.",
-    "year": "2025",
-    "type": "video",
-    "imageUrl": "",
-    "videoUrl": "https://yoursitename.netlify.app/.netlify/blobs/serve/videos/your-video-name.mp4",
-    "sectionId": "videoclips",
-    "tags": ["Tag1", "Tag2", "Tag3"]
-  }
-]
-```
-
-**Field Descriptions:**
-- `id`: Unique identifier (string)
-- `title`: Project title
-- `category`: Project category (e.g., Photography, Design, Video)
-- `description`: Full project description (use `\n` for line breaks)
-- `year`: Project year
-- `type`: **Required.** One of `image`, `video` or `gallery`. Decides which renderer is
-  used and which media field must be present. Items without it are rejected on load
-- `imageUrl`: Required for `image`. For `video` it is the poster, and it is also the still
-  shown for the project on its section page, so it is worth setting
-- `videoUrl`: Required for `video`. Full URL to your video in Netlify Blobs
-- `galleryImages`: Required for `gallery`. Array of image URLs
-- `sectionId`: Optional. Which section the project appears under, e.g. `videoclips`.
-  Must match a section `id` in `MockSectionRepository`. **A project without it appears
-  on no section page**, so it is effectively invisible unless linked directly
-- `gifUrl`: Optional. Animated preview, used instead of the still on section pages and
-  shown below the text on the project page. Intended for 3D work
-- `tags`: Array of tags for the project
-
-**Available section ids:** `3d-modeling`, `videoclips`, `black-and-white`,
-`exhibitions`, `awards-and-recognition`. They live in
-`src/infrastructure/adapters/MockSectionRepository.ts`, which is also where a section's
-title, order and cover media are set.
-
-**Step 3:** Upload the updated JSON file:
-```bash
-netlify blobs:set work-items items.json items.json
-```
-
-#### 3. Video URL Format
-
-Your video URL should follow this pattern:
-```
-https://[your-site-name].netlify.app/.netlify/blobs/serve/videos/[video-filename].mp4
-```
-
-Replace `[your-site-name]` with your Netlify site name and `[video-filename]` with the name you used when uploading.
-
-#### 4. Verify Your Changes
-
-After uploading, deploy your site or wait for the next build. Your new work items will appear automatically.
-
-### Managing Content via Netlify CLI
-
-**List all blobs in a store:**
-```bash
-netlify blobs:list videos
-netlify blobs:list work-items
-```
-
-**Delete a blob:**
-```bash
-netlify blobs:delete videos your-video-name.mp4
-netlify blobs:delete work-items items.json
-```
-
-**View a blob:**
-```bash
-netlify blobs:get work-items items.json
-```
-
-### Environment Variables
-
-The application requires the `NETLIFY_BLOB_ACCESS` environment variable to be set in your Netlify dashboard:
-
-1. Go to your Netlify site dashboard
-2. Navigate to **Site settings** → **Environment variables**
-3. Add `NETLIFY_BLOB_ACCESS` with your Netlify Blobs access token
-4. Get your token from: https://app.netlify.com/user/applications#personal-access-tokens
-
-### Alternative: API Integration
-
-If you prefer using a Headless CMS instead of Netlify Blobs, replace mock data in the Infrastructure layer (`MOCK_WORK_ITEMS`, `MOCK_ABOUT_CONTENT`) or connect to a Headless CMS:
-
-### API Integration
-Add the following environment variables to Netlify:
-- VITE_API_KEY: Your CMS/API key
-- VITE_API_URL: Your API endpoint URL
-
-And replace the mock functions in the Infrastructure layer with real API calls:
-
-```typescript
-async function getWorkItems(): Promise<WorkItem[]> {
-  const response = await fetch(`${API_URL}/work-items`, {
-    headers: {
-      'Authorization': `Bearer ${import.meta.env.VITE_API_KEY}`
-    }
-  });
-  return response.json();
-}
-```
+300 credits a month; the site pauses when they run out. Bandwidth costs 20 credits
+per GB (about 15 GB a month) and each production deploy 15. Enable credit usage
+notifications in Netlify.
 
 ## 🛠️ Technologies
 
-- **React 18**: Modern UI library with Hooks
-- **TypeScript 5**: Static typing and improved DX
-- **Tailwind CSS 3**: Utility-first CSS framework
-- **Vite 5**: Next-generation frontend tooling
-- **ESLint**: Code quality and consistency
+- React 18, TypeScript 5, Tailwind CSS 3, Vite 5
+- Netlify Edge Functions and Blobs
+- hls.js, sharp, ffmpeg
+- ESLint
 
 ## 📄 License
 

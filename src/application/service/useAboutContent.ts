@@ -23,6 +23,7 @@ export function useAboutContent(repository: AboutContentRepository) {
           setAboutContent(content);
         }
       } catch (err) {
+        console.error(err);
         if (isMounted) {
           setError(err instanceof Error ? err.message : 'Failed to fetch about content');
         }

@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
+import type { SiteIdentityRepository } from '../../infrastructure/ports/repositories';
+import { useSiteIdentity } from '../../application/service/useSiteIdentity';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { ResponsiveImage } from './media/ResponsiveImage';
 
-// TODO: replace with the final logo gif served from /public
-const INTRO_GIF_URL = 'https://media.giphy.com/media/3o6nVbF4uoHsV6Vqne/giphy.gif';
+const INTRO_SIZES = '70vw';
 
-/** How long the logo stays on screen once the gif is ready. */
+/** How long the logo stays on screen once the animation is ready. */
 const HOLD_MS = 2500;
 /** Duration of the fade out. Shared with the inline transition below. */
 const FADE_MS = 500;
-/** Upper bound on waiting for the gif, so a slow CDN cannot stall the splash. */
+/** Upper bound on waiting for the animation, so a slow CDN cannot stall the splash. */
 const MAX_LOAD_WAIT_MS = 3000;
 
 const SESSION_KEY = 'sara-intro-seen';
@@ -37,12 +39,19 @@ function shouldSkipIntro(): boolean {
  * Full-screen animated logo shown on the first visit of a browser session.
  * Fades out on its own, and can be dismissed early with a click or a key press.
  */
-export function IntroSplash() {
+interface IntroSplashProps {
+  repository: SiteIdentityRepository;
+}
+
+export function IntroSplash({ repository }: IntroSplashProps) {
   const [skipped] = useState(shouldSkipIntro);
   const [phase, setPhase] = useState<Phase>('visible');
-  const [isGifReady, setIsGifReady] = useState(false);
+  const [isIntroReady, setIsIntroReady] = useState(false);
+  const { siteIdentity, loading } = useSiteIdentity(repository);
+  const intro = siteIdentity?.intro;
 
-  const isOnScreen = !skipped && phase !== 'done';
+  const hasNoIntro = !loading && !intro;
+  const isOnScreen = !skipped && !hasNoIntro && phase !== 'done';
 
   // Flag the session as soon as the intro starts, so reloading mid-animation
   // does not replay it.
@@ -58,25 +67,25 @@ export function IntroSplash() {
     }
   }, [skipped]);
 
-  // Give up waiting for the gif after MAX_LOAD_WAIT_MS.
+  // Give up waiting for the animation after MAX_LOAD_WAIT_MS.
   useEffect(() => {
-    if (skipped || isGifReady) {
+    if (skipped || isIntroReady) {
       return undefined;
     }
 
-    const timer = window.setTimeout(() => setIsGifReady(true), MAX_LOAD_WAIT_MS);
+    const timer = window.setTimeout(() => setIsIntroReady(true), MAX_LOAD_WAIT_MS);
     return () => window.clearTimeout(timer);
-  }, [skipped, isGifReady]);
+  }, [skipped, isIntroReady]);
 
   // Hold the logo, then start fading.
   useEffect(() => {
-    if (skipped || !isGifReady || phase !== 'visible') {
+    if (skipped || !isIntroReady || phase !== 'visible') {
       return undefined;
     }
 
     const timer = window.setTimeout(() => setPhase('fading'), HOLD_MS);
     return () => window.clearTimeout(timer);
-  }, [skipped, isGifReady, phase]);
+  }, [skipped, isIntroReady, phase]);
 
   // Unmount once the fade is over.
   useEffect(() => {
@@ -122,13 +131,30 @@ export function IntroSplash() {
       // Inline so the fade always matches FADE_MS, which also drives the timer.
       style={{ transitionDuration: `${FADE_MS}ms` }}
     >
-      <img
-        src={INTRO_GIF_URL}
-        alt=""
-        className="max-h-[70vh] max-w-[70vw] object-contain"
-        onLoad={() => setIsGifReady(true)}
-        onError={() => setIsGifReady(true)}
-      />
+      {intro?.kind === 'loop' && (
+        <video
+          src={intro.url}
+          width={intro.width}
+          height={intro.height}
+          className="max-h-[70vh] max-w-[70vw] w-auto h-auto object-contain"
+          autoPlay
+          loop
+          muted
+          playsInline
+          onLoadedData={() => setIsIntroReady(true)}
+          onError={() => setIsIntroReady(true)}
+        />
+      )}
+      {intro?.kind === 'image' && (
+        <ResponsiveImage
+          image={intro}
+          sizes={INTRO_SIZES}
+          loading="eager"
+          isPriority
+          className="max-h-[70vh] max-w-[70vw] w-auto h-auto object-contain"
+          onSettled={() => setIsIntroReady(true)}
+        />
+      )}
     </div>
   );
 }

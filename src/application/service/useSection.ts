@@ -31,6 +31,7 @@ export function useSection(repository: SectionRepository, id: string | undefined
           setSection(found);
         }
       } catch (err) {
+        console.error(err);
         if (isMounted) {
           setError(err instanceof Error ? err.message : 'Failed to fetch section');
         }

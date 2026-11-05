@@ -7,6 +7,11 @@ import type {
   WorkItemRepository,
 } from '../../infrastructure/ports/repositories';
 import { ProjectRow } from './ProjectRow';
+import { ResponsiveImage } from './media/ResponsiveImage';
+import { LoadErrorMessage } from './LoadErrorMessage';
+
+/** Exported so the home cards can preload the same rendition. */
+export const SECTION_HEADER_SIZES = '(min-width: 768px) 70vw, 100vw';
 
 interface SectionPageProps {
   sectionRepository: SectionRepository;
@@ -33,7 +38,8 @@ export function SectionPage({ sectionRepository, workItemRepository }: SectionPa
     window.scrollTo(0, 0);
   }, [id]);
 
-  const loading = sectionLoading || itemsLoading;
+  // The header only needs the section; waiting for the work items would delay its image.
+  const loading = sectionLoading;
   const error = sectionError ?? itemsError;
 
   if (loading) {
@@ -51,7 +57,7 @@ export function SectionPage({ sectionRepository, workItemRepository }: SectionPa
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-500 font-light">Error: {error}</p>
+          <LoadErrorMessage />
         </div>
       </div>
     );
@@ -114,15 +120,20 @@ export function SectionPage({ sectionRepository, workItemRepository }: SectionPa
               {section.title}
             </h1>
 
-            <img
-              src={section.coverImageUrl}
+            <ResponsiveImage
+              image={section.cover}
+              sizes={SECTION_HEADER_SIZES}
               alt={section.title}
+              loading="eager"
+              isPriority
               className="w-full aspect-[4/3] object-cover"
             />
           </div>
         </header>
 
-        {projects.length === 0 ? (
+        {itemsLoading ? (
+          <div className="w-8 h-8 border-2 border-site-text-muted border-t-transparent rounded-full animate-spin mx-auto" />
+        ) : projects.length === 0 ? (
           <p className="text-site-text-secondary font-light text-lg">
             No projects in this section yet.
           </p>

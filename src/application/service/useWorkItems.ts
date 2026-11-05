@@ -23,6 +23,7 @@ export function useWorkItems(repository: WorkItemRepository) {
           setWorkItems(items);
         }
       } catch (err) {
+        console.error(err);
         if (isMounted) {
           setError(err instanceof Error ? err.message : 'Failed to fetch work items');
         }

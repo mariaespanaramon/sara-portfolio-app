@@ -1,0 +1,14 @@
+[build]
+  command = "npm run lint && npm run build"
+  publish = "dist"
+  # Skips builds for commits touching only docs, skills, scripts or Markdown; equal refs always build.
+  ignore = """
+    [ "$CACHED_COMMIT_REF" != "$COMMIT_REF" ] && \
+    git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- . \
+      ':(exclude)docs' ':(exclude).claude' ':(exclude)scripts' ':(exclude)*.md'
+  """
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

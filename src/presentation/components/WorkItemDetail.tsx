@@ -2,9 +2,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useWorkItems } from '../../application/service/useWorkItems';
 import type { WorkItemRepository } from '../../infrastructure/ports/repositories';
-import { WorkItemDetailFactory } from './workItemDetails/WorkItemDetailFactory';
+import { MediaView } from './media/MediaView';
+import { MediaGallery } from './MediaGallery';
 import { toUrlId } from '../../application/domain/urlId';
 import { RevealOnScroll } from './RevealOnScroll';
+import { LoadErrorMessage } from './LoadErrorMessage';
+
+const HERO_SIZES = '100vw';
 
 interface WorkItemDetailProps {
   repository: WorkItemRepository;
@@ -69,7 +73,7 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-500 font-light">Error: {error}</p>
+          <LoadErrorMessage />
         </div>
       </div>
     );
@@ -94,8 +98,9 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
     );
   }
 
-  const renderer = WorkItemDetailFactory.getRenderer(workItem.type);
-  const bodyMedia = renderer.renderBodyMedia(workItem);
+  const [heroMedia] = workItem.media;
+  // A single piece is already the hero.
+  const hasGallery = workItem.media.length > 1;
 
   return (
     <div className="min-h-screen">
@@ -104,7 +109,14 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
       {/* Media full screen. The section's padding is the frame. */}
       <section className="h-screen w-full p-4 md:p-8">
         <div className="w-full h-full overflow-hidden border border-site-border bg-site-surface">
-          {renderer.renderHeroMedia(workItem)}
+          <MediaView
+            asset={heroMedia}
+            sizes={HERO_SIZES}
+            alt={workItem.title}
+            loading="eager"
+            isPriority
+            className="w-full h-full object-cover"
+          />
         </div>
       </section>
 
@@ -128,7 +140,13 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
             </p>
           </RevealOnScroll>
 
-          {bodyMedia && <RevealOnScroll>{bodyMedia}</RevealOnScroll>}
+          {hasGallery && (
+            <RevealOnScroll>
+              <div className="aspect-video overflow-hidden border border-site-border bg-site-surface">
+                <MediaGallery media={workItem.media} title={workItem.title} />
+              </div>
+            </RevealOnScroll>
+          )}
 
           <RevealOnScroll>
             <div className="flex flex-wrap gap-3">

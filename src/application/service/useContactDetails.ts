@@ -23,6 +23,7 @@ export function useContactDetails(repository: ContactDetailsRepository) {
           setContactDetails(details);
         }
       } catch (err) {
+        console.error(err);
         if (isMounted) {
           setError(err instanceof Error ? err.message : 'Failed to fetch contact details');
         }

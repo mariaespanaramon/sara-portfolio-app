@@ -2,6 +2,7 @@ import type { WorkItem } from '../../application/domain/WorkItem';
 import type { Section } from '../../application/domain/Section';
 import type { AboutContent } from '../../application/domain/AboutContent';
 import type { ContactDetails } from '../../application/domain/ContactDetails';
+import type { SiteIdentity } from '../../application/domain/SiteIdentity';
 
 /**
  * Port (Interface) for WorkItem repository
@@ -34,4 +35,8 @@ export interface AboutContentRepository {
  */
 export interface ContactDetailsRepository {
   get(): Promise<ContactDetails>;
+}
+
+export interface SiteIdentityRepository {
+  get(): Promise<SiteIdentity>;
 }

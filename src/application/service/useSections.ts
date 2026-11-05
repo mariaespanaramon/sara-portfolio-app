@@ -23,6 +23,7 @@ export function useSections(repository: SectionRepository) {
           setSections(items);
         }
       } catch (err) {
+        console.error(err);
         if (isMounted) {
           setError(err instanceof Error ? err.message : 'Failed to fetch sections');
         }
