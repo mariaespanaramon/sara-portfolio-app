@@ -1,4 +1,4 @@
-import type { ImageAsset, ImageFormat, ImageSource } from '../../../application/domain/Media';
+import type { ImageAsset, ImageFormat, ImageSource } from '../../../application/domain/MediaAsset';
 
 /** Most efficient first. The last format present is the `<img>` fallback. */
 const FORMAT_PREFERENCE: ImageFormat[] = ['avif', 'webp', 'jpeg'];
@@ -15,7 +15,6 @@ export interface SourceSet {
   srcSet: string;
 }
 
-/** One `srcset` per format the image is available in, most efficient first. */
 export function sourceSetsOf(image: ImageAsset): SourceSet[] {
   return FORMAT_PREFERENCE.flatMap((format) => {
     const sources = image.sources
@@ -36,11 +35,7 @@ export function sourceSetsOf(image: ImageAsset): SourceSet[] {
   });
 }
 
-/**
- * Picks a single rendition, for places that take one URL only such as a video
- * poster. Prefers formats every browser decodes, then the smallest width that is
- * at least `minWidth`.
- */
+/** For single-URL slots such as a video poster: prefers formats every browser decodes. */
 export function pickSource(image: ImageAsset, minWidth: number): ImageSource | undefined {
   const universal = image.sources.filter((source) => source.format !== 'avif');
   const candidates = (universal.length > 0 ? universal : image.sources)

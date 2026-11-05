@@ -1,18 +1,9 @@
-import type { ImageAsset, LoopAsset, VideoAsset } from '../../application/domain/Media';
+import type { ImageAsset, LoopAsset, VideoAsset } from '../../application/domain/MediaAsset';
 
-/**
- * Builders for the placeholder media used by the mock repositories.
- *
- * Pexels resizes on the fly, so a placeholder can offer several widths the same
- * way real content does and exercise the responsive image path.
- */
-
+// Pexels resizes on the fly, so placeholders exercise the responsive image path.
 const PLACEHOLDER_WIDTHS = [640, 1024, 1600];
 
-/**
- * @param photoId - Numeric id of a Pexels photo.
- * @param aspect - Width over height of the crop.
- */
+/** @param aspect - Width over height of the crop. */
 export function pexelsImage(photoId: number, aspect: number): ImageAsset {
   const largest = PLACEHOLDER_WIDTHS[PLACEHOLDER_WIDTHS.length - 1];
 

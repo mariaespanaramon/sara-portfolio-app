@@ -11,14 +11,7 @@ function invalid(problem: string): never {
   throw new ContentError('INVALID_METADATA', `Invalid metadata: ${problem}`, { problems: [problem] });
 }
 
-/**
- * Use case: replace the hero image or the intro splash animation.
- *
- * The hero must be an image. The intro can be an image, a video or a GIF; moving
- * ones become a loop, or stay an animated image when their transparency must
- * survive, which a logo over the page usually needs.
- */
-export class SetSiteMedia {
+export class SetSiteIdentity {
   private readonly deps: MediaPublisherDependencies & { content: ContentStore };
   private readonly publisher: MediaPublisher;
 

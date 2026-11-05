@@ -8,10 +8,7 @@ import type {
 } from '../application/ports.ts';
 import type { NetlifyCredentials } from './netlifyCredentials.ts';
 
-/**
- * `region` is honoured by the client at runtime, but this version's types only
- * declare it for deploy stores.
- */
+// The client honours `region` for site stores, but these types only declare it for deploy stores.
 type SiteStoreOptions = Parameters<typeof getStore>[0] & { name: string; region: string };
 
 function openStore(name: string, credentials: NetlifyCredentials) {
@@ -19,15 +16,10 @@ function openStore(name: string, credentials: NetlifyCredentials) {
   return getStore(options);
 }
 
-/** Copies into a standalone ArrayBuffer, which is what the client accepts. */
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
   return bytes.slice().buffer as ArrayBuffer;
 }
 
-/**
- * Adapter: MediaStore over the `media` blob store. Each blob carries the content
- * type and size the media Edge Function serves it with.
- */
 export class NetlifyBlobsMediaStore implements MediaStore {
   private readonly store;
 
@@ -62,7 +54,6 @@ export class NetlifyBlobsMediaStore implements MediaStore {
 
 const JSON_CONTENT_TYPE = 'application/json; charset=utf-8';
 
-/** Adapter: ContentStore over the `content` blob store. */
 export class NetlifyBlobsContentStore implements ContentStore {
   private readonly store;
 
@@ -71,7 +62,6 @@ export class NetlifyBlobsContentStore implements ContentStore {
   }
 
   async read(key: string): Promise<StoredDocument | null> {
-    // Strong consistency: a document read just to change it must be the latest.
     const result = await this.store.getWithMetadata(key, { type: 'json', consistency: 'strong' });
     if (!result || !result.etag) {
       return null;

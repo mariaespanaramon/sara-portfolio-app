@@ -11,13 +11,6 @@ import {
   type WorkItemsDocument,
 } from './contentSchema.ts';
 
-/**
- * Runtime validation of the stored content documents.
- *
- * They come from outside the bundle, so their shape cannot be trusted at compile
- * time. Each check reports the path of the offending field, which turns a broken
- * upload into an error that says what to fix.
- */
 
 export class InvalidContentError extends Error {
   constructor(path: string, expected: string) {

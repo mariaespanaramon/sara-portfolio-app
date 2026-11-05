@@ -3,13 +3,9 @@ import { parseSectionsDocument, parseSiteDocument, parseWorkItemsDocument } from
 import { mediaKeysOf, readDocument, readLastChange, type Documents } from './contentDocuments.ts';
 import type { ContentStore, MediaStore } from './ports.ts';
 
-/**
- * Media younger than this is never deleted: an upload in progress elsewhere
- * stores its files before the document that references them.
- */
+// An upload in progress stores its files before the document that references them.
 const GRACE_HOURS = 24;
 
-/** Only media laid out by the scripts is ever touched. */
 const MANAGED_PREFIXES = /^(images|videos|loops)\/[^/]+\//;
 
 function mediaOf(documents: Partial<Documents>): StoredMedia[] {
@@ -27,11 +23,7 @@ const PARSERS = {
   site: parseSiteDocument,
 } as const;
 
-/**
- * Deletes media nothing references any more: not the current documents, and
- * not the version the last change replaced, which undo may still bring back.
- * Runs after every change, so orphans go one change later at most.
- */
+/** Keeps what the last change replaced too, since undo may bring it back. */
 export async function cleanMedia({ media, content }: { media: MediaStore; content: ContentStore }) {
   const [workItems, sections, site, lastChange] = await Promise.all([
     readDocument(content, 'workItems'),
@@ -47,7 +39,7 @@ export async function cleanMedia({ media, content }: { media: MediaStore; conten
   };
   const previous: Partial<Documents> = {};
   if (lastChange?.before) {
-    // A backup that no longer parses keeps everything, rather than risk deleting.
+    // Rather keep everything than risk deleting what an unreadable backup needs.
     try {
       Object.assign(previous, { [lastChange.document]: PARSERS[lastChange.document](lastChange.before) });
     } catch {

@@ -19,22 +19,14 @@ import type {
   VideoEncoder,
 } from './ports.ts';
 
-/** Below these widths a piece starts to look soft on large, high density screens. */
 const SOFT_IMAGE_WIDTH = 1600;
 const SOFT_VIDEO_WIDTH = 1280;
 
-/** Loops this long get heavy, since a loop is a single file played in full. */
 const LONG_LOOP_SECONDS = 30;
 
 const IMAGE_CONTENT_TYPES = { avif: 'image/avif', webp: 'image/webp' } as const;
 
-/**
- * How a piece is published:
- * - image: responsive AVIF and WebP renditions.
- * - video: adaptive stream with controls, poster and a muted preview.
- * - loop: a muted MP4 that plays on its own, for GIFs and short clips.
- * - animation: an animated WebP, only for GIFs whose transparency must survive.
- */
+/** `animation` is an animated WebP, only for GIFs whose transparency must survive. */
 export type PieceRole = 'image' | 'video' | 'loop' | 'animation';
 
 export interface PlannedPiece {
@@ -42,13 +34,9 @@ export interface PlannedPiece {
   role: PieceRole;
   width: number;
   height: number;
-  /** Videos and loops. */
   durationSeconds?: number;
-  /** Video files: whether there is sound, a silent track counting as none. */
   hasSound?: boolean;
-  /** Video files: what the person would most likely choose, for the skill to propose. */
   suggestedRole?: MovingRole;
-  /** GIFs: whether they have transparent areas. */
   isTransparent?: boolean;
 }
 
@@ -68,7 +56,6 @@ export function emptyTotals(): UploadTotals {
   return { filesUploaded: 0, filesAlreadyStored: 0, bytesUploaded: 0 };
 }
 
-/** A file checked and ready to publish. */
 export interface Piece {
   source: SourceFile;
   kind: SourceKind;
@@ -84,14 +71,7 @@ export interface MediaPublisherDependencies {
   hasher: Hasher;
 }
 
-/**
- * Application service shared by every use case that publishes files: checks
- * them, works out how each is published, encodes them and uploads the result.
- *
- * Uploads are idempotent: keys derive from the source bytes and the encoder
- * version, and files already stored are skipped, so a run that fails half way
- * can simply be repeated.
- */
+/** Keys derive from the source bytes and encoder version, so a failed run can be repeated. */
 export class MediaPublisher {
   private readonly deps: MediaPublisherDependencies;
 
@@ -99,7 +79,6 @@ export class MediaPublisher {
     this.deps = deps;
   }
 
-  /** Every publishable file in a folder, in display order. */
   async filesIn(folder: string): Promise<SourceFile[]> {
     const listed = await this.deps.folders.list(folder);
     if (!listed) {
@@ -115,7 +94,6 @@ export class MediaPublisher {
     return files.sort((a, b) => byDisplayOrder(a.name, b.name));
   }
 
-  /** A single publishable file. */
   async file(path: string): Promise<SourceFile> {
     const file = await this.deps.folders.file(path);
     if (!file) {
@@ -125,7 +103,6 @@ export class MediaPublisher {
     return file;
   }
 
-  /** Inspects the files and decides how each is published, without encoding anything. */
   async plan(files: SourceFile[], options: MediaOptions): Promise<{ pieces: Piece[]; warnings: MediaWarning[] }> {
     this.checkFileReferences(files, options);
 
@@ -180,7 +157,6 @@ export class MediaPublisher {
     }
   }
 
-  /** `loops` and `keepTransparency` may only name files of the right kind. */
   private checkFileReferences(files: SourceFile[], options: MediaOptions): void {
     const kindOf = new Map(files.map((file) => [file.name, classify(file.name).kind]));
     const problems = [
@@ -310,7 +286,7 @@ export class MediaPublisher {
     const video = await this.encoded(source, () => videos.encodeVideo(source.path));
 
     try {
-      // Segments before playlists: a playlist must never point at a missing file.
+      // Segments first: a playlist must never point at a missing file.
       const playlists = video.stream.filter((output) => output.name.endsWith('.m3u8'));
       const rest = video.stream.filter((output) => !output.name.endsWith('.m3u8'));
       for (const output of [...rest, ...playlists]) {

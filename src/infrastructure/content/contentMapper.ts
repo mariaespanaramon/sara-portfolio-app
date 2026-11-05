@@ -1,7 +1,7 @@
-import type { ImageAsset, LoopAsset, MediaAsset, VideoAsset } from '../../application/domain/Media';
+import type { ImageAsset, LoopAsset, MediaAsset, VideoAsset } from '../../application/domain/MediaAsset';
 import type { WorkItem } from '../../application/domain/WorkItem';
 import type { Section } from '../../application/domain/Section';
-import type { SiteMedia } from '../../application/domain/SiteMedia';
+import type { SiteIdentity } from '../../application/domain/SiteIdentity';
 import type {
   StoredImage,
   StoredLoop,
@@ -12,14 +12,8 @@ import type {
   StoredWorkItem,
 } from './contentSchema';
 
-/**
- * Maps stored content to domain objects, resolving media keys to URLs.
- *
- * This is the only place that knows how keys in the media store turn into
- * addresses, so it must stay in step with the layout the content scripts write.
- */
+/** Must match the key layout the content scripts write. */
 export class ContentMapper {
-  /** @param mediaBaseUrl - Where the media store is served, without a trailing slash. */
   constructor(private readonly mediaBaseUrl: string) {}
 
   toWorkItem(stored: StoredWorkItem): WorkItem {
@@ -48,7 +42,7 @@ export class ContentMapper {
     };
   }
 
-  toSiteMedia(stored: SiteDocument): SiteMedia {
+  toSiteIdentity(stored: SiteDocument): SiteIdentity {
     return {
       hero: stored.hero && this.toImage(stored.hero),
       intro:

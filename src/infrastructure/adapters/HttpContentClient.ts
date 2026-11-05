@@ -1,17 +1,7 @@
-/**
- * Fetches content documents over HTTP, once per page load.
- *
- * A document that does not exist yet resolves to null rather than failing: a
- * fresh site has no content, and that is not an error.
- *
- * Several screens ask for the same document (a section page and a project page
- * both need every work item), so the in-flight request is shared and its result
- * kept. A failed request is forgotten, so the next caller retries.
- */
+/** Fetches each document once per page load; a missing document is null, not an error. */
 export class HttpContentClient {
   private readonly documents = new Map<string, Promise<unknown | null>>();
 
-  /** @param contentBaseUrl - Where the content store is served, without a trailing slash. */
   constructor(private readonly contentBaseUrl: string) {}
 
   get(key: string): Promise<unknown | null> {

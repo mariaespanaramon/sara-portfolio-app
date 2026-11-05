@@ -5,10 +5,6 @@ import { parseSectionsDocument } from '../content/contentValidation';
 import type { ContentMapper } from '../content/contentMapper';
 import type { HttpContentClient } from './HttpContentClient';
 
-/**
- * Adapter for Section repository, reading the sections document served from the
- * content store.
- */
 export class HttpSectionRepository implements SectionRepository {
   constructor(
     private readonly client: HttpContentClient,

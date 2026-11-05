@@ -7,7 +7,6 @@ import { LoopVideo } from './media/LoopVideo';
 import { preloadImage } from './media/preloadImage';
 import { SECTION_HEADER_SIZES } from './SectionPage';
 
-/** Three columns from `md` up, one below. */
 const SECTION_CARD_SIZES = '(min-width: 768px) 33vw, 100vw';
 
 interface SectionCardProps {
@@ -30,8 +29,7 @@ export function SectionCard({ section }: SectionCardProps) {
   const canPlayOnHover = !isMobile;
   const isPlaying = canPlayOnHover && isHovered;
 
-  // Hovering or touching a card is a strong hint the section is next, so its
-  // header image starts downloading before the click.
+  // A hover or touch is a strong hint the section is next.
   const preloadSectionHeader = () => {
     preloadImage(section.cover, SECTION_HEADER_SIZES);
   };
@@ -88,7 +86,7 @@ export function SectionCard({ section }: SectionCardProps) {
         className="absolute inset-0 w-full h-full object-cover"
       />
 
-      {/* Hover loop layered over the still. It downloads nothing until first hovered. */}
+      {/* Hover media layered over the still. */}
       {section.hover && (
         <LoopVideo
           loop={section.hover}

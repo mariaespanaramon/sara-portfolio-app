@@ -1,13 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import type { WorkItem } from '../../application/domain/WorkItem';
 import { toUrlId } from '../../application/domain/urlId';
-import { stillOf } from '../../application/domain/Media';
+import { stillOf } from '../../application/domain/MediaAsset';
 import { ResponsiveImage } from './media/ResponsiveImage';
 import { LoopVideo } from './media/LoopVideo';
 import { previewLoopOf } from './media/previewLoop';
 import { useInView } from '../hooks/useInView';
 
-/** Half the container from `md` up, where media and text sit side by side. */
 const ROW_MEDIA_SIZES = '(min-width: 768px) 50vw, 100vw';
 
 interface ProjectRowProps {
@@ -51,11 +50,7 @@ export function ProjectRow({ item, index }: ProjectRowProps) {
       {/* Media. On mobile it always comes first, whatever the row's parity. */}
       <div className={isReversed ? 'md:order-2' : 'md:order-1'}>
         <div ref={mediaRef} className="overflow-hidden bg-site-surface aspect-[4/3]">
-          {/*
-            Rows never play a video with sound: that happens on the project's own
-            page. A loop cover, or a video's short muted preview, plays while the
-            row is in view; everything else shows its still.
-          */}
+          {/* Rows never play sound: only loops and muted previews, while in view. */}
           {previewLoop ? (
             <LoopVideo
               loop={previewLoop}

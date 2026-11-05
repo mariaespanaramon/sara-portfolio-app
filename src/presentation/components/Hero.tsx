@@ -1,21 +1,21 @@
-import type { SiteMediaRepository } from '../../infrastructure/ports/repositories';
-import { useSiteMedia } from '../../application/service/useSiteMedia';
+import type { SiteIdentityRepository } from '../../infrastructure/ports/repositories';
+import { useSiteIdentity } from '../../application/service/useSiteIdentity';
 import { ResponsiveImage } from './media/ResponsiveImage';
 
 interface HeroProps {
-  repository: SiteMediaRepository;
+  repository: SiteIdentityRepository;
 }
 
 /**
  * Hero section component
  */
 export function Hero({ repository }: HeroProps) {
-  const { siteMedia } = useSiteMedia(repository);
-  const image = siteMedia?.hero;
+  const { siteIdentity } = useSiteIdentity(repository);
+  const image = siteIdentity?.hero;
 
   return (
     <section className="relative min-h-screen flex items-center justify-center px-6 lg:px-12">
-      {/* Background image. The surface colour holds its place until it arrives. */}
+      {/* Background image */}
       <div className="absolute inset-0 z-0 bg-site-surface">
         {image && (
           <ResponsiveImage

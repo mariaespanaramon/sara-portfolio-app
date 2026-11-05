@@ -22,7 +22,6 @@ import type { ContentStore } from './ports.ts';
 export interface AddProjectInput {
   folder: string;
   draft: ProjectDraft;
-  /** Check everything and report the plan, without encoding or uploading. */
   dryRun: boolean;
 }
 
@@ -30,11 +29,9 @@ export type Warning = MediaWarning | { code: 'NO_SECTIONS_YET'; section: string 
 
 export interface AddProjectResult {
   id: string;
-  /** Where the project page will live on the site. */
   path: string;
   pieces: (PlannedPiece & { isCover: boolean })[];
   warnings: Warning[];
-  /** Only after a real run. */
   upload?: UploadTotals;
 }
 
@@ -42,12 +39,7 @@ interface Dependencies extends MediaPublisherDependencies {
   content: ContentStore;
 }
 
-/**
- * Use case: publish a new project from a folder of files and its texts.
- *
- * Media is uploaded before the project is added to the work items document, so
- * the site never lists a project whose files are not there yet.
- */
+/** Media goes up before the document, so the site never lists a project missing files. */
 export class AddProject {
   private readonly deps: Dependencies;
   private readonly publisher: MediaPublisher;
@@ -94,7 +86,7 @@ export class AddProject {
     };
 
     await updateWorkItems(this.deps.content, `add project "${draft.title}"`, (document) => {
-      // Checked again here: someone may have added it since the first check.
+      // Someone may have added it since the first check.
       assertTitleFree(document, draft.title);
       return { ...document, items: [...document.items, item] };
     });

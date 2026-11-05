@@ -5,10 +5,6 @@ import { parseWorkItemsDocument } from '../content/contentValidation';
 import type { ContentMapper } from '../content/contentMapper';
 import type { HttpContentClient } from './HttpContentClient';
 
-/**
- * Adapter for WorkItem repository, reading the work items document served from
- * the content store.
- */
 export class HttpWorkItemRepository implements WorkItemRepository {
   constructor(
     private readonly client: HttpContentClient,

@@ -10,7 +10,6 @@ import {
 } from './MediaPublisher.ts';
 import type { ContentStore } from './ports.ts';
 
-/** Use case: add pieces from a folder to an existing project. */
 export class AddMedia {
   private readonly deps: MediaPublisherDependencies & { content: ContentStore };
   private readonly publisher: MediaPublisher;
@@ -55,7 +54,6 @@ export class AddMedia {
       const at = Math.min(position - 1, current.media.length);
       const coverIndex = current.coverIndex ?? 0;
       const media = [...current.media.slice(0, at), ...added, ...current.media.slice(at)];
-      // The cover is the same piece as before, wherever it moved to.
       const movedCover = coverIndex >= at ? coverIndex + added.length : coverIndex;
       const updated = { ...current, media, ...(movedCover === 0 ? { coverIndex: undefined } : { coverIndex: movedCover }) };
       return { ...document, items: document.items.map((item) => (item.id === id ? updated : item)) };

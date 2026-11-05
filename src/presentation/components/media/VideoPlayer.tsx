@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import type { VideoAsset } from '../../../application/domain/Media';
+import type { VideoAsset } from '../../../application/domain/MediaAsset';
 import { pickSource } from './imageSources';
 
-/** Players usually fill most of the screen, so the poster is taken large. */
 const POSTER_MIN_WIDTH = 1600;
 
 const HLS_MIME_TYPE = 'application/vnd.apple.mpegurl';
@@ -14,13 +13,7 @@ interface VideoPlayerProps {
 
 type Teardown = () => void;
 
-/**
- * Connects the element to the video's stream and starts playback.
- *
- * Safari plays HLS natively. Other browsers get hls.js, imported only now: it is
- * a sizeable library, and most visits never press play. Progressive files such
- * as the mocks' MP4s are set directly.
- */
+/** Safari plays HLS natively; elsewhere hls.js is imported only once play is pressed. */
 async function startPlayback(element: HTMLVideoElement, url: string): Promise<Teardown> {
   const isStream = url.endsWith('.m3u8');
 
@@ -38,7 +31,6 @@ async function startPlayback(element: HTMLVideoElement, url: string): Promise<Te
     return () => {};
   }
 
-  // Never fetch a rendition larger than the player shows.
   const hls = new Hls({ capLevelToPlayerSize: true });
   hls.on(Hls.Events.MANIFEST_PARSED, () => {
     element.play().catch(() => {});
@@ -49,14 +41,7 @@ async function startPlayback(element: HTMLVideoElement, url: string): Promise<Te
   return () => hls.destroy();
 }
 
-/**
- * A video with native controls.
- *
- * Until the visitor presses play, only the poster loads: there is no source on
- * the element at all, which also keeps every browser from preloading. A play
- * button of its own stands in for the native one meanwhile, since browsers
- * disagree on how controls behave on an element without a source.
- */
+/** No source until play: browsers disagree on controls without one, hence a play button of its own. */
 export function VideoPlayer({ video, className }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const teardownRef = useRef<Teardown>();

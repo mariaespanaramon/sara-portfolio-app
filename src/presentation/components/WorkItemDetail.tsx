@@ -8,7 +8,6 @@ import { toUrlId } from '../../application/domain/urlId';
 import { RevealOnScroll } from './RevealOnScroll';
 import { LoadErrorMessage } from './LoadErrorMessage';
 
-/** The hero fills the viewport, less its frame. */
 const HERO_SIZES = '100vw';
 
 interface WorkItemDetailProps {
@@ -100,7 +99,7 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
   }
 
   const [heroMedia] = workItem.media;
-  // A single piece is already the hero; a gallery of one would add nothing.
+  // A single piece is already the hero.
   const hasGallery = workItem.media.length > 1;
 
   return (

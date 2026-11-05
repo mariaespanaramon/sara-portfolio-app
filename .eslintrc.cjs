@@ -1,8 +1,3 @@
-/**
- * ESLint configuration. The app runs in the browser; the content scripts run on
- * Node and the media Edge Function on Netlify's Deno runtime, both with
- * standard Web APIs.
- */
 module.exports = {
   root: true,
   env: { browser: true, es2022: true },

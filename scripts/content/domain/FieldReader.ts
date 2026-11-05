@@ -3,10 +3,7 @@ import type { MediaOptions } from './ProjectDraft.ts';
 
 type Json = Record<string, unknown>;
 
-/**
- * Reads optional and required fields off a JSON object, collecting every
- * problem so they can all be reported, and fixed, at once.
- */
+/** Collects every problem, so they can all be fixed at once. */
 export class FieldReader {
   readonly problems: string[] = [];
   private readonly json: Json;

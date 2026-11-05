@@ -125,7 +125,7 @@ Every image on the site lives in Blobs, including the ones that are not
 project content. They are described in `site.json`:
 
 ```ts
-interface SiteMedia {
+interface SiteIdentity {
   hero: ImageAsset;
   intro: LoopAsset;
 }
@@ -219,7 +219,7 @@ use them later without a programming background:
 | `/edit-project` | A project id | Changes metadata, reorders pieces or picks a different cover |
 | `/remove-project` | A project id, optionally specific pieces | Removes the item or pieces and deletes blobs nothing else references |
 | `/set-section` | A section id plus title, order, cover image and optional hover video or GIF | Creates the section or changes any of those |
-| `/set-site-media` | `hero` or `intro` plus a file | Replaces the hero image or the intro splash loop |
+| `/set-site-identity` | `hero` or `intro` plus a file | Replaces the hero image or the intro splash loop |
 
 ## Step by step
 
@@ -265,7 +265,7 @@ steps 2 and 3.
       `NetlifyBlobSource` adapter, `serveBlob` (ETag/304, small-file `Range`,
       content types, cache headers) and the route entry for `/media/*` and
       `/content/*` with `cache: "manual"`.
-- [x] Domain: `Media.ts` (`ImageAsset`, `VideoAsset`, `LoopAsset`), plus the
+- [x] Domain: `MediaAsset.ts` (`ImageAsset`, `VideoAsset`, `LoopAsset`), plus the
       `WorkItem` (`cover` and `media[]`) and `Section` (`cover` and `hover`)
       changes. Assets carry resolved URLs; keys stay in infrastructure.
 - [x] Infrastructure: `content/contentSchema.ts` (stored format, shared with
@@ -400,18 +400,18 @@ steps 2 and 3.
       (texts, section, cover, order, removing pieces and alt texts by position;
       a new title moves the page) and `SetSection` (create with title, order and
       cover, or change any of them; the hover is always a loop), plus
-      `SetSiteMedia` (the hero is an image; the intro is an image, a loop, or an
+      `SetSiteIdentity` (the hero is an image; the intro is an image, a loop, or an
       animation kept transparent).
 - [x] `check-setup` checks Node, ffmpeg, ffprobe, sharp, the Netlify link and
       login, and Blobs access, reporting every item.
-- [x] `site.json` in the schema; the `SiteMedia` domain type,
-      `SiteMediaRepository`, the HTTP and mock adapters and `useSiteMedia`. The
+- [x] `site.json` in the schema; the `SiteIdentity` domain type,
+      `SiteIdentityRepository`, the HTTP and mock adapters and `useSiteIdentity`. The
       hero and the intro splash read it, the intro waits for a loop or image to
       be ready, and a site without an intro has no splash. `site.json` is
       preloaded too.
 - [x] Skills: `/add-media`, `/edit-project`, `/remove-project`,
       `/undo-last-change`, `/set-section` (renamed from `/set-section-cover`,
-      since it also creates sections), `/set-site-media` and `/check-setup`.
+      since it also creates sections), `/set-site-identity` and `/check-setup`.
       They share the error table in `/add-project`.
 - [x] 21 tests with in-memory adapters.
 - [x] Removed the "Mixed Media Test" sample with `remove-project`.

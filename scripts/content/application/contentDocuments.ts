@@ -16,12 +16,6 @@ import { toUrlId } from '../../../src/application/domain/urlId.ts';
 import { ContentError } from '../domain/ContentError.ts';
 import type { ContentStore } from './ports.ts';
 
-/**
- * The content documents, and the one record of the last change made to any of
- * them, which is what undo restores and what keeps media from being cleaned up
- * while an undo could still need it.
- */
-
 export interface Documents {
   workItems: WorkItemsDocument;
   sections: SectionsDocument;
@@ -58,10 +52,8 @@ export const LAST_CHANGE_KEY = 'last-change.json';
 
 export interface LastChange {
   document: DocumentName;
-  /** What was done, in a few words, for the undo skill to name it. */
   description: string;
   changedAt: string;
-  /** The document as it was before. Null when it did not exist yet. */
   before: unknown | null;
 }
 
@@ -76,7 +68,6 @@ function parseOrFail<T>(parse: (value: unknown) => T, value: unknown, key: strin
   }
 }
 
-/** Null when the document does not exist yet. */
 export async function readDocument<Name extends DocumentName>(
   store: ContentStore,
   name: Name
@@ -99,15 +90,7 @@ export async function readLastChange(store: ContentStore): Promise<LastChange | 
   return stored ? (stored.data as LastChange) : null;
 }
 
-/**
- * Applies a change to a document without losing anyone else's.
- *
- * The write only lands if the document is still the version that was read; if
- * another change got there first, this one is reapplied on top of it a few
- * times before giving up. The result is validated with the same rules the site
- * uses before it is written, and the version replaced is recorded as the last
- * change, for undo.
- */
+/** Retries when another change lands first, and records the replaced version for undo. */
 export async function updateDocument<Name extends DocumentName>(
   store: ContentStore,
   name: Name,
@@ -146,7 +129,6 @@ export async function updateDocument<Name extends DocumentName>(
   );
 }
 
-/** Same as updateDocument for the work items, the most common case. */
 export function updateWorkItems(
   store: ContentStore,
   description: string,
@@ -155,10 +137,7 @@ export function updateWorkItems(
   return updateDocument(store, 'workItems', description, change);
 }
 
-/**
- * Restores a document to what it was before. The undone version becomes the new
- * last change, so undoing twice puts it back.
- */
+/** The undone version becomes the new last change, so undoing twice redoes. */
 export async function restoreDocument(store: ContentStore, change: LastChange): Promise<void> {
   const type = DOCUMENTS[change.document] as DocumentType<unknown>;
   const stored = await store.read(type.key);
@@ -182,15 +161,11 @@ export async function restoreDocument(store: ContentStore, change: LastChange): 
   await store.overwrite(LAST_CHANGE_KEY, record);
 }
 
-/** Every media key a stored piece needs, its own and its poster's. */
 export function mediaKeysOf(piece: StoredMedia): string[] {
   return piece.kind === 'image' ? [piece.key] : [piece.key, piece.poster.key];
 }
 
-/**
- * Project pages are addressed by their title, so a title that maps to the same
- * address as another project's would make one of the two unreachable.
- */
+/** Project pages are addressed by title, so two titles with the same address would clash. */
 export function assertTitleFree(document: WorkItemsDocument, title: string, exceptId?: string): string {
   const id = toUrlId(title);
   const clash = document.items.find(

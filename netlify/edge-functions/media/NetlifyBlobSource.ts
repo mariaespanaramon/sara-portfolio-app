@@ -2,27 +2,13 @@ import { getStore } from '@netlify/blobs';
 import type { BlobInfo, BlobSource } from './BlobSource.ts';
 import { BLOBS_REGION } from '../../../src/infrastructure/content/blobStores.ts';
 
-/**
- * `region` is honoured by the client at runtime, but this version's types only
- * declare it for deploy stores.
- */
+// The client honours `region` for site stores, but its types only declare it for deploy stores.
 type SiteStoreOptions = Parameters<typeof getStore>[0] & { name: string; region: string };
 
-/**
- * Adapter: BlobSource over a site-wide Netlify Blobs store.
- *
- * Inside an Edge Function the site id and token are provided by Netlify, so
- * nothing secret is configured here.
- */
 export class NetlifyBlobSource implements BlobSource {
   private readonly store;
 
-  /**
-   * Create one per request. The store carries the Blobs token Netlify provides
-   * for the current request, and that token expires: a store kept across
-   * requests fails with "Token expired". Creating it at import time fails the
-   * build instead, since the bundler evaluates modules where no token exists.
-   */
+  // One per request: the store holds a per-request token that expires, and there is none at build time.
   constructor(storeName: string) {
     const options: SiteStoreOptions = { name: storeName, region: BLOBS_REGION };
     this.store = getStore(options);
@@ -45,7 +31,6 @@ export class NetlifyBlobSource implements BlobSource {
   }
 
   async stream(key: string): Promise<ReadableStream<Uint8Array> | null> {
-    // Typed as never null, but resolves to null for a missing key.
     const stream: ReadableStream<Uint8Array> | null = await this.store.get(key, { type: 'stream' });
     return stream ?? null;
   }

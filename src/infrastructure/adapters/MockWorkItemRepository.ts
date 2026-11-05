@@ -1,18 +1,16 @@
 import type { WorkItem } from '../../application/domain/WorkItem';
 import type { WorkItemRepository } from '../ports/repositories';
-import type { MediaAsset } from '../../application/domain/Media';
+import type { MediaAsset } from '../../application/domain/MediaAsset';
 import { mockLoop, mockVideo, pexelsImage } from './mockMedia';
 
 const WORK_ASPECT = 3 / 2;
 
-/** Mock projects use their first piece as cover, as real content defaults to. */
 function withMedia(media: MediaAsset[], coverIndex = 0): Pick<WorkItem, 'cover' | 'media'> {
   return { cover: media[coverIndex], media };
 }
 
 /**
- * Mock data for work items, used in local development. Production reads the
- * content store through HttpWorkItemRepository.
+ * Mock data for work items
  *
  * TODO: the sectionId of every item below is provisional. These are placeholder
  * projects, so they were matched to the closest section by category; Sara needs to
@@ -109,7 +107,6 @@ const MOCK_WORK_ITEMS: WorkItem[] = [
     ...withMedia([
       pexelsImage(2246476, WORK_ASPECT),
       mockLoop('https://media.giphy.com/media/3o6nVbF4uoHsV6Vqne/giphy.mp4', pexelsImage(2246476, WORK_ASPECT)),
-    // 3D work is previewed by its animation on section pages.
     ], 1),
     tags: ['3D', 'Blender', 'Simulation'],
     sectionId: '3d-modeling',

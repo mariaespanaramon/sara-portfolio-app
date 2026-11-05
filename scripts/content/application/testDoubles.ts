@@ -19,11 +19,6 @@ import type {
 } from './ports.ts';
 import { strict as assert } from 'node:assert';
 
-/**
- * In-memory and fake adapters for the content use case tests. Fake files
- * describe themselves through their bytes and path; see FakeFile.
- */
-
 export class MemoryMediaStore implements MediaStore {
   readonly blobs = new Map<string, Uint8Array>();
   readonly uploaded = new Map<string, Date>();
@@ -49,7 +44,7 @@ export class MemoryMediaStore implements MediaStore {
 export class MemoryContentStore implements ContentStore {
   readonly documents = new Map<string, { data: unknown; etag: string }>();
   private version = 0;
-  /** Runs once, right before the next conditional write, to simulate a concurrent upload. */
+  /** Runs once before the next conditional write, to simulate a concurrent upload. */
   beforeNextWrite?: () => void;
 
   async read(key: string): Promise<StoredDocument | null> {
@@ -77,10 +72,7 @@ export class MemoryContentStore implements ContentStore {
   }
 }
 
-/**
- * Files whose bytes describe them, as text: `WxH` for images, `WxH+alpha` for a
- * transparent GIF, `WxH/seconds[+audio]` for a video, or `garbage`.
- */
+/** A fake file's bytes are its spec: `WxH`, `WxH+alpha` (GIF), `WxH/seconds[+audio]` (video) or `garbage`. */
 export type FakeFile = [number, number] | 'garbage' | string;
 
 function fakeFile(name: string, spec: FakeFile): SourceFile {
@@ -88,7 +80,6 @@ function fakeFile(name: string, spec: FakeFile): SourceFile {
   return { name, path: text, read: async () => new TextEncoder().encode(text) };
 }
 
-/** A folder at `/project`; single files are found at `/project/<name>`. */
 export function folderOf(files: Record<string, FakeFile>): SourceFolder {
   return {
     async list(path: string) {
@@ -149,11 +140,9 @@ export const hasher: Hasher = {
   digestFile: async (salt, path) => `${salt}_${path}`,
 };
 
-/** Paths are the fake file's spec, `WxH/seconds[+audio]`. */
 export class FakeVideoEncoder implements VideoEncoder {
   readonly version = 'fakevideo-v1';
   disposed = 0;
-  /** Size of every loop clip produced. */
   loopSize = 1000;
 
   async inspect(path: string): Promise<VideoInfo> {

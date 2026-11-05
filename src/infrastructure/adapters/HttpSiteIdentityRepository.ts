@@ -1,22 +1,18 @@
-import type { SiteMedia } from '../../application/domain/SiteMedia';
-import type { SiteMediaRepository } from '../ports/repositories';
+import type { SiteIdentity } from '../../application/domain/SiteIdentity';
+import type { SiteIdentityRepository } from '../ports/repositories';
 import { CONTENT_KEYS } from '../content/contentSchema';
 import { parseSiteDocument } from '../content/contentValidation';
 import type { ContentMapper } from '../content/contentMapper';
 import type { HttpContentClient } from './HttpContentClient';
 
-/**
- * Adapter for SiteMedia repository, reading the site document served from the
- * content store.
- */
-export class HttpSiteMediaRepository implements SiteMediaRepository {
+export class HttpSiteIdentityRepository implements SiteIdentityRepository {
   constructor(
     private readonly client: HttpContentClient,
     private readonly mapper: ContentMapper
   ) {}
 
-  async get(): Promise<SiteMedia> {
+  async get(): Promise<SiteIdentity> {
     const raw = await this.client.get(CONTENT_KEYS.site);
-    return raw === null ? {} : this.mapper.toSiteMedia(parseSiteDocument(raw));
+    return raw === null ? {} : this.mapper.toSiteIdentity(parseSiteDocument(raw));
   }
 }

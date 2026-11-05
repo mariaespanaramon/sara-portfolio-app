@@ -1,25 +1,10 @@
 import type { BlobSource } from './BlobSource.ts';
 
-/**
- * Turns a request for a blob into an HTTP response: conditional requests,
- * byte ranges for small files, content types and caching.
- *
- * Large files are streamed through untouched. Edge Functions get 50 ms of CPU per
- * request and share 512 MB of memory, so only blobs up to RANGE_LIMIT_BYTES are
- * ever read into memory, and only to answer a range request.
- */
-
-/**
- * Safari refuses to play an MP4 unless its server answers range requests. The
- * clips that need it (previews and loops) are a few MB at most; HLS segments are
- * requested whole and never need ranges.
- */
+// Safari only plays MP4 with range support; ranges are buffered in memory, so only small files get them.
 export const RANGE_LIMIT_BYTES = 16 * 1024 * 1024;
 
 export interface CachePolicy {
-  /** For browsers. */
   browser: string;
-  /** For Netlify's CDN only. */
   cdn: string;
 }
 
@@ -55,15 +40,10 @@ function matchesEtag(ifNoneMatch: string | null, etag: string): boolean {
 
 interface ByteRange {
   start: number;
-  /** Inclusive. */
   end: number;
 }
 
-/**
- * Parses a single `bytes=` range. Multiple ranges are not supported, and return
- * null like a malformed header would: the full file is then served instead.
- * Returns 'unsatisfiable' when the range lies outside the file.
- */
+/** Single ranges only; anything else serves the full file. */
 function parseRange(header: string, size: number): ByteRange | 'unsatisfiable' | null {
   const match = /^bytes=(\d*)-(\d*)$/.exec(header.trim());
   if (!match) {
@@ -77,7 +57,6 @@ function parseRange(header: string, size: number): ByteRange | 'unsatisfiable' |
   }
 
   if (startText === '') {
-    // Suffix range: the last N bytes.
     const length = Number(endText);
     if (length === 0) {
       return 'unsatisfiable';
@@ -140,7 +119,7 @@ export async function serveBlob(
     }
 
     if (range) {
-      // The CDN cannot key its cache on Range, so partial responses stay out of it.
+      // The CDN cannot vary on Range, so partial responses stay out of it.
       headers.set('Netlify-CDN-Cache-Control', NOT_CACHED);
       headers.set('Content-Range', `bytes ${range.start}-${range.end}/${info.size}`);
       headers.set('Content-Length', String(range.end - range.start + 1));

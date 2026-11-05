@@ -1,10 +1,6 @@
-import type { LoopAsset, MediaAsset } from '../../../application/domain/Media';
+import type { LoopAsset, MediaAsset } from '../../../application/domain/MediaAsset';
 
-/**
- * The muted clip that stands for a piece where it is only previewed, such as a
- * section row: the loop itself, or a video's short preview played as a loop.
- * Null for images and for videos without a preview.
- */
+/** A loop, or a video's preview played as one. Null when there is neither. */
 export function previewLoopOf(asset: MediaAsset): LoopAsset | null {
   if (asset.kind === 'loop') {
     return asset;

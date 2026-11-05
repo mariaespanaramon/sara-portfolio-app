@@ -65,8 +65,7 @@ const MOCK_SECTIONS: Section[] = [
 ];
 
 /**
- * Adapter for Section repository - Mock implementation, used in local development.
- * Production reads the content store through HttpSectionRepository.
+ * Adapter for Section repository - Mock implementation
  * Simulates an asynchronous API call to fetch sections
  */
 export class MockSectionRepository implements SectionRepository {

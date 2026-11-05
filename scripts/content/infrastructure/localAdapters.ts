@@ -4,7 +4,6 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import type { Hasher, SourceFile, SourceFolder } from '../application/ports.ts';
 
-/** Adapter: SourceFolder over the local file system. Does not descend into subfolders. */
 export class LocalSourceFolder implements SourceFolder {
   async list(path: string): Promise<SourceFile[] | null> {
     let entries;
@@ -36,7 +35,6 @@ function sourceFile(path: string): SourceFile {
   };
 }
 
-/** Adapter: Hasher over SHA-256, truncated to 16 hex characters (64 bits). */
 export class Sha256Hasher implements Hasher {
   digest(...parts: (string | Uint8Array)[]): string {
     const hash = createHash('sha256');

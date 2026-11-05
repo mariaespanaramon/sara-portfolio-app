@@ -12,14 +12,12 @@ import {
 } from './MediaPublisher.ts';
 import type { ContentStore } from './ports.ts';
 
-/** Section ids are also their address, so they stay simple: `3d-modeling`. */
 const SECTION_ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 function invalid(problems: string[]): never {
   throw new ContentError('INVALID_METADATA', `Invalid metadata: ${problems.join('; ')}`, { problems });
 }
 
-/** Use case: create a section, or change its title, order, cover or hover loop. */
 export class SetSection {
   private readonly deps: MediaPublisherDependencies & { content: ContentStore };
   private readonly publisher: MediaPublisher;
@@ -76,10 +74,6 @@ export class SetSection {
     return { ...result, upload };
   }
 
-  /**
-   * A cover must be an image. A hover must move: a GIF or a video, always
-   * published as a loop, with any transparency filled.
-   */
   private async planFile(path: string, as: 'image' | 'loop', alt?: string): Promise<{ piece: Piece; warnings: unknown[] }> {
     const file = await this.publisher.file(path);
     const kind = classify(file.name).kind;
@@ -92,7 +86,6 @@ export class SetSection {
       loops: as === 'loop' && kind === 'video' ? [file.name] : undefined,
       alts: alt ? { [file.name]: alt } : undefined,
     });
-    // Hover loops are muted clips with no alternative text of their own.
     return { piece: pieces[0], warnings: warnings.filter((warning) => as === 'image' || warning.code !== 'MISSING_ALT') };
   }
 }

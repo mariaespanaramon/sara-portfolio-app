@@ -24,8 +24,8 @@ import { MockSectionRepository } from './infrastructure/adapters/MockSectionRepo
 import { HttpContentClient } from './infrastructure/adapters/HttpContentClient';
 import { HttpWorkItemRepository } from './infrastructure/adapters/HttpWorkItemRepository';
 import { HttpSectionRepository } from './infrastructure/adapters/HttpSectionRepository';
-import { HttpSiteMediaRepository } from './infrastructure/adapters/HttpSiteMediaRepository';
-import { MockSiteMediaRepository } from './infrastructure/adapters/MockSiteMediaRepository';
+import { HttpSiteIdentityRepository } from './infrastructure/adapters/HttpSiteIdentityRepository';
+import { MockSiteIdentityRepository } from './infrastructure/adapters/MockSiteIdentityRepository';
 import { ContentMapper } from './infrastructure/content/contentMapper';
 import { MockAboutContentRepository } from './infrastructure/adapters/MockAboutContentRepository';
 import { MockContactDetailsRepository } from './infrastructure/adapters/MockContactDetailsRepository';
@@ -33,9 +33,7 @@ import { MockContactDetailsRepository } from './infrastructure/adapters/MockCont
 // Initialize repositories (dependency injection)
 // In a larger application, you might use a DI container or React Context
 
-// Work items and sections come from the content store, served by the media Edge
-// Function. `npm run dev` has no Edge Functions, so it uses the mocks unless
-// VITE_CONTENT_SOURCE=http (for example under `netlify dev`).
+// `npm run dev` has no Edge Function, so it uses the mocks unless VITE_CONTENT_SOURCE=http.
 // This follows the Dependency Inversion Principle - the app depends on the
 // repository interfaces, not the concrete implementations
 const useHttpContent = !import.meta.env.DEV || import.meta.env.VITE_CONTENT_SOURCE === 'http';
@@ -51,9 +49,9 @@ const sectionRepository = useHttpContent
   ? new HttpSectionRepository(contentClient, contentMapper)
   : new MockSectionRepository();
 
-const siteMediaRepository = useHttpContent
-  ? new HttpSiteMediaRepository(contentClient, contentMapper)
-  : new MockSiteMediaRepository();
+const siteIdentityRepository = useHttpContent
+  ? new HttpSiteIdentityRepository(contentClient, contentMapper)
+  : new MockSiteIdentityRepository();
 
 const aboutContentRepository = new MockAboutContentRepository();
 const contactDetailsRepository = new MockContactDetailsRepository();
@@ -64,7 +62,7 @@ const contactDetailsRepository = new MockContactDetailsRepository();
 function HomePage() {
   return (
     <>
-      <Hero repository={siteMediaRepository} />
+      <Hero repository={siteIdentityRepository} />
       <SectionGrid repository={sectionRepository} />
       <AboutSection repository={aboutContentRepository} />
       <ContactSection repository={contactDetailsRepository} />
@@ -89,7 +87,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-site-bg">
-        <IntroSplash repository={siteMediaRepository} />
+        <IntroSplash repository={siteIdentityRepository} />
         <Header isMenuOpen={isMenuOpen} onToggleMenu={toggleMenu} />
         <FullscreenMenu isOpen={isMenuOpen} onClose={closeMenu} />
         <main>

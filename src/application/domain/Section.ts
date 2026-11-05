@@ -1,4 +1,4 @@
-import type { ImageAsset, LoopAsset } from './Media';
+import type { ImageAsset, LoopAsset } from './MediaAsset';
 
 /**
  * Core domain interface representing a portfolio section.
@@ -19,6 +19,6 @@ export interface Section {
   order: number;
   /** Static image shown at rest. */
   cover: ImageAsset;
-  /** Plays while the cover is hovered. Covers both former videos and gifs. */
+  /** Plays while the cover is hovered. */
   hover?: LoopAsset;
 }

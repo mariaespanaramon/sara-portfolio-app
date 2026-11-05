@@ -21,10 +21,7 @@ function withAlt(piece: StoredMedia, alt: string): StoredMedia {
   return piece.kind === 'image' ? { ...piece, alt } : { ...piece, poster: { ...piece.poster, alt } };
 }
 
-/**
- * Applies changes to a project. Positions in `changes` all refer to the pieces
- * as they are now, before any reordering or removal.
- */
+/** Positions in `changes` refer to the pieces as they are now, before reordering or removal. */
 export function applyChanges(item: StoredWorkItem, changes: ProjectChanges): StoredWorkItem {
   const count = item.media.length;
   const inRange = (position: number) => position >= 1 && position <= count;
@@ -77,7 +74,6 @@ export function applyChanges(item: StoredWorkItem, changes: ProjectChanges): Sto
   };
 }
 
-/** Use case: change a project's texts, section, cover, order or pieces. */
 export class EditProject {
   private readonly deps: { content: ContentStore; media: MediaStore };
 
@@ -100,7 +96,6 @@ export class EditProject {
     const result = {
       id,
       title: updated.title,
-      // The page address follows the title, so a new title moves the page.
       path: `/work/${toUrlId(updated.title)}`,
       pathChanged: toUrlId(updated.title) !== toUrlId(project.title),
       pieces: updated.media.length,

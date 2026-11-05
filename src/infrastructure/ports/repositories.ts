@@ -2,7 +2,7 @@ import type { WorkItem } from '../../application/domain/WorkItem';
 import type { Section } from '../../application/domain/Section';
 import type { AboutContent } from '../../application/domain/AboutContent';
 import type { ContactDetails } from '../../application/domain/ContactDetails';
-import type { SiteMedia } from '../../application/domain/SiteMedia';
+import type { SiteIdentity } from '../../application/domain/SiteIdentity';
 
 /**
  * Port (Interface) for WorkItem repository
@@ -37,10 +37,6 @@ export interface ContactDetailsRepository {
   get(): Promise<ContactDetails>;
 }
 
-/**
- * Port (Interface) for SiteMedia repository
- * Defines the contract for data access operations
- */
-export interface SiteMediaRepository {
-  get(): Promise<SiteMedia>;
+export interface SiteIdentityRepository {
+  get(): Promise<SiteIdentity>;
 }

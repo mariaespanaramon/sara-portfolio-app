@@ -1,9 +1,4 @@
-/**
- * Every failure the content scripts report on purpose.
- *
- * The code is stable and machine readable, so the skills can explain each case
- * to someone without a programming background. The message is for developers.
- */
+/** Codes are stable so the skills can explain each one; messages are for developers. */
 export type ContentErrorCode =
   | 'INVALID_ARGUMENTS'
   | 'INVALID_METADATA'
@@ -26,7 +21,6 @@ export type ContentErrorCode =
 
 export class ContentError extends Error {
   readonly code: ContentErrorCode;
-  /** Specifics the skill can quote back, such as the offending file names. */
   readonly details: Record<string, unknown>;
 
   constructor(code: ContentErrorCode, message: string, details: Record<string, unknown> = {}) {

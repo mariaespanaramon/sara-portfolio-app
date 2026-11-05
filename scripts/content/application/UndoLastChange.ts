@@ -3,10 +3,6 @@ import { readLastChange, restoreDocument } from './contentDocuments.ts';
 import { cleanMedia } from './cleanMedia.ts';
 import type { ContentStore, MediaStore } from './ports.ts';
 
-/**
- * Use case: put back the document the last change replaced. Undoing twice
- * redoes the change, since the undo itself becomes the last change.
- */
 export class UndoLastChange {
   private readonly deps: { content: ContentStore; media: MediaStore };
 

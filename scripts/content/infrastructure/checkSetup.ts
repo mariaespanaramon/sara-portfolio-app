@@ -6,7 +6,7 @@ import { resolveNetlifyCredentials } from './netlifyCredentials.ts';
 
 const run = promisify(execFile);
 
-/** Running TypeScript directly needs Node 22.18 or later. */
+// Node runs TypeScript directly from 22.18.
 const MIN_NODE = [22, 18];
 
 export type CheckName = 'node' | 'ffmpeg' | 'ffprobe' | 'sharp' | 'netlify-link' | 'netlify-login' | 'blobs';
@@ -14,7 +14,6 @@ export type CheckName = 'node' | 'ffmpeg' | 'ffprobe' | 'sharp' | 'netlify-link'
 export interface Check {
   name: CheckName;
   ok: boolean;
-  /** A version or a short reason. */
   detail: string;
 }
 
@@ -27,11 +26,7 @@ async function tool(name: 'ffmpeg' | 'ffprobe'): Promise<Check> {
   }
 }
 
-/**
- * Checks everything the content commands rely on, and reports each item rather
- * than stopping at the first problem, so the skill can explain all the fixes at
- * once. Infrastructure only: there is no business rule here to keep apart.
- */
+/** Reports every check rather than stopping at the first failure, so all fixes can be explained at once. */
 export async function checkSetup(projectRoot: string): Promise<{ allPassed: boolean; checks: Check[] }> {
   const checks: Check[] = [];
 

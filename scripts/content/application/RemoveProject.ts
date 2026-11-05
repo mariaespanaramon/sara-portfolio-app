@@ -2,12 +2,6 @@ import { findProject, readWorkItems, updateWorkItems } from './contentDocuments.
 import { cleanMedia } from './cleanMedia.ts';
 import type { ContentStore, MediaStore } from './ports.ts';
 
-/**
- * Use case: take a project off the site.
- *
- * Its media stays stored until a later change, so the removal can be undone;
- * see cleanMedia.
- */
 export class RemoveProject {
   private readonly deps: { content: ContentStore; media: MediaStore };
 

@@ -1,11 +1,6 @@
 import { readSections, readWorkItems } from './contentDocuments.ts';
 import type { ContentStore } from './ports.ts';
 
-/**
- * Read-only use cases, so a skill can offer the existing sections and projects
- * as choices instead of asking for ids.
- */
-
 export async function listSections(content: ContentStore) {
   const document = await readSections(content);
   return (document?.sections ?? [])

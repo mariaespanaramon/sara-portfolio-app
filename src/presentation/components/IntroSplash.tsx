@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react';
-import type { SiteMediaRepository } from '../../infrastructure/ports/repositories';
-import { useSiteMedia } from '../../application/service/useSiteMedia';
+import type { SiteIdentityRepository } from '../../infrastructure/ports/repositories';
+import { useSiteIdentity } from '../../application/service/useSiteIdentity';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { ResponsiveImage } from './media/ResponsiveImage';
 
-/** The animation is centred and capped at 70% of the viewport either way. */
 const INTRO_SIZES = '70vw';
 
 /** How long the logo stays on screen once the animation is ready. */
 const HOLD_MS = 2500;
 /** Duration of the fade out. Shared with the inline transition below. */
 const FADE_MS = 500;
-/** Upper bound on waiting for the animation, so a slow network cannot stall the splash. */
+/** Upper bound on waiting for the animation, so a slow CDN cannot stall the splash. */
 const MAX_LOAD_WAIT_MS = 3000;
 
 const SESSION_KEY = 'sara-intro-seen';
@@ -41,17 +40,16 @@ function shouldSkipIntro(): boolean {
  * Fades out on its own, and can be dismissed early with a click or a key press.
  */
 interface IntroSplashProps {
-  repository: SiteMediaRepository;
+  repository: SiteIdentityRepository;
 }
 
 export function IntroSplash({ repository }: IntroSplashProps) {
   const [skipped] = useState(shouldSkipIntro);
   const [phase, setPhase] = useState<Phase>('visible');
   const [isIntroReady, setIsIntroReady] = useState(false);
-  const { siteMedia, loading } = useSiteMedia(repository);
-  const intro = siteMedia?.intro;
+  const { siteIdentity, loading } = useSiteIdentity(repository);
+  const intro = siteIdentity?.intro;
 
-  // A site without an intro animation simply has no splash.
   const hasNoIntro = !loading && !intro;
   const isOnScreen = !skipped && !hasNoIntro && phase !== 'done';
 

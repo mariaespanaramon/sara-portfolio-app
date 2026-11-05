@@ -1,5 +1,5 @@
 ---
-name: set-site-media
+name: set-site-identity
 description: Replace the big image at the top of the home page of Sara's site, or the animated logo shown when the site opens. Use when the user wants to change the hero image, the intro, the splash or the logo animation.
 ---
 
@@ -17,7 +17,7 @@ commands or error codes. Errors: see "Explaining errors" in
 4. Run the dry run:
 
    ```bash
-   npm run --silent content -- set-site-media --slot <hero|intro> --file "<path>" [--alt "<text>"] --dry-run
+   npm run --silent content -- set-site-identity --slot <hero|intro> --file "<path>" [--alt "<text>"] --dry-run
    ```
 
 5. For an intro GIF with `isTransparent: true` in the result, explain as

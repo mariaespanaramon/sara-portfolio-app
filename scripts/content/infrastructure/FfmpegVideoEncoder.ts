@@ -13,25 +13,16 @@ import type {
 
 const run = promisify(execFile);
 
-/**
- * Renditions of the adaptive stream, by the length of the short side so
- * portrait videos get the same treatment. Rungs above the source are skipped.
- * The bitrate caps keep complex footage from ballooning; simple footage stays
- * well below them thanks to the constant quality target.
- */
+// By short side, so portrait videos get the same treatment.
 const LADDER = [
   { shortSide: 1080, maxrate: '6000k', bufsize: '12000k' },
   { shortSide: 720, maxrate: '3500k', bufsize: '7000k' },
   { shortSide: 480, maxrate: '1600k', bufsize: '3200k' },
 ];
 
-/** A source this much above the top rung that fits gets a rung of its own. */
 const OWN_RUNG_MARGIN = 1.1;
 
-/**
- * The rungs for a source. Without its own rung, a 540p source would top out at
- * 480p and lose resolution for nothing.
- */
+/** Without a rung of its own, a 540p source would top out at 480p. */
 function ladderFor(sourceShort: number) {
   const fitting = LADDER.filter((rung) => rung.shortSide <= sourceShort);
   const top = fitting[0];
@@ -40,24 +31,20 @@ function ladderFor(sourceShort: number) {
     return fitting;
   }
 
-  // Bitrate caps from the rung above, which this one sits below.
   const above = LADDER.filter((rung) => rung.shortSide > sourceShort).pop() ?? LADDER[0];
   return [{ ...above, shortSide: even(Math.min(sourceShort, LADDER[0].shortSide)) }, ...fitting];
 }
 
-/** Constant quality target for the stream and loops; lower is better and larger. */
 const VIDEO_CRF = '20';
 const SEGMENT_SECONDS = 4;
 const AUDIO_BITRATE = '128k';
 
-/** Audio peaking below this is treated as no audio, and dropped. */
 const SILENCE_DB = -60;
 
 const PREVIEW_SECONDS = 4;
 const PREVIEW_SHORT_SIDE = 480;
 const PREVIEW_CRF = '28';
 
-/** Loops are a single file, so they are capped rather than laddered. */
 const LOOP_MAX_SIDE = 1920;
 
 const CONTENT_TYPES: Record<string, string> = {
@@ -96,7 +83,7 @@ function videoStream(info: Probe): Stream {
   return stream;
 }
 
-/** Size as displayed: phones store portrait video as rotated landscape. */
+// Phones store portrait video as rotated landscape.
 function displaySize(stream: Stream): { width: number; height: number } {
   const rotation = Number(stream.side_data_list?.find((data) => data.rotation !== undefined)?.rotation ?? stream.tags?.rotate ?? 0);
   const isQuarterTurn = Math.abs(rotation) % 180 === 90;
@@ -109,7 +96,6 @@ function even(value: number): number {
   return Math.max(2, Math.round(value / 2) * 2);
 }
 
-/** Output size for a given short side, keeping the aspect ratio. */
 function sizeFor(source: { width: number; height: number }, shortSide: number) {
   const isPortrait = source.height > source.width;
   const scale = shortSide / Math.min(source.width, source.height);
@@ -118,7 +104,6 @@ function sizeFor(source: { width: number; height: number }, shortSide: number) {
     : { width: even(source.width * scale), height: shortSide };
 }
 
-/** A scale filter to a short side, for either orientation. */
 function scaleTo(source: { width: number; height: number }, shortSide: number): string {
   return source.height > source.width ? `scale=${shortSide}:-2` : `scale=-2:${shortSide}`;
 }
@@ -147,13 +132,7 @@ async function filesUnder(dir: string): Promise<string[]> {
     .sort();
 }
 
-/**
- * Adapter: VideoEncoder on top of the ffmpeg and ffprobe command line tools.
- *
- * Everything is H.264 (with AAC audio when there is any), the one codec every
- * browser plays, Safari and iOS included. Work happens in a scratch directory
- * removed by dispose().
- */
+// H.264 and AAC: the one combination every browser plays, Safari and iOS included.
 export class FfmpegVideoEncoder implements VideoEncoder {
   readonly version = 'ffmpeg-v1';
 
@@ -164,7 +143,7 @@ export class FfmpegVideoEncoder implements VideoEncoder {
     return {
       ...size,
       durationSeconds: Number(info.format.duration ?? 0),
-      // Cameras and editors often export a silent track; that is no sound at all.
+      // Cameras and editors often export a silent track.
       hasSound: hasAudioTrack && !(await this.isSilent(path)),
     };
   }
@@ -190,7 +169,7 @@ export class FfmpegVideoEncoder implements VideoEncoder {
         ...(hasAudio ? rungs.flatMap(() => ['-map', '0:a:0']) : []),
         '-c:v', 'libx264', '-profile:v', 'high', '-preset', 'slow', '-crf', VIDEO_CRF,
         '-pix_fmt', 'yuv420p',
-        // Keyframes exactly at segment boundaries, so every rendition can switch there.
+        // Keyframes at segment boundaries, so renditions can switch there.
         '-sc_threshold', '0', '-force_key_frames', `expr:gte(t,n_forced*${SEGMENT_SECONDS})`,
         ...rungs.flatMap((rung, i) => [`-maxrate:v:${i}`, rung.maxrate, `-bufsize:v:${i}`, rung.bufsize]),
         ...(hasAudio ? ['-c:a', 'aac', '-b:a', AUDIO_BITRATE] : []),
@@ -210,7 +189,7 @@ export class FfmpegVideoEncoder implements VideoEncoder {
         '-movflags', '+faststart', preview,
       ]);
 
-      // A frame a moment in, since videos often open on black.
+      // Videos often open on black.
       const posterAt = Math.min(1, source.durationSeconds / 3);
       const poster = join(work, 'poster.png');
       await ffmpeg(['-ss', String(posterAt), '-i', path, '-frames:v', '1', poster]);
@@ -242,8 +221,7 @@ export class FfmpegVideoEncoder implements VideoEncoder {
     try {
       const clip = join(work, 'loop.mp4');
 
-      // A clip that is already H.264 at a sensible size is only repackaged:
-      // encoding it again would lose quality for nothing.
+      // Re-encoding a suitable clip would only lose quality.
       const isReady =
         stream.codec_name === 'h264' &&
         stream.pix_fmt === 'yuv420p' &&
@@ -256,7 +234,6 @@ export class FfmpegVideoEncoder implements VideoEncoder {
         const fit =
           `scale='if(gte(iw,ih),trunc(min(${LOOP_MAX_SIDE},iw)/2)*2,-2)'` +
           `:'if(gte(iw,ih),-2,trunc(min(${LOOP_MAX_SIDE},ih)/2)*2)':flags=lanczos`;
-        // MP4 has no transparency: paint the background, then the frame over it.
         const flatten = `format=rgba,split[fg][bg];[bg]drawbox=c=${background}@1:t=fill[filled];[filled][fg]overlay=format=auto,format=yuv420p`;
 
         await ffmpeg([

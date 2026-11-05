@@ -1,8 +1,4 @@
 /**
- * Command line entry point for managing the site's content in Netlify Blobs.
- * Meant to be driven by the Claude Code skills in .claude/skills, which turn its
- * output into plain language.
- *
  *   npm run --silent content -- <command> [options]
  *
  *   check-setup
@@ -12,11 +8,10 @@
  *   edit-project     --id <project> --metadata <file.json> [--dry-run]
  *   remove-project   --id <project> [--dry-run]
  *   set-section      --id <section> --metadata <file.json> [--dry-run]
- *   set-site-media   --slot hero|intro --file <path> [--alt <text>] [--keep-transparency] [--dry-run]
+ *   set-site-identity   --slot hero|intro --file <path> [--alt <text>] [--keep-transparency] [--dry-run]
  *   undo-last-change [--dry-run]
  *
- * Output is always one JSON document on stdout: `{ "ok": true, ... }`, or
- * `{ "ok": false, "error": { "code", "message", "details" } }` with exit code 1.
+ * Prints one JSON document: `{ "ok": true, ... }` or `{ "ok": false, "error": { code, message, details } }`.
  */
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -28,7 +23,7 @@ import { EditProject } from './application/EditProject.ts';
 import { listProjects, listSections } from './application/listContent.ts';
 import { RemoveProject } from './application/RemoveProject.ts';
 import { SetSection } from './application/SetSection.ts';
-import { SetSiteMedia } from './application/SetSiteMedia.ts';
+import { SetSiteIdentity } from './application/SetSiteIdentity.ts';
 import { UndoLastChange } from './application/UndoLastChange.ts';
 import { ContentError } from './domain/ContentError.ts';
 import { parseMediaAddition, parseProjectChanges, parseProjectDraft } from './domain/ProjectDraft.ts';
@@ -51,7 +46,7 @@ const COMMANDS = [
   'edit-project',
   'remove-project',
   'set-section',
-  'set-site-media',
+  'set-site-identity',
   'undo-last-change',
 ];
 
@@ -75,7 +70,6 @@ function required(value: string | undefined, option: string): string {
   return value;
 }
 
-/** Wires the adapters together. Only built for commands that touch Netlify. */
 async function connect() {
   const credentials = await resolveNetlifyCredentials(PROJECT_ROOT);
   const content = new NetlifyBlobsContentStore(credentials);
@@ -159,12 +153,12 @@ async function run(argv: string[]): Promise<unknown> {
         dryRun,
       });
 
-    case 'set-site-media': {
+    case 'set-site-identity': {
       const slot = values.slot;
       if (!isSiteSlot(slot)) {
-        throw new ContentError('INVALID_ARGUMENTS', 'set-site-media needs --slot hero or --slot intro');
+        throw new ContentError('INVALID_ARGUMENTS', 'set-site-identity needs --slot hero or --slot intro');
       }
-      return new SetSiteMedia(publishing).run({
+      return new SetSiteIdentity(publishing).run({
         slot,
         path: resolve(required(values.file, 'file')),
         alt: values.alt,

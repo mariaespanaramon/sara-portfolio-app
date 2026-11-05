@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-import { stillOf, type MediaAsset } from '../../application/domain/Media';
+import { stillOf, type MediaAsset } from '../../application/domain/MediaAsset';
 import { MediaView } from './media/MediaView';
 import { ResponsiveImage } from './media/ResponsiveImage';
 import { useScrollLock } from '../hooks/useScrollLock';
 
-/** The gallery sits in a `max-w-4xl` column, 896px wide at most. */
 const GALLERY_SIZES = '(min-width: 896px) 896px, 100vw';
-/** The fullscreen viewer caps media at 90% of the viewport. */
 const FULLSCREEN_SIZES = '90vw';
 
 interface MediaGalleryProps {
@@ -14,15 +12,7 @@ interface MediaGalleryProps {
   title: string;
 }
 
-/**
- * Carousel over a project's media, mixing images, videos and loops, with a
- * fullscreen viewer.
- *
- * The current slide and its two neighbours are mounted, the neighbours hidden:
- * the browser then fetches them at the same rendition the current one uses, so
- * moving to the next slide is instant. Neighbouring clips show their poster only,
- * so nothing plays or streams out of sight.
- */
+/** Neighbouring slides are mounted hidden, as stills, so the next slide is instant and nothing plays out of sight. */
 export function MediaGallery({ media, title }: MediaGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -69,7 +59,6 @@ export function MediaGallery({ media, title }: MediaGalleryProps) {
           }
 
           const isCurrent = index === currentIndex;
-          // Videos keep their own click for the controls; everything else zooms.
           const zoomsOnClick = piece.kind !== 'video';
 
           return (
@@ -121,10 +110,7 @@ export function MediaGallery({ media, title }: MediaGalleryProps) {
           </>
         )}
 
-        {/*
-          The controls overlaid on the slide sit along the top edge, so they never
-          cover a video's own controls at the bottom.
-        */}
+        {/* Along the top edge, clear of a video's own controls. */}
 
         {/* Fullscreen Button */}
         <button

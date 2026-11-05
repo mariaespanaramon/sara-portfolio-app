@@ -7,7 +7,7 @@ import { cleanMedia } from './cleanMedia.ts';
 import { applyChanges, EditProject } from './EditProject.ts';
 import { RemoveProject } from './RemoveProject.ts';
 import { SetSection } from './SetSection.ts';
-import { SetSiteMedia } from './SetSiteMedia.ts';
+import { SetSiteIdentity } from './SetSiteIdentity.ts';
 import { UndoLastChange } from './UndoLastChange.ts';
 import {
   FakeEncoder,
@@ -56,7 +56,6 @@ describe('content changes', () => {
 
   const workItems = () => content.documents.get('work-items.json')!.data as WorkItemsDocument;
 
-  /** Pretends every stored blob was uploaded long ago, past the cleanup grace. */
   const ageEverything = () => {
     for (const key of media.uploaded.keys()) media.uploaded.set(key, new Date(0));
   };
@@ -177,7 +176,7 @@ describe('content changes', () => {
   });
 
   it('only takes an image as hero, and keeps a transparent intro when asked', async () => {
-    const setSite = () => new SetSiteMedia(publishing({ 'clip.mp4': '1920x1080/10', 'logo.gif': '800x800+alpha' }));
+    const setSite = () => new SetSiteIdentity(publishing({ 'clip.mp4': '1920x1080/10', 'logo.gif': '800x800+alpha' }));
 
     await rejectsWith(setSite().run({ slot: 'hero', path: '/project/clip.mp4', keepTransparency: false, dryRun: true }), 'INVALID_METADATA');
     await rejectsWith(setSite().run({ slot: 'hero', path: '/project/missing.jpg', keepTransparency: false, dryRun: true }), 'FILE_NOT_FOUND');

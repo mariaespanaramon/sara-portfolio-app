@@ -8,50 +8,29 @@ import type {
 } from '../application/ports.ts';
 import { TRANSPARENT_PIXEL_SHARE } from '../domain/mediaRules.ts';
 
-/**
- * Widths generated for every image, never above the source's own width. The top
- * one covers full-bleed images on large high density screens; the browser only
- * fetches it when the screen actually needs it.
- */
 const TARGET_WIDTHS = [640, 1024, 1600, 2400, 3200];
 
-/**
- * Tuned for a design portfolio, where artefacts are more visible than on a
- * typical site. AVIF keeps full chroma, which matters for fine coloured detail
- * such as type and linework.
- */
+// Full chroma keeps fine coloured detail, such as type and linework, sharp.
 const AVIF_OPTIONS = { quality: 62, effort: 5, chromaSubsampling: '4:4:4' } as const;
 const WEBP_OPTIONS = { quality: 84, effort: 5, smartSubsample: true } as const;
 
 const PLACEHOLDER_WIDTH = 16;
 
-/**
- * Animated WebP is far heavier than video, so animations are kept small: it is
- * only used for transparent GIFs such as a logo, never for full-bleed pieces.
- */
+// Animated WebP is far heavier than video; only transparent GIFs such as a logo use it.
 const ANIMATION_WIDTHS = [640, 1280];
 const ANIMATION_WEBP_OPTIONS = { quality: 82, effort: 5 } as const;
 
-/** Alpha below this counts as a transparent pixel. GIF alpha is on or off. */
 const ALPHA_THRESHOLD = 128;
 
-/**
- * Adapter: ImageEncoder on top of sharp (libvips).
- *
- * Every rendition is rotated upright from its EXIF orientation, converted to
- * sRGB so colours look the same in every browser, and stripped of metadata such
- * as camera details and location.
- */
 export class SharpImageEncoder implements ImageEncoder {
   readonly version = 'sharp-v1';
 
   async inspect(bytes: Uint8Array): Promise<ImageInfo> {
-    // Reads the header only, without decoding the pixels.
     const { width, height, orientation } = await sharp(bytes, { limitInputPixels: false }).metadata();
     if (!width || !height) {
       throw new Error('Not an image');
     }
-    // EXIF orientations 5 to 8 are rotated a quarter turn, which swaps the sides.
+    // EXIF orientations 5 to 8 are quarter turns.
     const isQuarterTurn = (orientation ?? 1) >= 5;
     return isQuarterTurn ? { width: height, height: width } : { width, height };
   }
@@ -91,8 +70,7 @@ export class SharpImageEncoder implements ImageEncoder {
       throw new Error('Not an image');
     }
 
-    // The metadata reports an alpha channel for almost every GIF, transparent or
-    // not, so the pixels themselves are counted.
+    // GIF metadata reports alpha for almost every GIF, so pixels are counted.
     const alpha = await sharp(bytes, { animated: true, limitInputPixels: false })
       .ensureAlpha()
       .extractChannel(3)
@@ -124,7 +102,6 @@ export class SharpImageEncoder implements ImageEncoder {
       renditions.push({ width, format: 'webp', bytes: webp });
     }
 
-    // From the first frame only, keeping its transparency.
     const placeholder = await sharp(bytes, { pages: 1 })
       .resize({ width: PLACEHOLDER_WIDTH })
       .webp({ quality: 40 })
@@ -141,7 +118,7 @@ export class SharpImageEncoder implements ImageEncoder {
   }
 
   private upright(bytes: Uint8Array) {
-    // limitInputPixels: false, since print-resolution exports can exceed the default cap.
+    // Print-resolution exports can exceed sharp's default pixel cap.
     return sharp(bytes, { limitInputPixels: false }).rotate().toColourspace('srgb');
   }
 }

@@ -1,9 +1,4 @@
-/**
- * What visitors see when content fails to load.
- *
- * Deliberately generic: the underlying error means nothing to a visitor, and the
- * hooks already log it to the console for whoever needs the details.
- */
+/** Generic on purpose: the hooks log the actual error. */
 export function LoadErrorMessage() {
   return (
     <p className="text-site-text-secondary font-light">

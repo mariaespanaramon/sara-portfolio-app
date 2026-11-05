@@ -1,11 +1,4 @@
-/**
- * Rules for the files Sara drops into a project folder.
- */
-
-/**
- * What a file is by its format. A video file can still end up as a loop: that
- * is the person's choice, not something the format tells.
- */
+/** By format only: whether a video is published as a loop is the person's choice. */
 export type SourceKind = 'image' | 'video' | 'loop';
 
 export type Classification =
@@ -24,8 +17,7 @@ function extensionOf(fileName: string): string {
 export function classify(fileName: string): Classification {
   const extension = extensionOf(fileName);
 
-  // iPhone photos. The image library cannot decode them, but every app can
-  // export them as JPEG, so this gets its own reason and advice.
+  // iPhone photos: sharp cannot decode them, so they get their own advice.
   if (extension === 'heic' || extension === 'heif') {
     return { kind: 'unsupported', reason: 'heic' };
   }
@@ -42,15 +34,11 @@ export function classify(fileName: string): Classification {
   return { kind };
 }
 
-/** Hidden and system files that end up in folders without anyone adding them. */
 export function isIgnored(fileName: string): boolean {
   return fileName.startsWith('.') || fileName === 'Thumbs.db' || fileName === 'desktop.ini';
 }
 
-/**
- * Display order of a project's pieces: by file name, with numbers compared as
- * numbers, so `2-…` comes before `10-…` without zero padding.
- */
+/** Numbers compare as numbers, so `2-…` comes before `10-…`. */
 export function byDisplayOrder(a: string, b: string): number {
   return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
 }

@@ -1,33 +1,20 @@
 import { useState } from 'react';
-import type { ImageAsset } from '../../../application/domain/Media';
+import type { ImageAsset } from '../../../application/domain/MediaAsset';
 import { sourceSetsOf } from './imageSources';
 
 interface ResponsiveImageProps {
   image: ImageAsset;
-  /**
-   * How wide the image renders, as a `sizes` attribute. The browser uses it to
-   * pick the smallest rendition that stays sharp, so it should be as accurate as
-   * the layout allows.
-   */
+  /** As accurate as the layout allows: the browser picks the rendition from it. */
   sizes: string;
   alt?: string;
   className?: string;
-  /** Lazy unless the image is visible on first paint. */
   loading?: 'lazy' | 'eager';
-  /** The main image of the screen: the browser fetches it ahead of the rest. */
   isPriority?: boolean;
   onClick?: (event: React.MouseEvent<HTMLImageElement>) => void;
-  /** Called once loaded, or on failure: either way there is nothing left to wait for. */
+  /** Called once loaded or failed. */
   onSettled?: () => void;
 }
 
-/**
- * Renders an image in the most efficient format the browser supports, at the
- * smallest width that fills its slot.
- *
- * The intrinsic size is set upfront so the layout does not shift once it loads,
- * and the blurred placeholder fills the box until then.
- */
 export function ResponsiveImage({
   image,
   sizes,
@@ -59,8 +46,7 @@ export function ResponsiveImage({
         height={image.height}
         alt={alt ?? image.alt ?? ''}
         loading={loading}
-        // Lower case on purpose: React 18 does not know the camelCase prop and
-        // would drop it, but passes unknown lower case attributes through.
+        // React 18 drops the camelCase prop but passes lower case attributes through.
         {...(isPriority ? { fetchpriority: 'high' } : {})}
         decoding="async"
         className={className}

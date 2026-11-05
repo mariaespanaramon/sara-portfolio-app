@@ -8,7 +8,6 @@ export interface NetlifyCredentials {
   token: string;
 }
 
-/** Where the Netlify CLI keeps its login, per platform. */
 function cliConfigPaths(): string[] {
   const home = homedir();
   return [
@@ -39,11 +38,7 @@ async function tokenFromCli(): Promise<string | null> {
   return null;
 }
 
-/**
- * Finds the site and login the scripts write with, reusing what `netlify link`
- * and `netlify login` already stored, so there is no separate secret to set up.
- * NETLIFY_SITE_ID and NETLIFY_AUTH_TOKEN take precedence when set.
- */
+/** Reuses `netlify link` and `netlify login`; NETLIFY_SITE_ID and NETLIFY_AUTH_TOKEN override them. */
 export async function resolveNetlifyCredentials(projectRoot: string): Promise<NetlifyCredentials> {
   const state = await readJson(join(projectRoot, '.netlify', 'state.json'));
   const siteID = process.env.NETLIFY_SITE_ID ?? (state?.siteId as string | undefined);
