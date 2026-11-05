@@ -89,7 +89,8 @@ export async function serveBlob(
     });
   }
 
-  const info = await source.info(key);
+  const opened = request.method === 'HEAD' ? null : await source.open(key);
+  const info = opened?.info ?? (request.method === 'HEAD' ? await source.info(key) : null);
   if (!info) {
     return new Response('Not found', { status: 404, headers: { 'Cache-Control': NOT_CACHED } });
   }
@@ -105,6 +106,7 @@ export async function serveBlob(
   });
 
   if (matchesEtag(request.headers.get('If-None-Match'), info.etag)) {
+    await opened?.body.cancel();
     return new Response(null, { status: 304, headers });
   }
 
@@ -113,6 +115,7 @@ export async function serveBlob(
     const range = parseRange(rangeHeader, info.size);
 
     if (range === 'unsatisfiable') {
+      await opened?.body.cancel();
       headers.set('Content-Range', `bytes */${info.size}`);
       headers.set('Netlify-CDN-Cache-Control', NOT_CACHED);
       return new Response(null, { status: 416, headers });
@@ -124,15 +127,11 @@ export async function serveBlob(
       headers.set('Content-Range', `bytes ${range.start}-${range.end}/${info.size}`);
       headers.set('Content-Length', String(range.end - range.start + 1));
 
-      if (request.method === 'HEAD') {
+      if (!opened) {
         return new Response(null, { status: 206, headers });
       }
 
-      const bytes = await source.bytes(key);
-      if (!bytes) {
-        return new Response('Not found', { status: 404, headers: { 'Cache-Control': NOT_CACHED } });
-      }
-
+      const bytes = await new Response(opened.body).arrayBuffer();
       return new Response(bytes.slice(range.start, range.end + 1), { status: 206, headers });
     }
   }
@@ -141,14 +140,5 @@ export async function serveBlob(
     headers.set('Content-Length', String(info.size));
   }
 
-  if (request.method === 'HEAD') {
-    return new Response(null, { status: 200, headers });
-  }
-
-  const body = await source.stream(key);
-  if (!body) {
-    return new Response('Not found', { status: 404, headers: { 'Cache-Control': NOT_CACHED } });
-  }
-
-  return new Response(body, { status: 200, headers });
+  return new Response(opened?.body ?? null, { status: 200, headers });
 }

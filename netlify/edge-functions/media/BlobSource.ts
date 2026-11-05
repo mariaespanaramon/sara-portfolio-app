@@ -5,8 +5,13 @@ export interface BlobInfo {
   size?: number;
 }
 
+export interface OpenBlob {
+  info: BlobInfo;
+  body: ReadableStream<Uint8Array>;
+}
+
 export interface BlobSource {
   info(key: string): Promise<BlobInfo | null>;
-  stream(key: string): Promise<ReadableStream<Uint8Array> | null>;
-  bytes(key: string): Promise<ArrayBuffer | null>;
+  /** Metadata and contents in one round trip. */
+  open(key: string): Promise<OpenBlob | null>;
 }

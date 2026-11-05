@@ -47,6 +47,7 @@ export function IntroSplash({ repository }: IntroSplashProps) {
   const [skipped] = useState(shouldSkipIntro);
   const [phase, setPhase] = useState<Phase>('visible');
   const [isIntroReady, setIsIntroReady] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const { siteIdentity, loading } = useSiteIdentity(repository);
   const intro = siteIdentity?.intro;
 
@@ -132,18 +133,31 @@ export function IntroSplash({ repository }: IntroSplashProps) {
       style={{ transitionDuration: `${FADE_MS}ms` }}
     >
       {intro?.kind === 'loop' && (
-        <video
-          src={intro.url}
-          width={intro.width}
-          height={intro.height}
-          className="max-h-[70vh] max-w-[70vw] w-auto h-auto object-contain"
-          autoPlay
-          loop
-          muted
-          playsInline
-          onLoadedData={() => setIsIntroReady(true)}
-          onError={() => setIsIntroReady(true)}
-        />
+        // The poster shows first, and its inline placeholder before that, so the
+        // splash is never blank while the clip downloads.
+        <div className="relative">
+          <ResponsiveImage
+            image={intro.poster}
+            sizes={INTRO_SIZES}
+            loading="eager"
+            isPriority
+            className="max-h-[70vh] max-w-[70vw] w-auto h-auto object-contain"
+            onSettled={() => setIsIntroReady(true)}
+          />
+          <video
+            src={intro.url}
+            width={intro.width}
+            height={intro.height}
+            className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
+              isVideoPlaying ? 'opacity-100' : 'opacity-0'
+            }`}
+            autoPlay
+            loop
+            muted
+            playsInline
+            onPlaying={() => setIsVideoPlaying(true)}
+          />
+        </div>
       )}
       {intro?.kind === 'image' && (
         <ResponsiveImage

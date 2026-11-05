@@ -46,6 +46,8 @@ const PREVIEW_SHORT_SIDE = 480;
 const PREVIEW_CRF = '28';
 
 const LOOP_MAX_SIDE = 1920;
+// Above this, a clip is worth re-encoding even if it is already H.264.
+const LOOP_MAX_BITS_PER_PIXEL = 0.1;
 
 const CONTENT_TYPES: Record<string, string> = {
   '.m3u8': 'application/vnd.apple.mpegurl',
@@ -59,6 +61,8 @@ interface Stream {
   width?: number;
   height?: number;
   pix_fmt?: string;
+  bit_rate?: string;
+  avg_frame_rate?: string;
   tags?: { rotate?: string };
   side_data_list?: { rotation?: number }[];
 }
@@ -90,6 +94,15 @@ function displaySize(stream: Stream): { width: number; height: number } {
   return isQuarterTurn
     ? { width: stream.height!, height: stream.width! }
     : { width: stream.width!, height: stream.height! };
+}
+
+/** Infinity when unknown, so an unmeasurable clip is re-encoded rather than trusted. */
+function bitsPerPixel(stream: Stream): number {
+  const [frames, seconds] = (stream.avg_frame_rate ?? '').split('/').map(Number);
+  const fps = frames / seconds;
+  const bitRate = Number(stream.bit_rate);
+  if (!fps || !bitRate || !stream.width || !stream.height) return Infinity;
+  return bitRate / (stream.width * stream.height * fps);
 }
 
 function even(value: number): number {
@@ -134,7 +147,7 @@ async function filesUnder(dir: string): Promise<string[]> {
 
 // H.264 and AAC: the one combination every browser plays, Safari and iOS included.
 export class FfmpegVideoEncoder implements VideoEncoder {
-  readonly version = 'ffmpeg-v1';
+  readonly version = 'ffmpeg-v2';
 
   async inspect(path: string): Promise<VideoInfo> {
     const info = await probe(path);
@@ -226,6 +239,7 @@ export class FfmpegVideoEncoder implements VideoEncoder {
         stream.codec_name === 'h264' &&
         stream.pix_fmt === 'yuv420p' &&
         Math.max(size.width, size.height) <= LOOP_MAX_SIDE &&
+        bitsPerPixel(stream) <= LOOP_MAX_BITS_PER_PIXEL &&
         /mp4|mov/.test(info.format.format_name ?? '');
 
       if (isReady) {

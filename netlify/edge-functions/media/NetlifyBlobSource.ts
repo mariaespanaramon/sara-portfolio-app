@@ -1,5 +1,5 @@
 import { getStore } from '@netlify/blobs';
-import type { BlobInfo, BlobSource } from './BlobSource.ts';
+import type { BlobInfo, BlobSource, OpenBlob } from './BlobSource.ts';
 import { BLOBS_REGION } from '../../../src/infrastructure/content/blobStores.ts';
 
 // The client honours `region` for site stores, but its types only declare it for deploy stores.
@@ -16,27 +16,20 @@ export class NetlifyBlobSource implements BlobSource {
 
   async info(key: string): Promise<BlobInfo | null> {
     const result = await this.store.getMetadata(key);
-
-    if (!result || !result.etag) {
-      return null;
-    }
-
-    const { contentType, size } = result.metadata;
-
-    return {
-      etag: result.etag,
-      contentType: typeof contentType === 'string' ? contentType : undefined,
-      size: typeof size === 'number' ? size : undefined,
-    };
+    return result?.etag ? toInfo(result.etag, result.metadata) : null;
   }
 
-  async stream(key: string): Promise<ReadableStream<Uint8Array> | null> {
-    const stream: ReadableStream<Uint8Array> | null = await this.store.get(key, { type: 'stream' });
-    return stream ?? null;
+  async open(key: string): Promise<OpenBlob | null> {
+    const result = await this.store.getWithMetadata(key, { type: 'stream' });
+    return result?.etag ? { info: toInfo(result.etag, result.metadata), body: result.data } : null;
   }
+}
 
-  async bytes(key: string): Promise<ArrayBuffer | null> {
-    const bytes: ArrayBuffer | null = await this.store.get(key, { type: 'arrayBuffer' });
-    return bytes ?? null;
-  }
+function toInfo(etag: string, metadata: Record<string, unknown>): BlobInfo {
+  const { contentType, size } = metadata;
+  return {
+    etag,
+    contentType: typeof contentType === 'string' ? contentType : undefined,
+    size: typeof size === 'number' ? size : undefined,
+  };
 }
