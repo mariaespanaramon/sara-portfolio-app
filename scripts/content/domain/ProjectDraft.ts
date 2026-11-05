@@ -16,6 +16,10 @@ export interface ProjectDraft {
   cover?: string;
   /** Alternative text per file name, for visitors using screen readers. */
   alts?: Record<string, string>;
+  /** Video files to publish as muted loops rather than as videos with controls. */
+  loops?: string[];
+  /** Transparent GIFs to keep transparent, as animated images, instead of filling the background. */
+  keepTransparency?: string[];
 }
 
 /**
@@ -79,11 +83,24 @@ export function parseProjectDraft(value: unknown): ProjectDraft {
     }
   }
 
+  const fileList = (field: 'loops' | 'keepTransparency'): string[] | undefined => {
+    const raw = json[field];
+    if (raw === undefined) return undefined;
+    if (!Array.isArray(raw) || !raw.every((name) => typeof name === 'string' && name !== '')) {
+      problems.push(`${field} must be a list of file names`);
+      return undefined;
+    }
+    return raw as string[];
+  };
+
+  const loops = fileList('loops');
+  const keepTransparency = fileList('keepTransparency');
+
   if (problems.length > 0) {
     throw new ContentError('INVALID_METADATA', `Invalid project metadata: ${problems.join('; ')}`, {
       problems,
     });
   }
 
-  return { title, category, year, description, tags, section, cover, alts };
+  return { title, category, year, description, tags, section, cover, alts, loops, keepTransparency };
 }

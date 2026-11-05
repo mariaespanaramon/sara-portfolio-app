@@ -1,5 +1,12 @@
 import sharp from 'sharp';
-import type { EncodedImage, EncodedRendition, ImageEncoder, ImageInfo } from '../application/ports.ts';
+import type {
+  AnimationInfo,
+  EncodedImage,
+  EncodedRendition,
+  ImageEncoder,
+  ImageInfo,
+} from '../application/ports.ts';
+import { TRANSPARENT_PIXEL_SHARE } from '../domain/mediaRules.ts';
 
 /**
  * Widths generated for every image, never above the source's own width. The top
@@ -17,6 +24,16 @@ const AVIF_OPTIONS = { quality: 62, effort: 5, chromaSubsampling: '4:4:4' } as c
 const WEBP_OPTIONS = { quality: 84, effort: 5, smartSubsample: true } as const;
 
 const PLACEHOLDER_WIDTH = 16;
+
+/**
+ * Animated WebP is far heavier than video, so animations are kept small: it is
+ * only used for transparent GIFs such as a logo, never for full-bleed pieces.
+ */
+const ANIMATION_WIDTHS = [640, 1280];
+const ANIMATION_WEBP_OPTIONS = { quality: 82, effort: 5 } as const;
+
+/** Alpha below this counts as a transparent pixel. GIF alpha is on or off. */
+const ALPHA_THRESHOLD = 128;
 
 /**
  * Adapter: ImageEncoder on top of sharp (libvips).
@@ -54,6 +71,61 @@ export class SharpImageEncoder implements ImageEncoder {
     }
 
     const placeholder = await this.upright(bytes)
+      .resize({ width: PLACEHOLDER_WIDTH })
+      .webp({ quality: 40 })
+      .toBuffer();
+
+    const largest = widths[widths.length - 1];
+
+    return {
+      width: largest,
+      height: Math.round((sourceHeight * largest) / sourceWidth),
+      renditions,
+      placeholder: `data:image/webp;base64,${placeholder.toString('base64')}`,
+    };
+  }
+
+  async inspectAnimation(bytes: Uint8Array): Promise<AnimationInfo> {
+    const { width, pageHeight, height } = await sharp(bytes, { animated: true }).metadata();
+    if (!width || !(pageHeight ?? height)) {
+      throw new Error('Not an image');
+    }
+
+    // The metadata reports an alpha channel for almost every GIF, transparent or
+    // not, so the pixels themselves are counted.
+    const alpha = await sharp(bytes, { animated: true, limitInputPixels: false })
+      .ensureAlpha()
+      .extractChannel(3)
+      .raw()
+      .toBuffer();
+    let transparent = 0;
+    for (const value of alpha) {
+      if (value < ALPHA_THRESHOLD) transparent += 1;
+    }
+
+    return {
+      width,
+      height: pageHeight ?? height!,
+      isTransparent: transparent / alpha.length > TRANSPARENT_PIXEL_SHARE,
+    };
+  }
+
+  async encodeAnimation(bytes: Uint8Array): Promise<EncodedImage> {
+    const { width: sourceWidth, height: sourceHeight } = await this.inspectAnimation(bytes);
+    const below = ANIMATION_WIDTHS.filter((width) => width < sourceWidth);
+    const widths = [...new Set([...below, Math.min(sourceWidth, ANIMATION_WIDTHS[ANIMATION_WIDTHS.length - 1])])];
+    const renditions: EncodedRendition[] = [];
+
+    for (const width of widths) {
+      const webp = await sharp(bytes, { animated: true, limitInputPixels: false })
+        .resize({ width, withoutEnlargement: true })
+        .webp(ANIMATION_WEBP_OPTIONS)
+        .toBuffer();
+      renditions.push({ width, format: 'webp', bytes: webp });
+    }
+
+    // From the first frame only, keeping its transparency.
+    const placeholder = await sharp(bytes, { pages: 1 })
       .resize({ width: PLACEHOLDER_WIDTH })
       .webp({ quality: 40 })
       .toBuffer();

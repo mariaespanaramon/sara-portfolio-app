@@ -4,6 +4,7 @@ import { toUrlId } from '../../application/domain/urlId';
 import { stillOf } from '../../application/domain/Media';
 import { ResponsiveImage } from './media/ResponsiveImage';
 import { LoopVideo } from './media/LoopVideo';
+import { previewLoopOf } from './media/previewLoop';
 import { useInView } from '../hooks/useInView';
 
 /** Half the container from `md` up, where media and text sit side by side. */
@@ -23,6 +24,7 @@ export function ProjectRow({ item, index }: ProjectRowProps) {
   const navigate = useNavigate();
   const { ref: mediaRef, isInView } = useInView();
   const { cover } = item;
+  const previewLoop = previewLoopOf(cover);
   // Even rows put the media on the left, odd rows on the right.
   const isReversed = index % 2 === 1;
 
@@ -50,13 +52,13 @@ export function ProjectRow({ item, index }: ProjectRowProps) {
       <div className={isReversed ? 'md:order-2' : 'md:order-1'}>
         <div ref={mediaRef} className="overflow-hidden bg-site-surface aspect-[4/3]">
           {/*
-            Rows never play video: a project's own page is where it plays, so a
-            video cover shows its poster. Loops are the exception, being the
-            animated preview of 3D work, and play while the row is in view.
+            Rows never play a video with sound: that happens on the project's own
+            page. A loop cover, or a video's short muted preview, plays while the
+            row is in view; everything else shows its still.
           */}
-          {cover.kind === 'loop' ? (
+          {previewLoop ? (
             <LoopVideo
-              loop={cover}
+              loop={previewLoop}
               isPlaying={isInView}
               className="w-full h-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
             />

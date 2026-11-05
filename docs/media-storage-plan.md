@@ -350,13 +350,39 @@ steps 2 and 3.
 
 ### Step 4: Videos and loops
 
-- [ ] Video pipeline (ffmpeg): HLS ladder, poster, preview and silent-track
-      detection.
-- [ ] Loop pipeline: GIF or short clip to MP4, plus a poster.
-- [ ] `HlsVideo` (native HLS or lazy `hls.js`) and `LoopVideo`.
-- [ ] Cards and rows use previews (hover, in-view, reduced motion,
-      `Save-Data`).
-- [ ] `/add-project` accepts videos and GIFs.
+- [x] Ports: `VideoEncoder` (inspect, encodeVideo, encodeLoop), animation
+      support on `ImageEncoder`, encoder outputs read lazily and disposed after
+      upload, `SourceFile.path` and `Hasher.digestFile`, so large videos are
+      never held in memory.
+- [x] `FfmpegVideoEncoder`:
+  - HLS in H.264 and fMP4, 4 s segments with aligned keyframes. The ladder is
+    1080/720/480 by short side, so portrait works, plus a rung at the source's
+    own resolution when it sits clearly between rungs. CRF 20 with bitrate
+    caps.
+  - AAC only when there is real sound; a silent track (below −60 dB) is
+    dropped.
+  - A 4 s 480p muted preview, and a poster frame at about 1 s.
+  - Loops: up to 1920 px on the long side, transparency filled with the site
+    background (`#ffffff`). Clips that are already H.264 and yuv420p at a
+    suitable size are only remuxed, with no re-encode.
+- [x] Transparent GIFs: transparency is detected by counting pixels, since the
+      metadata claims alpha for almost every GIF. By default it is filled;
+      `keepTransparency` keeps it as an animated WebP (640/1280 px).
+- [x] `AddProject`: four roles (image, video, loop, animation). `loops` and
+      `keepTransparency` in the draft, `suggestedRole` and `hasSound` in the dry
+      run, the `TRANSPARENCY_FILLED` and `LONG_LOOP` warnings, and the
+      `UNREADABLE_VIDEO` and `LOOP_TOO_LARGE` errors (16 MB, the Edge
+      Function's range limit, so loops always play on Safari). Segments are
+      uploaded before playlists. 11 tests.
+- [x] Web: `VideoPlayer` shows the poster and a play button of its own, then
+      plays HLS natively on Safari or with `hls.js/light` elsewhere (a lazy
+      chunk of 119 KB gzipped, capped to the player's size). Section rows play
+      a video cover's muted preview while in view.
+- [x] Skill: asks per video whether it is a video or a loop (proposing one from
+      length and sound), and per transparent GIF whether to keep the
+      transparency.
+- [ ] End to end: publish a real video, loop and GIF, then check playback on the
+      preview in Chrome, Safari and iOS.
 
 ### Step 5: Remaining skills
 

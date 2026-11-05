@@ -2,18 +2,19 @@
  * Rules for the files Sara drops into a project folder.
  */
 
+/**
+ * What a file is by its format. A video file can still end up as a loop: that
+ * is the person's choice, not something the format tells.
+ */
 export type SourceKind = 'image' | 'video' | 'loop';
 
 export type Classification =
   | { kind: SourceKind }
-  | { kind: 'unsupported'; reason: 'not-yet-supported' | 'unknown-format' | 'heic' };
+  | { kind: 'unsupported'; reason: 'unknown-format' | 'heic' };
 
 const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'avif', 'tif', 'tiff']);
 const VIDEO_EXTENSIONS = new Set(['mp4', 'mov', 'm4v', 'webm']);
 const LOOP_EXTENSIONS = new Set(['gif']);
-
-/** Kinds the pipeline can process today. Videos and loops arrive in a later step. */
-const SUPPORTED_KINDS = new Set<SourceKind>(['image']);
 
 function extensionOf(fileName: string): string {
   const dot = fileName.lastIndexOf('.');
@@ -38,7 +39,7 @@ export function classify(fileName: string): Classification {
     return { kind: 'unsupported', reason: 'unknown-format' };
   }
 
-  return SUPPORTED_KINDS.has(kind) ? { kind } : { kind: 'unsupported', reason: 'not-yet-supported' };
+  return { kind };
 }
 
 /** Hidden and system files that end up in folders without anyone adding them. */

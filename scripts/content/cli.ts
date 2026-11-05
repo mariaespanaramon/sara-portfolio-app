@@ -22,6 +22,7 @@ import { NetlifyBlobsContentStore, NetlifyBlobsMediaStore } from './infrastructu
 import { LocalSourceFolder, Sha256Hasher } from './infrastructure/localAdapters.ts';
 import { resolveNetlifyCredentials } from './infrastructure/netlifyCredentials.ts';
 import { SharpImageEncoder } from './infrastructure/SharpImageEncoder.ts';
+import { FfmpegVideoEncoder } from './infrastructure/FfmpegVideoEncoder.ts';
 
 const PROJECT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -58,6 +59,7 @@ async function run(argv: string[]): Promise<unknown> {
       const addProject = new AddProject({
         folders: new LocalSourceFolder(),
         images: new SharpImageEncoder(),
+        videos: new FfmpegVideoEncoder(),
         media: new NetlifyBlobsMediaStore(credentials),
         content,
         hasher: new Sha256Hasher(),
