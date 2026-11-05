@@ -300,7 +300,16 @@ steps 2 and 3.
     behave the same way.
   - `Range` returns 206 with the right bytes, both before and after a full
     fetch; partial responses are never cached.
-- [ ] Visual check on the preview, including a loop on Safari or iOS.
+- [x] Visual check on the preview, on Chrome and Safari.
+- [x] Section header image was slow (over 1 s): it ended a serial chain of
+      HTML, JS, both documents and then the image. Fixed by rendering the
+      header before the work items arrive, preloading the documents from the
+      HTML, `fetchpriority="high"`, and preloading the header rendition when a
+      home card is hovered, touched or focused.
+- [x] Stores moved from the default `us-east-2` to `eu-central-1` (Frankfurt),
+      closer to the expected visitors. The region and store names live in
+      `src/infrastructure/content/blobStores.ts` and every read and write must
+      pass them.
 
 ### Step 2: Images
 
@@ -341,7 +350,8 @@ steps 2 and 3.
 ### Step 6: Real content and cleanup
 
 - [ ] Upload Sara's real projects and section covers; check them on the preview.
-- [ ] Delete the old `videos` and `work-items` stores and the root `items.json`.
+- [ ] Delete the old `videos` and `work-items` stores, and the sample copies of
+      `media` and `content` left in `us-east-2`.
 - [ ] Update the README: the new content workflow, the skills and the
       prerequisites. Remove the obsolete Blobs instructions.
 - [ ] Enable credit usage notifications in Netlify.

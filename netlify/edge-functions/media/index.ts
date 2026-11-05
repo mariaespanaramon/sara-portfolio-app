@@ -1,6 +1,7 @@
 import type { Config } from '@netlify/edge-functions';
 import { NetlifyBlobSource } from './NetlifyBlobSource.ts';
 import { serveBlob, type CachePolicy } from './serveBlob.ts';
+import { BLOB_STORES } from '../../../src/infrastructure/content/blobStores.ts';
 
 /**
  * Serves the `media` and `content` blob stores over HTTP.
@@ -19,7 +20,7 @@ interface Route {
 
 const ROUTES: Record<string, Route> = {
   media: {
-    storeName: 'media',
+    storeName: BLOB_STORES.media,
     // Keys change whenever the file does, so a key's bytes never change.
     cache: {
       browser: 'public, max-age=31536000, immutable',
@@ -27,7 +28,7 @@ const ROUTES: Record<string, Route> = {
     },
   },
   content: {
-    storeName: 'content',
+    storeName: BLOB_STORES.content,
     // Browsers always revalidate (cheap, thanks to the ETag); the CDN holds a
     // copy for a minute, so an upload shows up within about that long.
     cache: {

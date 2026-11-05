@@ -1,5 +1,12 @@
 import { getStore } from '@netlify/blobs';
 import type { BlobInfo, BlobSource } from './BlobSource.ts';
+import { BLOBS_REGION } from '../../../src/infrastructure/content/blobStores.ts';
+
+/**
+ * `region` is honoured by the client at runtime, but this version's types only
+ * declare it for deploy stores.
+ */
+type SiteStoreOptions = Parameters<typeof getStore>[0] & { name: string; region: string };
 
 /**
  * Adapter: BlobSource over a site-wide Netlify Blobs store.
@@ -17,7 +24,8 @@ export class NetlifyBlobSource implements BlobSource {
    * build instead, since the bundler evaluates modules where no token exists.
    */
   constructor(storeName: string) {
-    this.store = getStore(storeName);
+    const options: SiteStoreOptions = { name: storeName, region: BLOBS_REGION };
+    this.store = getStore(options);
   }
 
   async info(key: string): Promise<BlobInfo | null> {
