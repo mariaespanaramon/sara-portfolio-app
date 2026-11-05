@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { readdir, readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { readdir, readFile, stat } from 'node:fs/promises';
+import { basename, join } from 'node:path';
 import type { Hasher, SourceFile, SourceFolder } from '../application/ports.ts';
 
 /** Adapter: SourceFolder over the local file system. Does not descend into subfolders. */
@@ -16,15 +16,24 @@ export class LocalSourceFolder implements SourceFolder {
 
     return entries
       .filter((entry) => entry.isFile())
-      .map((entry) => {
-        const filePath = join(path, entry.name);
-        return {
-          name: entry.name,
-          path: filePath,
-          read: async () => new Uint8Array(await readFile(filePath)),
-        };
-      });
+      .map((entry) => sourceFile(join(path, entry.name)));
   }
+
+  async file(path: string): Promise<SourceFile | null> {
+    try {
+      return (await stat(path)).isFile() ? sourceFile(path) : null;
+    } catch {
+      return null;
+    }
+  }
+}
+
+function sourceFile(path: string): SourceFile {
+  return {
+    name: basename(path),
+    path,
+    read: async () => new Uint8Array(await readFile(path)),
+  };
 }
 
 /** Adapter: Hasher over SHA-256, truncated to 16 hex characters (64 bits). */

@@ -1,11 +1,13 @@
 import type { ImageAsset, LoopAsset, MediaAsset, VideoAsset } from '../../application/domain/Media';
 import type { WorkItem } from '../../application/domain/WorkItem';
 import type { Section } from '../../application/domain/Section';
+import type { SiteMedia } from '../../application/domain/SiteMedia';
 import type {
   StoredImage,
   StoredLoop,
   StoredMedia,
   StoredSection,
+  SiteDocument,
   StoredVideo,
   StoredWorkItem,
 } from './contentSchema';
@@ -43,6 +45,15 @@ export class ContentMapper {
       order: stored.order,
       cover: this.toImage(stored.cover),
       hover: stored.hover && this.toLoop(stored.hover),
+    };
+  }
+
+  toSiteMedia(stored: SiteDocument): SiteMedia {
+    return {
+      hero: stored.hero && this.toImage(stored.hero),
+      intro:
+        stored.intro &&
+        (stored.intro.kind === 'loop' ? this.toLoop(stored.intro) : this.toImage(stored.intro)),
     };
   }
 

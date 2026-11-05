@@ -72,6 +72,18 @@ export interface StoredSection {
   hover?: StoredLoop;
 }
 
+/** Media that belong to the site itself rather than to a project or section. */
+export interface SiteDocument {
+  version: typeof CONTENT_SCHEMA_VERSION;
+  /** Background of the home page hero. */
+  hero?: StoredImage;
+  /**
+   * The intro splash animation: a loop, or an animated image when it needs
+   * transparency, as a logo usually does.
+   */
+  intro?: StoredLoop | StoredImage;
+}
+
 export interface WorkItemsDocument {
   version: typeof CONTENT_SCHEMA_VERSION;
   items: StoredWorkItem[];
@@ -86,4 +98,5 @@ export interface SectionsDocument {
 export const CONTENT_KEYS = {
   workItems: 'work-items.json',
   sections: 'sections.json',
+  site: 'site.json',
 } as const;

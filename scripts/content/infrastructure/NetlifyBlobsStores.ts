@@ -41,8 +41,22 @@ export class NetlifyBlobsMediaStore implements MediaStore {
 
   async put(key: string, bytes: Uint8Array, contentType: string): Promise<void> {
     await this.store.set(key, toArrayBuffer(bytes), {
-      metadata: { contentType, size: bytes.byteLength },
+      metadata: { contentType, size: bytes.byteLength, uploadedAt: new Date().toISOString() },
     });
+  }
+
+  async uploadedAt(key: string): Promise<Date | null> {
+    const uploadedAt = (await this.store.getMetadata(key))?.metadata.uploadedAt;
+    return typeof uploadedAt === 'string' ? new Date(uploadedAt) : null;
+  }
+
+  async list(): Promise<string[]> {
+    const { blobs } = await this.store.list();
+    return blobs.map((blob) => blob.key);
+  }
+
+  async delete(key: string): Promise<void> {
+    await this.store.delete(key);
   }
 }
 

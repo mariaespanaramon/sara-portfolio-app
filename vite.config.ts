@@ -13,7 +13,7 @@ function preloadContent(): Plugin {
     name: 'preload-content',
     apply: 'build',
     transformIndexHtml() {
-      return ['/content/sections.json', '/content/work-items.json'].map((href) => ({
+      return ['/content/sections.json', '/content/work-items.json', '/content/site.json'].map((href) => ({
         tag: 'link',
         attrs: { rel: 'preload', href, as: 'fetch', crossorigin: 'anonymous' },
         injectTo: 'head',

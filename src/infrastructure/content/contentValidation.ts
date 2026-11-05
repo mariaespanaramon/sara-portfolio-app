@@ -1,6 +1,7 @@
 import {
   CONTENT_SCHEMA_VERSION,
   type SectionsDocument,
+  type SiteDocument,
   type StoredImage,
   type StoredLoop,
   type StoredMedia,
@@ -236,5 +237,22 @@ export function parseSectionsDocument(value: unknown): SectionsDocument {
     sections: asArray(json.sections, 'sections.sections').map((section, index) =>
       parseSection(section, `sections.sections[${index}]`)
     ),
+  };
+}
+
+export function parseSiteDocument(value: unknown): SiteDocument {
+  const json = asObject(value, 'site');
+  checkVersion(json, 'site');
+
+  let intro: SiteDocument['intro'];
+  if (json.intro !== undefined) {
+    const kind = asObject(json.intro, 'site.intro').kind;
+    intro = kind === 'loop' ? parseLoop(json.intro, 'site.intro') : parseImage(json.intro, 'site.intro');
+  }
+
+  return {
+    version: CONTENT_SCHEMA_VERSION,
+    hero: json.hero === undefined ? undefined : parseImage(json.hero, 'site.hero'),
+    intro,
   };
 }

@@ -218,7 +218,7 @@ use them later without a programming background:
 | `/add-media` | A project id, files and a position | Inserts pieces into an existing project |
 | `/edit-project` | A project id | Changes metadata, reorders pieces or picks a different cover |
 | `/remove-project` | A project id, optionally specific pieces | Removes the item or pieces and deletes blobs nothing else references |
-| `/set-section-cover` | A section id plus an image and optional hover video or GIF | Replaces the section's cover media |
+| `/set-section` | A section id plus title, order, cover image and optional hover video or GIF | Creates the section or changes any of those |
 | `/set-site-media` | `hero` or `intro` plus a file | Replaces the hero image or the intro splash loop |
 
 ## Step by step
@@ -384,14 +384,39 @@ steps 2 and 3.
 - [ ] End to end: publish a real video, loop and GIF, then check playback on the
       preview in Chrome, Safari and iOS.
 
-### Step 5: Remaining skills
+### Step 5: Remaining skills and site media
 
-- [ ] `/add-media`, `/edit-project`, `/remove-project` (with orphan blob
-      cleanup), `/undo-last-change`, `/set-section-cover` and
-      `/set-site-media`.
-- [ ] `HttpSiteMediaRepository`; the hero and intro splash read from
-      `site.json`.
-- [ ] `/check-setup`.
+- [x] `MediaPublisher`: an application service with the file checks,
+      planning, encoding and upload, shared by every use case that publishes.
+- [x] One `last-change.json` record of the document a change replaced (which
+      document, a description, when, and how it was before) instead of
+      per-document backups, so undo always knows what to restore.
+- [x] `cleanMedia` runs after every change. It deletes media that neither the
+      current documents nor the last change's previous version reference, only
+      under `images/`, `videos/` and `loops/`, and never anything uploaded in
+      the last 24 hours, which an upload in progress may own.
+- [x] Use cases: `RemoveProject`, `UndoLastChange` (undoing twice redoes),
+      `AddMedia` (at a position, the cover stays the same piece), `EditProject`
+      (texts, section, cover, order, removing pieces and alt texts by position;
+      a new title moves the page) and `SetSection` (create with title, order and
+      cover, or change any of them; the hover is always a loop), plus
+      `SetSiteMedia` (the hero is an image; the intro is an image, a loop, or an
+      animation kept transparent).
+- [x] `check-setup` checks Node, ffmpeg, ffprobe, sharp, the Netlify link and
+      login, and Blobs access, reporting every item.
+- [x] `site.json` in the schema; the `SiteMedia` domain type,
+      `SiteMediaRepository`, the HTTP and mock adapters and `useSiteMedia`. The
+      hero and the intro splash read it, the intro waits for a loop or image to
+      be ready, and a site without an intro has no splash. `site.json` is
+      preloaded too.
+- [x] Skills: `/add-media`, `/edit-project`, `/remove-project`,
+      `/undo-last-change`, `/set-section` (renamed from `/set-section-cover`,
+      since it also creates sections), `/set-site-media` and `/check-setup`.
+      They share the error table in `/add-project`.
+- [x] 21 tests with in-memory adapters.
+- [x] Removed the "Mixed Media Test" sample with `remove-project`.
+- [x] Delete the stale `work-items.previous.json` left in the content store by
+      the earlier backup scheme (done by Maria).
 
 ### Step 6: Real content and cleanup
 

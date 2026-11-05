@@ -17,6 +17,8 @@ interface ResponsiveImageProps {
   /** The main image of the screen: the browser fetches it ahead of the rest. */
   isPriority?: boolean;
   onClick?: (event: React.MouseEvent<HTMLImageElement>) => void;
+  /** Called once loaded, or on failure: either way there is nothing left to wait for. */
+  onSettled?: () => void;
 }
 
 /**
@@ -34,6 +36,7 @@ export function ResponsiveImage({
   loading = 'lazy',
   isPriority = false,
   onClick,
+  onSettled,
 }: ResponsiveImageProps) {
   // Dropped once loaded, so it cannot show through images with transparency.
   const [isLoaded, setIsLoaded] = useState(false);
@@ -62,7 +65,11 @@ export function ResponsiveImage({
         decoding="async"
         className={className}
         onClick={onClick}
-        onLoad={() => setIsLoaded(true)}
+        onLoad={() => {
+          setIsLoaded(true);
+          onSettled?.();
+        }}
+        onError={onSettled}
         style={
           image.placeholder && !isLoaded
             ? { backgroundImage: `url(${image.placeholder})`, backgroundSize: 'cover' }

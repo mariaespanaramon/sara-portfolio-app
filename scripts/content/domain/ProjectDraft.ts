@@ -1,19 +1,7 @@
-import { ContentError } from './ContentError.ts';
+import { FieldReader } from './FieldReader.ts';
 
-/**
- * The texts of a new project, as gathered by the skill before anything is
- * processed or uploaded.
- */
-export interface ProjectDraft {
-  title: string;
-  category: string;
-  year: string;
-  description: string;
-  tags: string[];
-  /** Id of the section the project is listed under. */
-  section: string;
-  /** File name of the piece used as cover. Defaults to the first piece. */
-  cover?: string;
+/** How the pieces in a folder are to be published, beyond what their files tell. */
+export interface MediaOptions {
   /** Alternative text per file name, for visitors using screen readers. */
   alts?: Record<string, string>;
   /** Video files to publish as muted loops rather than as videos with controls. */
@@ -23,84 +11,84 @@ export interface ProjectDraft {
 }
 
 /**
- * Validates the metadata file the skill writes. Reports every problem at once,
- * so they can all be fixed in one go.
+ * The texts of a new project, as gathered by the skill before anything is
+ * processed or uploaded.
  */
+export interface ProjectDraft extends MediaOptions {
+  title: string;
+  category: string;
+  year: string;
+  description: string;
+  tags: string[];
+  /** Id of the section the project is listed under. */
+  section: string;
+  /** File name of the piece used as cover. Defaults to the first piece. */
+  cover?: string;
+}
+
+/** Pieces to add to an existing project. */
+export interface MediaAddition extends MediaOptions {
+  /** 1-based position the first new piece takes. Defaults to the end. */
+  position?: number;
+}
+
+/**
+ * Changes to an existing project. Pieces are referred to by their 1-based
+ * position, as people see them on the page.
+ */
+export interface ProjectChanges {
+  title?: string;
+  category?: string;
+  year?: string;
+  description?: string;
+  tags?: string[];
+  section?: string;
+  /** Position of the piece to use as cover. */
+  cover?: number;
+  /** Every current position, in the new order. */
+  order?: number[];
+  /** Positions of pieces to take out of the project. */
+  removePieces?: number[];
+  /** New alternative text per position. */
+  alts?: Record<string, string>;
+}
+
+/** Validates the metadata file the add-project skill writes. */
 export function parseProjectDraft(value: unknown): ProjectDraft {
-  const problems: string[] = [];
-  const json = (typeof value === 'object' && value !== null ? value : {}) as Record<string, unknown>;
+  const fields = new FieldReader(value);
 
-  const text = (field: string, required: boolean): string => {
-    const raw = json[field];
-    if (raw === undefined && !required) return '';
-    if (typeof raw !== 'string' || (required && raw.trim() === '')) {
-      problems.push(`${field} must be ${required ? 'a non-empty' : 'a'} string`);
-      return '';
-    }
-    return raw.trim();
-  };
+  return fields.done({
+    title: fields.text('title', true),
+    category: fields.text('category', true),
+    year: fields.year('year', true) ?? '',
+    description: fields.text('description', false) ?? '',
+    tags: fields.tags('tags') ?? [],
+    section: fields.text('section', true),
+    cover: fields.text('cover', false),
+    ...fields.mediaOptions(),
+  });
+}
 
-  const title = text('title', true);
-  const category = text('category', true);
-  const year = text('year', true);
-  const description = text('description', false);
-  const section = text('section', true);
+/** Validates the metadata file the add-media skill writes. */
+export function parseMediaAddition(value: unknown): MediaAddition {
+  const fields = new FieldReader(value);
+  return fields.done({ position: fields.position('position'), ...fields.mediaOptions() });
+}
 
-  if (year && !/^\d{4}$/.test(year)) {
-    problems.push('year must be four digits, such as 2025');
-  }
+/** Validates the changes file the edit-project skill writes. */
+export function parseProjectChanges(value: unknown): ProjectChanges {
+  const fields = new FieldReader(value);
 
-  let tags: string[] = [];
-  if (json.tags !== undefined) {
-    if (!Array.isArray(json.tags) || !json.tags.every((tag) => typeof tag === 'string')) {
-      problems.push('tags must be a list of strings');
-    } else {
-      tags = json.tags.map((tag) => tag.trim()).filter((tag) => tag !== '');
-    }
-  }
-
-  let cover: string | undefined;
-  if (json.cover !== undefined) {
-    if (typeof json.cover !== 'string' || json.cover.trim() === '') {
-      problems.push('cover must be a file name');
-    } else {
-      cover = json.cover.trim();
-    }
-  }
-
-  let alts: Record<string, string> | undefined;
-  if (json.alts !== undefined) {
-    const raw = json.alts;
-    if (
-      typeof raw !== 'object' ||
-      raw === null ||
-      Array.isArray(raw) ||
-      !Object.values(raw).every((alt) => typeof alt === 'string')
-    ) {
-      problems.push('alts must map file names to texts');
-    } else {
-      alts = raw as Record<string, string>;
-    }
-  }
-
-  const fileList = (field: 'loops' | 'keepTransparency'): string[] | undefined => {
-    const raw = json[field];
-    if (raw === undefined) return undefined;
-    if (!Array.isArray(raw) || !raw.every((name) => typeof name === 'string' && name !== '')) {
-      problems.push(`${field} must be a list of file names`);
-      return undefined;
-    }
-    return raw as string[];
-  };
-
-  const loops = fileList('loops');
-  const keepTransparency = fileList('keepTransparency');
-
-  if (problems.length > 0) {
-    throw new ContentError('INVALID_METADATA', `Invalid project metadata: ${problems.join('; ')}`, {
-      problems,
-    });
-  }
-
-  return { title, category, year, description, tags, section, cover, alts, loops, keepTransparency };
+  return fields.done({
+    title: fields.text('title', false),
+    category: fields.text('category', false),
+    year: fields.year('year', false),
+    description: fields.text('description', false),
+    tags: fields.tags('tags'),
+    section: fields.text('section', false),
+    cover: fields.position('cover'),
+    order: fields.positions('order'),
+    removePieces: fields.positions('removePieces'),
+    alts: fields.textMap('alts'),
+  });
 }

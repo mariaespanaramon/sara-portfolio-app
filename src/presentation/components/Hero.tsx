@@ -1,16 +1,32 @@
+import type { SiteMediaRepository } from '../../infrastructure/ports/repositories';
+import { useSiteMedia } from '../../application/service/useSiteMedia';
+import { ResponsiveImage } from './media/ResponsiveImage';
+
+interface HeroProps {
+  repository: SiteMediaRepository;
+}
+
 /**
  * Hero section component
  */
-export function Hero() {
+export function Hero({ repository }: HeroProps) {
+  const { siteMedia } = useSiteMedia(repository);
+  const image = siteMedia?.hero;
+
   return (
     <section className="relative min-h-screen flex items-center justify-center px-6 lg:px-12">
-      {/* Background image */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.pexels.com/photos/28843650/pexels-photo-28843650.jpeg"
-          alt="Hero background"
-          className="w-full h-full object-cover"
-        />
+      {/* Background image. The surface colour holds its place until it arrives. */}
+      <div className="absolute inset-0 z-0 bg-site-surface">
+        {image && (
+          <ResponsiveImage
+            image={image}
+            sizes="100vw"
+            alt={image.alt ?? ''}
+            loading="eager"
+            isPriority
+            className="w-full h-full object-cover"
+          />
+        )}
       </div>
 
       {/*

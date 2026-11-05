@@ -7,6 +7,11 @@
 export interface MediaStore {
   has(key: string): Promise<boolean>;
   put(key: string, bytes: Uint8Array, contentType: string): Promise<void>;
+  /** Every key in the store. */
+  list(): Promise<string[]>;
+  /** When the blob was uploaded. Null when unknown or missing. */
+  uploadedAt(key: string): Promise<Date | null>;
+  delete(key: string): Promise<void>;
 }
 
 export interface StoredDocument {
@@ -41,10 +46,12 @@ export interface SourceFile {
   read(): Promise<Uint8Array>;
 }
 
-/** The folder a project is uploaded from. */
+/** The files a project, a section or the site is uploaded from. */
 export interface SourceFolder {
   /** Every file directly inside the folder. Null when the folder does not exist. */
   list(path: string): Promise<SourceFile[] | null>;
+  /** A single file. Null when it does not exist. */
+  file(path: string): Promise<SourceFile | null>;
 }
 
 export interface ImageInfo {

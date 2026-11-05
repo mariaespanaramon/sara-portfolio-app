@@ -153,6 +153,8 @@ uploaded are skipped.
 
 ## Explaining errors
 
+This table is shared by every content skill.
+
 | Code | What to say and do |
 |---|---|
 | `NOT_LOGGED_IN` | The computer is not connected to the site's account. Ask them to type `! npx netlify login` in the chat and approve it in the browser. |
@@ -165,6 +167,9 @@ uploaded are skipped.
 | `LOOP_TOO_LARGE` | `details.file` is too heavy to play as a loop on iPhones and Safari (`details.sizeMB` MB, the limit is `details.maxMB`). Suggest trimming it, or for a video, publishing it with controls instead. Nothing was published. |
 | `COVER_NOT_FOUND` | The chosen cover is not in the folder. Ask again, offering the file names. |
 | `PROJECT_EXISTS` | There is already a project called `details.existingTitle`. Ask for a different title. |
+| `PROJECT_NOT_FOUND` | That project is not on the site. Offer the ones in `details.projects` by title. |
+| `FILE_NOT_FOUND` | The file could not be found. Ask them to drag it into the chat again. |
+| `NOTHING_TO_UNDO` | There is no change to undo yet. |
 | `SECTION_NOT_FOUND` | Offer the sections in `details.sections` again. |
 | `INVALID_METADATA` | A mistake on your side writing the metadata file. Fix it from `details.problems` and retry; do not bother them with it. |
 | `CONTENT_CHANGED` | Someone else was changing the site at the same moment. Wait a minute and retry. |
