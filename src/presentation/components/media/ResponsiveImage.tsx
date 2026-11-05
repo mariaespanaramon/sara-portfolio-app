@@ -14,6 +14,8 @@ interface ResponsiveImageProps {
   className?: string;
   /** Lazy unless the image is visible on first paint. */
   loading?: 'lazy' | 'eager';
+  /** The main image of the screen: the browser fetches it ahead of the rest. */
+  isPriority?: boolean;
   onClick?: (event: React.MouseEvent<HTMLImageElement>) => void;
 }
 
@@ -30,6 +32,7 @@ export function ResponsiveImage({
   alt,
   className,
   loading = 'lazy',
+  isPriority = false,
   onClick,
 }: ResponsiveImageProps) {
   // Dropped once loaded, so it cannot show through images with transparency.
@@ -53,6 +56,9 @@ export function ResponsiveImage({
         height={image.height}
         alt={alt ?? image.alt ?? ''}
         loading={loading}
+        // Lower case on purpose: React 18 does not know the camelCase prop and
+        // would drop it, but passes unknown lower case attributes through.
+        {...(isPriority ? { fetchpriority: 'high' } : {})}
         decoding="async"
         className={className}
         onClick={onClick}

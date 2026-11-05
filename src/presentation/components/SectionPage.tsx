@@ -9,8 +9,11 @@ import type {
 import { ProjectRow } from './ProjectRow';
 import { ResponsiveImage } from './media/ResponsiveImage';
 
-/** The header image takes 70% of the container from `md` up, all of it below. */
-const SECTION_HEADER_SIZES = '(min-width: 768px) 70vw, 100vw';
+/**
+ * The header image takes 70% of the container from `md` up, all of it below.
+ * Exported so the home cards can preload the same rendition.
+ */
+export const SECTION_HEADER_SIZES = '(min-width: 768px) 70vw, 100vw';
 
 interface SectionPageProps {
   sectionRepository: SectionRepository;
@@ -37,7 +40,9 @@ export function SectionPage({ sectionRepository, workItemRepository }: SectionPa
     window.scrollTo(0, 0);
   }, [id]);
 
-  const loading = sectionLoading || itemsLoading;
+  // The header only needs the section, so it renders as soon as that arrives;
+  // waiting for the work items too would hold its image back for nothing.
+  const loading = sectionLoading;
   const error = sectionError ?? itemsError;
 
   if (loading) {
@@ -123,12 +128,15 @@ export function SectionPage({ sectionRepository, workItemRepository }: SectionPa
               sizes={SECTION_HEADER_SIZES}
               alt={section.title}
               loading="eager"
+              isPriority
               className="w-full aspect-[4/3] object-cover"
             />
           </div>
         </header>
 
-        {projects.length === 0 ? (
+        {itemsLoading ? (
+          <div className="w-8 h-8 border-2 border-site-text-muted border-t-transparent rounded-full animate-spin mx-auto" />
+        ) : projects.length === 0 ? (
           <p className="text-site-text-secondary font-light text-lg">
             No projects in this section yet.
           </p>

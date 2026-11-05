@@ -4,6 +4,8 @@ import type { Section } from '../../application/domain/Section';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { ResponsiveImage } from './media/ResponsiveImage';
 import { LoopVideo } from './media/LoopVideo';
+import { preloadImage } from './media/preloadImage';
+import { SECTION_HEADER_SIZES } from './SectionPage';
 
 /** Three columns from `md` up, one below. */
 const SECTION_CARD_SIZES = '(min-width: 768px) 33vw, 100vw';
@@ -28,7 +30,15 @@ export function SectionCard({ section }: SectionCardProps) {
   const canPlayOnHover = !isMobile;
   const isPlaying = canPlayOnHover && isHovered;
 
+  // Hovering or touching a card is a strong hint the section is next, so its
+  // header image starts downloading before the click.
+  const preloadSectionHeader = () => {
+    preloadImage(section.cover, SECTION_HEADER_SIZES);
+  };
+
   const handleMouseEnter = () => {
+    preloadSectionHeader();
+
     if (!canPlayOnHover) {
       return;
     }
@@ -67,6 +77,8 @@ export function SectionCard({ section }: SectionCardProps) {
       className="relative aspect-[8/9] overflow-hidden bg-site-surface cursor-pointer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={preloadSectionHeader}
+      onFocus={preloadSectionHeader}
       onClick={goToSection}
       onKeyDown={handleKeyDown}
     >

@@ -287,6 +287,9 @@ steps 2 and 3.
       from reading it, so Maria ran the upload herself.
 - [x] Push and open draft PR #11. The first preview failed: the edge bundler
       evaluates modules at build time, so `getStore` must not run at import.
+      Creating it lazily and keeping it then failed later with 500s ("Token
+      expired"): the Blobs token is per request, so the store is now created
+      per request.
 - [x] Preview checks with curl:
   - SPA fallback works for deep links; `/media/../x` is rejected.
   - Headers are as designed. `Netlify-CDN-Cache-Control` does not reach the
