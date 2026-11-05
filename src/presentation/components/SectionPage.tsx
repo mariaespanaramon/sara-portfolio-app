@@ -8,6 +8,7 @@ import type {
 } from '../../infrastructure/ports/repositories';
 import { ProjectRow } from './ProjectRow';
 import { ResponsiveImage } from './media/ResponsiveImage';
+import { LoadErrorMessage } from './LoadErrorMessage';
 
 /**
  * The header image takes 70% of the container from `md` up, all of it below.
@@ -60,7 +61,7 @@ export function SectionPage({ sectionRepository, workItemRepository }: SectionPa
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-500 font-light">Error: {error}</p>
+          <LoadErrorMessage />
         </div>
       </div>
     );

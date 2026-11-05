@@ -1,6 +1,7 @@
 import { SectionCard } from './SectionCard';
 import { useSections } from '../../application/service/useSections';
 import type { SectionRepository } from '../../infrastructure/ports/repositories';
+import { LoadErrorMessage } from './LoadErrorMessage';
 
 interface SectionGridProps {
   repository: SectionRepository;
@@ -33,7 +34,7 @@ export function SectionGrid({ repository }: SectionGridProps) {
     return (
       <section id="work" className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-500 font-light">Error: {error}</p>
+          <LoadErrorMessage />
         </div>
       </section>
     );

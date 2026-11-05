@@ -10,6 +10,8 @@ interface MediaViewProps {
   className?: string;
   alt?: string;
   loading?: 'lazy' | 'eager';
+  /** See ResponsiveImage. Applies to images only. */
+  isPriority?: boolean;
   /** Loops play while true. Images and videos ignore it. */
   isActive?: boolean;
 }
@@ -26,6 +28,7 @@ export function MediaView({
   className,
   alt,
   loading,
+  isPriority,
   isActive = true,
 }: MediaViewProps) {
   switch (asset.kind) {
@@ -37,6 +40,7 @@ export function MediaView({
           alt={alt}
           className={className}
           loading={loading}
+          isPriority={isPriority}
         />
       );
     case 'video':

@@ -313,15 +313,35 @@ steps 2 and 3.
 
 ### Step 2: Images
 
-- [ ] Missing content documents read as empty content; real failures show a
-      neutral message and log the details to the console, not to visitors.
-
-- [ ] `scripts/content/` core: Blobs client, content-hashed keys, reading and
-      writing the JSON with ETag-based conditional writes (`onlyIfMatch`) so two
-      uploads cannot overwrite each other.
-- [ ] Image pipeline (sharp): sRGB, variants, AVIF/WebP and placeholder.
-- [ ] `fetchpriority="high"` for the first visible image.
-- [ ] `/add-project` skill, images only.
+- [x] Missing content documents read as empty content; real failures show a
+      neutral message (`LoadErrorMessage`) and the hooks log the details to the
+      console.
+- [x] `fetchpriority="high"` on the section header and the project hero.
+- [x] `scripts/content/`, hexagonal:
+  - `domain/`: `ContentError` (stable codes the skills map to plain language),
+    `ProjectDraft` (metadata validation) and `sourceFiles` (file kinds, ignored
+    files, numeric-aware ordering).
+  - `application/`: the ports, `AddProject` (dry run, idempotent uploads keyed
+    by content hash and encoder version, media before document),
+    `contentDocuments` (read, then a conditional write with retries, a backup
+    in `work-items.previous.json`, and the site's own validation) and
+    `listContent`.
+  - `infrastructure/`: `SharpImageEncoder` (AVIF q62 at 4:4:4 and WebP q84, at
+    640/1024/1600/2400/3200 capped at the source width, in sRGB with EXIF
+    stripped, plus a 16 px placeholder; about 7–8 s per image),
+    `NetlifyBlobsStores` (eu-central-1, contentType and size metadata, strong
+    consistency reads), `netlifyCredentials` (reuses `netlify link` and
+    `netlify login`, or the env vars) and `localAdapters`.
+  - `cli.ts`: `add-project`, `list-sections` and `list-projects`, always
+    printing JSON.
+- [x] `npm run content`, `npm run test:tools` (node:test, in-memory adapters, 7
+      tests) and `npm run typecheck:tools` (scripts and Edge Function).
+- [x] The `cover.*` convention was dropped: the cover is the first piece, or
+      one picked by file name, since it must be one of the project's pieces.
+- [x] `/add-project` skill, images only.
+- [ ] End-to-end run of the skill against Blobs. The CLI reads the Netlify
+      login, which the auto mode classifier blocks for Claude, so it needs a
+      permission rule or a run by Maria.
 
 ### Step 3: Mixed gallery polish
 

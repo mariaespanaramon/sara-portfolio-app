@@ -16,7 +16,12 @@ export class HttpWorkItemRepository implements WorkItemRepository {
   ) {}
 
   async getAll(): Promise<WorkItem[]> {
-    const document = parseWorkItemsDocument(await this.client.get(CONTENT_KEYS.workItems));
+    const raw = await this.client.get(CONTENT_KEYS.workItems);
+    if (raw === null) {
+      return [];
+    }
+
+    const document = parseWorkItemsDocument(raw);
     return document.items.map((item) => this.mapper.toWorkItem(item));
   }
 }

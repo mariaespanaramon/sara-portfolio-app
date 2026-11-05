@@ -16,7 +16,12 @@ export class HttpSectionRepository implements SectionRepository {
   ) {}
 
   async getAll(): Promise<Section[]> {
-    const document = parseSectionsDocument(await this.client.get(CONTENT_KEYS.sections));
+    const raw = await this.client.get(CONTENT_KEYS.sections);
+    if (raw === null) {
+      return [];
+    }
+
+    const document = parseSectionsDocument(raw);
     return document.sections
       .map((section) => this.mapper.toSection(section))
       .sort((a, b) => a.order - b.order);

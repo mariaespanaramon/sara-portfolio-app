@@ -8,7 +8,7 @@ import {
   type StoredVideo,
   type StoredWorkItem,
   type WorkItemsDocument,
-} from './contentSchema';
+} from './contentSchema.ts';
 
 /**
  * Runtime validation of the stored content documents.

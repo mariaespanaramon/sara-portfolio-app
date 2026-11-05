@@ -6,7 +6,9 @@
  * URL-free means the delivery path can change without rewriting stored content.
  *
  * The content scripts write these documents and the HTTP adapters read them, so
- * both sides import the types from here.
+ * both sides import the types from here. The scripts run on Node without a build
+ * step, so this file and contentValidation.ts must only use erasable TypeScript
+ * and import with explicit `.ts` extensions.
  */
 
 export const CONTENT_SCHEMA_VERSION = 1;

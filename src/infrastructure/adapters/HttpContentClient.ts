@@ -1,17 +1,20 @@
 /**
  * Fetches content documents over HTTP, once per page load.
  *
+ * A document that does not exist yet resolves to null rather than failing: a
+ * fresh site has no content, and that is not an error.
+ *
  * Several screens ask for the same document (a section page and a project page
  * both need every work item), so the in-flight request is shared and its result
  * kept. A failed request is forgotten, so the next caller retries.
  */
 export class HttpContentClient {
-  private readonly documents = new Map<string, Promise<unknown>>();
+  private readonly documents = new Map<string, Promise<unknown | null>>();
 
   /** @param contentBaseUrl - Where the content store is served, without a trailing slash. */
   constructor(private readonly contentBaseUrl: string) {}
 
-  get(key: string): Promise<unknown> {
+  get(key: string): Promise<unknown | null> {
     let document = this.documents.get(key);
 
     if (!document) {
@@ -23,8 +26,12 @@ export class HttpContentClient {
     return document;
   }
 
-  private async fetchDocument(key: string): Promise<unknown> {
+  private async fetchDocument(key: string): Promise<unknown | null> {
     const response = await fetch(`${this.contentBaseUrl}/${key}`);
+
+    if (response.status === 404) {
+      return null;
+    }
 
     if (!response.ok) {
       throw new Error(`Failed to fetch ${key}: HTTP ${response.status}`);

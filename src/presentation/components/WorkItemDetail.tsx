@@ -6,6 +6,7 @@ import { MediaView } from './media/MediaView';
 import { MediaGallery } from './MediaGallery';
 import { toUrlId } from '../../application/domain/urlId';
 import { RevealOnScroll } from './RevealOnScroll';
+import { LoadErrorMessage } from './LoadErrorMessage';
 
 /** The hero fills the viewport, less its frame. */
 const HERO_SIZES = '100vw';
@@ -73,7 +74,7 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-500 font-light">Error: {error}</p>
+          <LoadErrorMessage />
         </div>
       </div>
     );
@@ -114,6 +115,7 @@ export function WorkItemDetail({ repository }: WorkItemDetailProps) {
             sizes={HERO_SIZES}
             alt={workItem.title}
             loading="eager"
+            isPriority
             className="w-full h-full object-cover"
           />
         </div>
