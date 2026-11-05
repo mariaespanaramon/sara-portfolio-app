@@ -1,0 +1,18 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  # Every production deploy costs credits, so commits that cannot change the
+  # site skip the build. Exit 0 means skip. The first check makes sure a build
+  # with nothing to compare against (equal refs) always goes ahead.
+  ignore = """
+    [ "$CACHED_COMMIT_REF" != "$COMMIT_REF" ] && \
+    git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- . \
+      ':(exclude)docs' ':(exclude).claude' ':(exclude)scripts' ':(exclude)*.md'
+  """
+
+# Client-side routes (/section/..., /work/...) all load the app shell. Static
+# files and the media Edge Function take precedence over this rule.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

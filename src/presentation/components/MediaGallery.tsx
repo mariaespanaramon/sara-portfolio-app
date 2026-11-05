@@ -1,82 +1,53 @@
-import { useState, useEffect } from 'react';
-import type { WorkItem } from '../../../application/domain/WorkItem';
-import type { IWorkItemDetail } from './IWorkItemDetail';
+import { useEffect, useState } from 'react';
+import { stillOf, type MediaAsset } from '../../application/domain/Media';
+import { MediaView } from './media/MediaView';
+import { ResponsiveImage } from './media/ResponsiveImage';
+import { useScrollLock } from '../hooks/useScrollLock';
 
-/**
- * Gallery work item detail renderer
- *
- * The hero shows the opening image on its own; the carousel, with its navigation
- * and fullscreen viewer, is revealed further down the page.
- */
-export class GalleryItemDetail implements IWorkItemDetail {
-  renderHeroMedia(workItem: WorkItem): JSX.Element {
-    const firstImage = workItem.galleryImages?.[0];
+/** The gallery sits in a `max-w-4xl` column, 896px wide at most. */
+const GALLERY_SIZES = '(min-width: 896px) 896px, 100vw';
+/** The fullscreen viewer caps media at 90% of the viewport. */
+const FULLSCREEN_SIZES = '90vw';
 
-    if (!firstImage) {
-      return (
-        <div className="w-full h-full flex items-center justify-center bg-site-surface">
-          <span className="text-site-text-secondary">No images available</span>
-        </div>
-      );
-    }
-
-    return (
-      <img src={firstImage} alt={workItem.title} className="w-full h-full object-cover" />
-    );
-  }
-
-  renderBodyMedia(workItem: WorkItem): JSX.Element | null {
-    const images = workItem.galleryImages || [];
-
-    // A single image is already the hero; a carousel of one would add nothing.
-    if (images.length <= 1) {
-      return null;
-    }
-
-    return (
-      <div className="aspect-video overflow-hidden border border-site-border bg-site-surface">
-        <ImageCarousel images={images} title={workItem.title} />
-      </div>
-    );
-  }
+interface MediaGalleryProps {
+  media: MediaAsset[];
+  title: string;
 }
 
 /**
- * Image carousel component for gallery display with fullscreen support
+ * Carousel over a project's media, mixing images, videos and loops, with a
+ * fullscreen viewer.
+ *
+ * The current slide and its two neighbours are mounted, the neighbours hidden:
+ * the browser then fetches them at the same rendition the current one uses, so
+ * moving to the next slide is instant. Neighbouring clips show their poster only,
+ * so nothing plays or streams out of sight.
  */
-function ImageCarousel({ images, title }: { images: string[]; title: string }) {
+export function MediaGallery({ media, title }: MediaGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set([0]));
 
-  // Preload adjacent images for faster navigation
-  useEffect(() => {
-    const imagesToLoad = [
-      currentIndex,
-      currentIndex === 0 ? images.length - 1 : currentIndex - 1,
-      currentIndex === images.length - 1 ? 0 : currentIndex + 1,
-    ];
+  useScrollLock(isFullscreen);
 
-    imagesToLoad.forEach((index) => {
-      if (!loadedImages.has(index)) {
-        const img = new Image();
-        img.src = images[index];
-        img.onload = () => {
-          setLoadedImages((prev) => new Set(prev).add(index));
-        };
-      }
-    });
-  }, [currentIndex, images, loadedImages]);
+  const count = media.length;
+  const previousIndex = (currentIndex - 1 + count) % count;
+  const nextIndex = (currentIndex + 1) % count;
+  const mountedIndexes = new Set([previousIndex, currentIndex, nextIndex]);
+  const current = media[currentIndex];
+
+  const goToPrevious = () => setCurrentIndex(previousIndex);
+  const goToNext = () => setCurrentIndex(nextIndex);
+  const toggleFullscreen = () => setIsFullscreen((open) => !open);
 
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isFullscreen) return;
-      
+
       if (e.key === 'ArrowLeft') {
-        goToPrevious();
+        setCurrentIndex((index) => (index - 1 + count) % count);
       } else if (e.key === 'ArrowRight') {
-        goToNext();
+        setCurrentIndex((index) => (index + 1) % count);
       } else if (e.key === 'Escape') {
         setIsFullscreen(false);
       }
@@ -84,77 +55,81 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFullscreen, currentIndex]);
+  }, [isFullscreen, count]);
 
-  // Prevent body scroll when fullscreen is active
-  useEffect(() => {
-    if (isFullscreen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isFullscreen]);
-
-  const goToPrevious = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
-  };
-
-  const goToNext = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === images.length - 1 ? 0 : prevIndex + 1
-    );
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrentIndex(index);
-  };
-
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-  };
+  const pieceLabel = (index: number) => `${title} - ${index + 1} of ${count}`;
 
   return (
     <>
       {/* Main Carousel */}
       <div className="relative w-full h-full group">
-        {/* Current Image */}
-        <img
-          src={images[currentIndex]}
-          alt={`${title} - Image ${currentIndex + 1}`}
-          className="w-full h-full object-cover cursor-zoom-in"
-          onClick={toggleFullscreen}
-          loading="eager"
-        />
+        {media.map((piece, index) => {
+          if (!mountedIndexes.has(index)) {
+            return null;
+          }
+
+          const isCurrent = index === currentIndex;
+          // Videos keep their own click for the controls; everything else zooms.
+          const zoomsOnClick = piece.kind !== 'video';
+
+          return (
+            <div
+              key={index}
+              className={`absolute inset-0 ${isCurrent ? '' : 'invisible'} ${
+                zoomsOnClick ? 'cursor-zoom-in' : ''
+              }`}
+              aria-hidden={!isCurrent}
+              onClick={zoomsOnClick ? toggleFullscreen : undefined}
+            >
+              {isCurrent ? (
+                <MediaView
+                  asset={piece}
+                  sizes={GALLERY_SIZES}
+                  alt={pieceLabel(index)}
+                  loading="eager"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <ResponsiveImage
+                  image={stillOf(piece)}
+                  sizes={GALLERY_SIZES}
+                  loading="eager"
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+          );
+        })}
 
         {/* Navigation Arrows */}
-        {images.length > 1 && (
+        {count > 1 && (
           <>
             <button
               onClick={goToPrevious}
               className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-site-bg/80 hover:bg-site-bg/90 text-site-text-primary transition-all opacity-0 group-hover:opacity-100"
-              aria-label="Previous image"
+              aria-label="Previous"
             >
               <span className="text-2xl">‹</span>
             </button>
             <button
               onClick={goToNext}
               className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-site-bg/80 hover:bg-site-bg/90 text-site-text-primary transition-all opacity-0 group-hover:opacity-100"
-              aria-label="Next image"
+              aria-label="Next"
             >
               <span className="text-2xl">›</span>
             </button>
           </>
         )}
 
+        {/*
+          The controls overlaid on the slide sit along the top edge, so they never
+          cover a video's own controls at the bottom.
+        */}
+
         {/* Fullscreen Button */}
         <button
           onClick={toggleFullscreen}
-          className="absolute bottom-4 right-4 w-10 h-10 flex items-center justify-center bg-site-bg/80 hover:bg-site-bg/90 text-site-text-primary transition-all opacity-0 group-hover:opacity-100"
+          className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-site-bg/80 hover:bg-site-bg/90 text-site-text-primary transition-all opacity-0 group-hover:opacity-100"
           aria-label="View fullscreen"
           title="View fullscreen"
         >
@@ -174,24 +149,24 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
           </svg>
         </button>
 
-        {/* Image Counter */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-site-bg/80 text-site-text-primary text-sm font-light tracking-wide">
-          {currentIndex + 1} / {images.length}
+        {/* Counter */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-site-bg/80 text-site-text-primary text-sm font-light tracking-wide">
+          {currentIndex + 1} / {count}
         </div>
 
         {/* Dot Indicators */}
-        {images.length > 1 && images.length <= 10 && (
-          <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-2">
-            {images.map((_, index) => (
+        {count > 1 && count <= 10 && (
+          <div className="absolute top-16 left-1/2 -translate-x-1/2 flex gap-2">
+            {media.map((_, index) => (
               <button
                 key={index}
-                onClick={() => goToSlide(index)}
+                onClick={() => setCurrentIndex(index)}
                 className={`w-2 h-2 rounded-full transition-all ${
                   index === currentIndex
                     ? 'bg-site-text-primary w-6'
                     : 'bg-site-text-secondary hover:bg-site-text-muted'
                 }`}
-                aria-label={`Go to image ${index + 1}`}
+                aria-label={`Go to ${index + 1}`}
               />
             ))}
           </div>
@@ -222,17 +197,20 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
             </svg>
           </button>
 
-          {/* Fullscreen Image */}
-          <img
-            src={images[currentIndex]}
-            alt={`${title} - Image ${currentIndex + 1}`}
-            className="max-w-[90vw] max-h-[90vh] object-contain"
-            onClick={(e) => e.stopPropagation()}
-            loading="eager"
-          />
+          {/* Fullscreen Media */}
+          <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-center">
+            <MediaView
+              key={currentIndex}
+              asset={current}
+              sizes={FULLSCREEN_SIZES}
+              alt={pieceLabel(currentIndex)}
+              loading="eager"
+              className="max-w-[90vw] max-h-[90vh] w-auto h-auto object-contain"
+            />
+          </div>
 
           {/* Navigation Arrows in Fullscreen */}
-          {images.length > 1 && (
+          {count > 1 && (
             <>
               <button
                 onClick={(e) => {
@@ -240,7 +218,7 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
                   goToPrevious();
                 }}
                 className="absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white transition-all"
-                aria-label="Previous image"
+                aria-label="Previous"
               >
                 <span className="text-3xl">‹</span>
               </button>
@@ -250,34 +228,32 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
                   goToNext();
                 }}
                 className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white transition-all"
-                aria-label="Next image"
+                aria-label="Next"
               >
                 <span className="text-3xl">›</span>
               </button>
             </>
           )}
 
-          {/* Image Counter in Fullscreen */}
+          {/* Counter in Fullscreen */}
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 bg-white/10 text-white text-base font-light tracking-wide">
-            {currentIndex + 1} / {images.length}
+            {currentIndex + 1} / {count}
           </div>
 
           {/* Dot Indicators in Fullscreen */}
-          {images.length > 1 && images.length <= 10 && (
+          {count > 1 && count <= 10 && (
             <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-3">
-              {images.map((_, index) => (
+              {media.map((_, index) => (
                 <button
                   key={index}
                   onClick={(e) => {
                     e.stopPropagation();
-                    goToSlide(index);
+                    setCurrentIndex(index);
                   }}
                   className={`w-2.5 h-2.5 rounded-full transition-all ${
-                    index === currentIndex
-                      ? 'bg-white w-8'
-                      : 'bg-white/50 hover:bg-white/75'
+                    index === currentIndex ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/75'
                   }`}
-                  aria-label={`Go to image ${index + 1}`}
+                  aria-label={`Go to ${index + 1}`}
                 />
               ))}
             </div>

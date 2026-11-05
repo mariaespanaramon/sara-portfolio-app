@@ -1,3 +1,5 @@
+import type { ImageAsset, LoopAsset } from './Media';
+
 /**
  * Core domain interface representing a portfolio section.
  *
@@ -16,9 +18,7 @@ export interface Section {
   /** Position in the home grid, ascending. */
   order: number;
   /** Static image shown at rest. */
-  coverImageUrl: string;
-  /** Plays while the cover is hovered. Takes precedence over coverGifUrl. */
-  coverVideoUrl?: string;
-  /** Alternative to coverVideoUrl for the hover state. */
-  coverGifUrl?: string;
+  cover: ImageAsset;
+  /** Plays while the cover is hovered. Covers both former videos and gifs. */
+  hover?: LoopAsset;
 }

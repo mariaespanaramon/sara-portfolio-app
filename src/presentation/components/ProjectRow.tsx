@@ -1,6 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import type { WorkItem } from '../../application/domain/WorkItem';
 import { toUrlId } from '../../application/domain/urlId';
+import { stillOf } from '../../application/domain/Media';
+import { ResponsiveImage } from './media/ResponsiveImage';
+import { LoopVideo } from './media/LoopVideo';
+import { useInView } from '../hooks/useInView';
+
+/** Half the container from `md` up, where media and text sit side by side. */
+const ROW_MEDIA_SIZES = '(min-width: 768px) 50vw, 100vw';
 
 interface ProjectRowProps {
   item: WorkItem;
@@ -9,30 +16,13 @@ interface ProjectRowProps {
 }
 
 /**
- * Picks the still shown for a project inside a section row.
- *
- * Rows never play video: a project's own page is where it plays. 3D work carries
- * an animated preview instead, and video projects fall back to their poster.
- */
-function resolvePreview(item: WorkItem): string | undefined {
-  if (item.gifUrl) {
-    return item.gifUrl;
-  }
-
-  if (item.imageUrl) {
-    return item.imageUrl;
-  }
-
-  return item.galleryImages?.[0];
-}
-
-/**
  * One project per row, with the media alternating between the left and right
  * side down the page and its title and description on the opposite side.
  */
 export function ProjectRow({ item, index }: ProjectRowProps) {
   const navigate = useNavigate();
-  const preview = resolvePreview(item);
+  const { ref: mediaRef, isInView } = useInView();
+  const { cover } = item;
   // Even rows put the media on the left, odd rows on the right.
   const isReversed = index % 2 === 1;
 
@@ -58,17 +48,25 @@ export function ProjectRow({ item, index }: ProjectRowProps) {
     >
       {/* Media. On mobile it always comes first, whatever the row's parity. */}
       <div className={isReversed ? 'md:order-2' : 'md:order-1'}>
-        <div className="overflow-hidden bg-site-surface aspect-[4/3]">
-          {preview ? (
-            <img
-              src={preview}
-              alt={item.title}
+        <div ref={mediaRef} className="overflow-hidden bg-site-surface aspect-[4/3]">
+          {/*
+            Rows never play video: a project's own page is where it plays, so a
+            video cover shows its poster. Loops are the exception, being the
+            animated preview of 3D work, and play while the row is in view.
+          */}
+          {cover.kind === 'loop' ? (
+            <LoopVideo
+              loop={cover}
+              isPlaying={isInView}
               className="w-full h-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-site-text-muted font-light">No preview available</span>
-            </div>
+            <ResponsiveImage
+              image={stillOf(cover)}
+              sizes={ROW_MEDIA_SIZES}
+              alt={item.title}
+              className="w-full h-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
+            />
           )}
         </div>
       </div>

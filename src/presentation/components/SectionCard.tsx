@@ -1,7 +1,12 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Section } from '../../application/domain/Section';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { ResponsiveImage } from './media/ResponsiveImage';
+import { LoopVideo } from './media/LoopVideo';
+
+/** Three columns from `md` up, one below. */
+const SECTION_CARD_SIZES = '(min-width: 768px) 33vw, 100vw';
 
 interface SectionCardProps {
   section: Section;
@@ -10,17 +15,12 @@ interface SectionCardProps {
 /**
  * Home page card for a portfolio section.
  *
- * Shows a still at rest and plays the cover video (or gif) while hovered. Unlike
+ * Shows a still at rest and plays the hover loop while hovered. Unlike
  * the work item cards, the title is visible at all times rather than revealed by
  * an overlay.
  */
 export function SectionCard({ section }: SectionCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  // The cover gif is only mounted after the first hover: gifs cannot be told to
-  // preload lazily, and mounting it upfront would download the whole file on
-  // every home page visit. Once mounted it stays, so later hovers are instant.
-  const [hasHovered, setHasHovered] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -34,14 +34,6 @@ export function SectionCard({ section }: SectionCardProps) {
     }
 
     setIsHovered(true);
-    setHasHovered(true);
-
-    const video = videoRef.current;
-    if (video) {
-      video.currentTime = 0;
-      // Rejects when the browser refuses playback; there is nothing to recover.
-      video.play().catch(() => {});
-    }
   };
 
   const handleMouseLeave = () => {
@@ -50,12 +42,6 @@ export function SectionCard({ section }: SectionCardProps) {
     }
 
     setIsHovered(false);
-
-    const video = videoRef.current;
-    if (video) {
-      video.pause();
-      video.currentTime = 0;
-    }
   };
 
   const goToSection = () => {
@@ -84,26 +70,21 @@ export function SectionCard({ section }: SectionCardProps) {
       onClick={goToSection}
       onKeyDown={handleKeyDown}
     >
-      <img
-        src={section.coverImageUrl}
-        alt=""
+      <ResponsiveImage
+        image={section.cover}
+        sizes={SECTION_CARD_SIZES}
         className="absolute inset-0 w-full h-full object-cover"
       />
 
-      {/* Hover media layered over the still. A video takes precedence over a gif. */}
-      {section.coverVideoUrl ? (
-        <video
-          ref={videoRef}
-          src={section.coverVideoUrl}
+      {/* Hover loop layered over the still. It downloads nothing until first hovered. */}
+      {section.hover && (
+        <LoopVideo
+          loop={section.hover}
+          isPlaying={isPlaying}
+          showPoster={false}
           className={hoverMediaClassName}
-          loop
-          muted
-          playsInline
-          preload="metadata"
         />
-      ) : section.coverGifUrl && hasHovered ? (
-        <img src={section.coverGifUrl} alt="" className={hoverMediaClassName} />
-      ) : null}
+      )}
 
       {/* Title, always visible and centred both ways. A flat scrim replaces the
           former bottom gradient: a gradient only helps text anchored to an edge,

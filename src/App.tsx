@@ -20,25 +20,34 @@ import { Footer } from './presentation/components/Footer';
 import { WorkItemDetail } from './presentation/components/WorkItemDetail';
 import { SectionPage } from './presentation/components/SectionPage';
 import { MockWorkItemRepository } from './infrastructure/adapters/MockWorkItemRepository';
-import { NetlifyBlobsWorkItemRepository } from './infrastructure/adapters/NetlifyBlobsWorkItemRepository';
 import { MockSectionRepository } from './infrastructure/adapters/MockSectionRepository';
+import { HttpContentClient } from './infrastructure/adapters/HttpContentClient';
+import { HttpWorkItemRepository } from './infrastructure/adapters/HttpWorkItemRepository';
+import { HttpSectionRepository } from './infrastructure/adapters/HttpSectionRepository';
+import { ContentMapper } from './infrastructure/content/contentMapper';
 import { MockAboutContentRepository } from './infrastructure/adapters/MockAboutContentRepository';
 import { MockContactDetailsRepository } from './infrastructure/adapters/MockContactDetailsRepository';
-import { createNetlifyBlobsConfig, isNetlifyBlobsConfigured } from './infrastructure/config/netlify.config';
 
 // Initialize repositories (dependency injection)
 // In a larger application, you might use a DI container or React Context
 
-// Work Item Repository: Use Netlify Blobs if configured, otherwise use Mock
+// Work items and sections come from the content store, served by the media Edge
+// Function. `npm run dev` has no Edge Functions, so it uses the mocks unless
+// VITE_CONTENT_SOURCE=http (for example under `netlify dev`).
 // This follows the Dependency Inversion Principle - the app depends on the
-// WorkItemRepository interface, not the concrete implementation
-const workItemRepository = isNetlifyBlobsConfigured()
-  ? new NetlifyBlobsWorkItemRepository(createNetlifyBlobsConfig())
+// repository interfaces, not the concrete implementations
+const useHttpContent = !import.meta.env.DEV || import.meta.env.VITE_CONTENT_SOURCE === 'http';
+
+const contentClient = new HttpContentClient('/content');
+const contentMapper = new ContentMapper('/media');
+
+const workItemRepository = useHttpContent
+  ? new HttpWorkItemRepository(contentClient, contentMapper)
   : new MockWorkItemRepository();
 
-// Sections are mock-only for now. They will move to the same backing store as
-// work items once Sara's own cover material is in place.
-const sectionRepository = new MockSectionRepository();
+const sectionRepository = useHttpContent
+  ? new HttpSectionRepository(contentClient, contentMapper)
+  : new MockSectionRepository();
 
 const aboutContentRepository = new MockAboutContentRepository();
 const contactDetailsRepository = new MockContactDetailsRepository();

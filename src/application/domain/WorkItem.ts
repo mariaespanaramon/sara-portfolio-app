@@ -1,5 +1,10 @@
+import type { MediaAsset } from './Media';
+
 /**
- * Core domain interface representing a portfolio work item
+ * Core domain interface representing a portfolio work item.
+ *
+ * A project is an ordered list of media pieces, which can mix images, videos and
+ * loops freely.
  */
 export interface WorkItem {
   id: string;
@@ -7,19 +12,14 @@ export interface WorkItem {
   category: string;
   description: string;
   year: string;
-  type: 'image' | 'video' | 'gallery';
-  imageUrl?: string;
-  videoUrl?: string;
-  galleryImages?: string[];
   tags: string[];
   /**
-   * Key of the Section this item belongs to.
-   *
-   * Optional on purpose: the items.json already published to Netlify Blobs does
-   * not carry it, and making it required would break that deployment. An item
-   * without a section simply does not show up on any section page.
+   * Key of the Section this item belongs to. An item without a section simply
+   * does not show up on any section page.
    */
   sectionId?: string;
-  /** Animated preview, used instead of a still on section pages (3D work). */
-  gifUrl?: string;
+  /** Stands for the project on section pages. One of `media`, usually the first. */
+  cover: MediaAsset;
+  /** The project's content, in display order. Never empty. */
+  media: MediaAsset[];
 }
