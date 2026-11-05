@@ -8,10 +8,17 @@ import type { BlobInfo, BlobSource } from './BlobSource.ts';
  * nothing secret is configured here.
  */
 export class NetlifyBlobSource implements BlobSource {
-  private readonly store;
+  private storeInstance?: ReturnType<typeof getStore>;
 
-  constructor(storeName: string) {
-    this.store = getStore(storeName);
+  constructor(private readonly storeName: string) {}
+
+  /**
+   * Created on first use, not in the constructor: the bundler evaluates this
+   * module at build time, where the Blobs environment does not exist yet.
+   */
+  private get store() {
+    this.storeInstance ??= getStore(this.storeName);
+    return this.storeInstance;
   }
 
   async info(key: string): Promise<BlobInfo | null> {
